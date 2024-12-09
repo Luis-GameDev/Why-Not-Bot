@@ -13,12 +13,10 @@ async function calculateWeeklyStats(client) {
         const filePath = `${usersDir}/${file}`;
         const userData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
-        // Discord-ID statt discordName verwenden
         const discordId = userData.discordId;
         const playerId = userData.playerId;
         const previousStats = userData.weeklyStats || [];
 
-        // Debugging: Überprüfe, ob discordId und playerId korrekt ausgelesen werden
         console.log(`Processing file: ${file}, discordId: ${discordId}, playerId: ${playerId}`);
 
         try {
@@ -32,7 +30,6 @@ async function calculateWeeklyStats(client) {
 
                 results.push({ discordId, fame: fameDifference });
             } else {
-                // Keine vorherigen Stats, füge "No data" hinzu
                 results.push({ discordId, fame: 'No data' });
             }
 
@@ -44,7 +41,6 @@ async function calculateWeeklyStats(client) {
         }
     }
 
-    // Debugging: Überprüfe die Ergebnisse
     console.log("Results before sorting:", results);
 
     results.sort((a, b) => {

@@ -18,7 +18,6 @@ module.exports = {
         const userFilePath = path.join(__dirname, '../data/users/', `${discordId}.json`);
         const guildName = "WHY NOT";
 
-        // Überprüfen, ob der Benutzer bereits verknüpft ist
         if (fs.existsSync(userFilePath)) {
             await interaction.reply({
                 content: 'You are already linked to an Albion account!',
@@ -28,7 +27,6 @@ module.exports = {
         }
 
         try {
-            // Spielerinformationen mit der Gameinfo-API (EU-Server) abrufen
             const searchUrl = `https://gameinfo-ams.albiononline.com/api/gameinfo/search?q=${ign}`;
             const searchResponse = await axios.get(searchUrl);
 
@@ -41,7 +39,6 @@ module.exports = {
                 return;
             }
 
-            // Spieler-Details abrufen, um die Gilde zu überprüfen
             const playerId = player.Id;
             const playerDetailsUrl = `https://gameinfo-ams.albiononline.com/api/gameinfo/players/${playerId}`;
             const playerDetailsResponse = await axios.get(playerDetailsUrl);
@@ -55,7 +52,6 @@ module.exports = {
                 return;
             }
 
-            // Benutzer erfolgreich verknüpfen und JSON-Datei erstellen
             const userData = { discordId, ign, playerId };
             fs.writeFileSync(userFilePath, JSON.stringify(userData, null, 2));
 
