@@ -1,5 +1,6 @@
 const fs = require("fs");
 const axios = require("axios");
+const { EmbedBuilder } = require("discord.js");
 const DISCORD_MINIMUM_FAME = 50000000;
 
 async function calculateWeeklyStats(client) {
@@ -47,28 +48,49 @@ async function calculateWeeklyStats(client) {
         }
     });
 
-    const message = results.map(user => {
-        const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
-        const member = guild?.members.cache.get(user.discordId); 
-        if (!member) return; 
-    
-        if (user.fame !== 'No data') {
-            const emoji = user.fame < DISCORD_MINIMUM_FAME ? '❌' : '✔️';
-    
-            // Filter for WB-member
-            if (!member.roles.cache.has(process.env.WB_ROLE)) return;
-    
-            return `<@${user.discordId}>: ${user.fame.toLocaleString("de-DE")} Fame ${emoji}`;
-        } else {
-            // Filter for WB-member
-            if (!member.roles.cache.has(process.env.WB_ROLE)) return;
-    
-            return `<@${user.discordId}>: No data`;
-        }
-    }).filter(Boolean).join('\n');
+    let embed = new EmbedBuilder()
+        .setColor(0x1e90ff)
+        .setTitle("2-week Fame Report")
+        .setTimestamp();
 
-    let channel = client.channels.cache.get("1314680152588026020");
-    channel.send("# Weekly Fame Report: #\n" + message);
+    let currentFields = 0;
+    const MAX_FIELDS = 25;
+
+    results.forEach(user => {
+        const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+        guild.members.fetch()
+        
+        const member = guild?.members.cache.get(user.discordId); 
+        if (!member || !member.roles.cache.has(process.env.WB_ROLE)) return;
+
+        const fameValue = user.fame === 'No data' ? 'No data' : `${user.fame.toLocaleString("de-DE")} Fame`;
+        const emoji = user.fame !== 'No data' && user.fame < DISCORD_MINIMUM_FAME ? '❌' : '✔️';
+
+        if (currentFields >= MAX_FIELDS) {
+            // Send the current embed and create a new one
+            client.channels.cache.get("1314680152588026020").send({ embeds: [embed] });
+            embed = new EmbedBuilder()
+                .setColor(0x1e90ff)
+                .setTitle("2-week Fame Report")
+                .setTimestamp();
+            currentFields = 0;
+        }
+
+        embed.addFields({
+            name: ` `,
+            value: `<@${user.discordId}> - ${fameValue} ${emoji}`,
+            inline: false,
+        });
+
+        currentFields++;
+    });
+
+    if (currentFields > 0) {
+        let channel = client.channels.cache.get("1314680152588026020");
+        if (channel && channel.isTextBased()) {
+            channel.send({ embeds: [embed] });
+        }
+    }
 }
 
 module.exports = calculateWeeklyStats;

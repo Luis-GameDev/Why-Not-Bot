@@ -52,6 +52,9 @@ function savePlusOnes(plusOnes) {
 client.once("ready", () => {
     console.log("Bot is online");
     client.user.setActivity("Albion Online", "PLAYING");
+
+    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
+    guild.members.fetch()
 });
 
 client.on("messageCreate", async (message) => {
