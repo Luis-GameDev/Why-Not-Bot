@@ -1,6 +1,6 @@
 const fs = require("fs");
 const axios = require("axios");
-const DISCORD_MINIMUM_FAME = 10000000;
+const DISCORD_MINIMUM_FAME = 50000000;
 
 async function calculateWeeklyStats(client) {
     const apiUrl = 'https://gameinfo-ams.albiononline.com/api/gameinfo/players/';
@@ -16,8 +16,6 @@ async function calculateWeeklyStats(client) {
         const discordId = userData.discordId;
         const playerId = userData.playerId;
         const previousStats = userData.weeklyStats || [];
-
-        console.log(`Processing file: ${file}, discordId: ${discordId}, playerId: ${playerId}`);
 
         try {
             const response = await axios.get(`${apiUrl}${playerId}`);
@@ -41,8 +39,6 @@ async function calculateWeeklyStats(client) {
         }
     }
 
-    console.log("Results before sorting:", results);
-
     results.sort((a, b) => {
         if (typeof a.fame === 'number' && typeof b.fame === 'number') {
             return b.fame - a.fame;
@@ -52,15 +48,24 @@ async function calculateWeeklyStats(client) {
     });
 
     const message = results.map(user => {
+        const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+        const member = guild?.members.cache.get(user.discordId); 
+        if (!member) return; 
+    
         if (user.fame !== 'No data') {
-            const emoji = user.fame < DISCORD_MINIMUM_FAME ? '❌' : '';
-            return `<@${user.discordId}>: ${user.fame} Fame ${emoji}`;
+            const emoji = user.fame < DISCORD_MINIMUM_FAME ? '❌' : '✔️';
+    
+            // Filter for WB-member
+            if (!member.roles.cache.has(process.env.WB_ROLE)) return;
+    
+            return `<@${user.discordId}>: ${user.fame.toLocaleString("de-DE")} Fame ${emoji}`;
         } else {
+            // Filter for WB-member
+            if (!member.roles.cache.has(process.env.WB_ROLE)) return;
+    
             return `<@${user.discordId}>: No data`;
         }
-    }).join('\n');
-
-    console.log("Message to send:", message);
+    }).filter(Boolean).join('\n');
 
     let channel = client.channels.cache.get("1314680152588026020");
     channel.send("# Weekly Fame Report: #\n" + message);
