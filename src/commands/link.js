@@ -18,12 +18,16 @@ module.exports = {
         const userFilePath = path.join(__dirname, '../data/users/', `${discordId}.json`);
         const guildName = "WHY NOT";
 
+        let userData = {};
         if (fs.existsSync(userFilePath)) {
-            await interaction.reply({
-                content: 'You are already linked to an Albion account!',
-                ephemeral: true
-            });
-            return;
+            userData = JSON.parse(fs.readFileSync(userFilePath, 'utf8'));
+            if (userData.ign) {
+                await interaction.reply({
+                    content: 'You are already linked to an Albion account!',
+                    ephemeral: true
+                });
+                return;
+            }
         }
 
         try {
@@ -52,7 +56,10 @@ module.exports = {
                 return;
             }
 
-            const userData = { discordId, ign, playerId };
+            userData.discordId = discordId;
+            userData.ign = ign;
+            userData.playerId = playerId;
+
             fs.writeFileSync(userFilePath, JSON.stringify(userData, null, 2));
 
             await interaction.reply({

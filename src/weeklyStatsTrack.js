@@ -16,6 +16,10 @@ async function calculateWeeklyStats(client) {
 
         const discordId = userData.discordId;
         const playerId = userData.playerId;
+        const ign = userData.ign;
+
+        if(!ign) continue;
+
         const previousStats = userData.weeklyStats || [];
 
         try {
@@ -27,9 +31,9 @@ async function calculateWeeklyStats(client) {
                 const lastEntry = previousStats[previousStats.length - 1];
                 const fameDifference = currentFame - lastEntry.fame;
 
-                results.push({ discordId, fame: fameDifference });
+                results.push({ ign, discordId, fame: fameDifference });
             } else {
-                results.push({ discordId, fame: 'No data' });
+                results.push({ ign, discordId, fame: 'No data' });
             }
 
             previousStats.push({ date: currentDate, fame: currentFame });
@@ -55,10 +59,11 @@ async function calculateWeeklyStats(client) {
 
     let currentFields = 0;
     const MAX_FIELDS = 25;
+    
+    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+    guild.members.fetch()
 
     results.forEach(user => {
-        const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
-        guild.members.fetch()
         
         const member = guild?.members.cache.get(user.discordId); 
         if (!member || !member.roles.cache.has(process.env.WB_ROLE)) return;
@@ -78,7 +83,7 @@ async function calculateWeeklyStats(client) {
 
         embed.addFields({
             name: ` `,
-            value: `<@${user.discordId}> - ${fameValue} ${emoji}`,
+            value: `<@${user.discordId}> (${user.ign}) - ${fameValue} ${emoji}`,
             inline: false,
         });
 
