@@ -60,7 +60,7 @@ client.once("ready", () => {
 client.on("messageCreate", async (message) => {
     // will be replaced by a cron-job once it works
     if (message.content === "--stats") {
-        calcStats(client);
+        operateWeeklyStatsTrack()
     }
 
     if (message.channel.id === botChannelId && message.content === "+1" && !message.author.bot) {
@@ -78,6 +78,24 @@ client.on("messageCreate", async (message) => {
         message.reply(`<@${message.author.id}>, you now have **${plusOnes[userId]}** +1s.`);
     }
 });
+
+// cron job for 2-week statsTrack
+
+cron.schedule('0 2 * * 1', () => {
+    operateWeeklyStatsTrack()
+})
+
+function operateWeeklyStatsTrack() {
+    const statusFilePath = path.join(__dirname, './data/jobStatus.json');
+    const jobStatus = JSON.parse(fs.readFileSync(statusFilePath, 'utf8'));
+    
+    if(jobStatus === 0) {
+        fs.writeFileSync(statusFilePath, JSON.stringify(1, null, 2));
+    } else if(jobStatus === 1) {
+        fs.writeFileSync(statusFilePath, JSON.stringify(0, null, 2));
+        calcStats(client)
+    }
+}
 
 client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) return;
