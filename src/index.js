@@ -34,28 +34,25 @@ commandFiles.forEach((commandFile) => {
     client.commands.set(command.data.name, command);
 });
 
-const plusOneFilePath = path.join(__dirname, 'data', 'plusones.json');
 const botChannelId = process.env.BOT_CHANNEL; 
+const dataFilePath = path.join(__dirname, './data/plusones.json');
 
-function loadPlusOnes() {
-    if (fs.existsSync(plusOneFilePath)) {
-        return JSON.parse(fs.readFileSync(plusOneFilePath, 'utf8'));
-    } else {
-        return {}; 
+function addPlusOne(discordId, date) {
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+
+    if (!data[discordId]) {
+        data[discordId] = [];
     }
+
+    data[discordId].push({ date });
+
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
 }
 
-function savePlusOnes(plusOnes) {
-    fs.writeFileSync(plusOneFilePath, JSON.stringify(plusOnes, null, 2));
+function getPlusOneData(discordId) {
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+    return data[discordId] || [];
 }
-
-client.once("ready", () => {
-    console.log("Bot is online");
-    client.user.setActivity("Albion Online", "PLAYING");
-
-    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
-    guild.members.fetch()
-});
 
 client.on("messageCreate", async (message) => {
     // will be replaced by a cron-job once it works
@@ -63,20 +60,23 @@ client.on("messageCreate", async (message) => {
         operateWeeklyStatsTrack()
     }
 
-    if (message.channel.id === botChannelId && message.content === "+1" && !message.author.bot) {
+    if (message.channel.id === botChannelId && message.content.startsWith("+1") && !message.author.bot) {
         const userId = message.author.id;
-        const plusOnes = loadPlusOnes(); 
+        const parts = message.content.split(" ").slice(1);
+        const inputDate = parts.join(" ").trim();
 
-        if (!plusOnes[userId]) {
-            plusOnes[userId] = 0;
-        }
-
-        plusOnes[userId] += 1;
-
-        savePlusOnes(plusOnes);
-
-        message.reply(`<@${message.author.id}>, you now have **${plusOnes[userId]}** +1s.`);
+        addPlusOne(userId, inputDate)
+        
+        message.reply(`<@${userId}>, you now have **${getPlusOneData(userId).length}** +1s.`);
     }
+});
+
+client.once("ready", () => {
+    console.log("Bot is online");
+    client.user.setActivity("Albion Online", "PLAYING");
+
+    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
+    guild.members.fetch()
 });
 
 // cron job for 2-week statsTrack
