@@ -77,6 +77,10 @@ client.once("ready", () => {
 
     const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
     guild.members.fetch()
+
+    client.guilds.cache.forEach((guild) => {
+        deployCommandsForGuild(guild.id);
+    });
 });
 
 // cron job for 2-week statsTrack
@@ -113,5 +117,32 @@ client.on("interactionCreate", async (interaction) => {
         }
     }
 });
+
+async function deployCommandsForGuild(guildId) {
+    const { REST } = require("@discordjs/rest");
+    const { Routes } = require("discord-api-types/v9");
+
+    const commands = [];
+    const commandFiles = fs
+        .readdirSync("./src/commands")
+        .filter((file) => file.endsWith(".js"));
+
+    commandFiles.forEach((commandFile) => {
+        const command = require(`./commands/${commandFile}`);
+        commands.push(command.data.toJSON());
+    });
+
+    const restClient = new REST({ version: "9" }).setToken(process.env.DISCORD_BOT_TOKEN);
+
+    try {
+        await restClient.put(
+            Routes.applicationGuildCommands(process.env.DISCORD_APPLICATION_ID, guildId),
+            { body: commands }
+        );
+        console.log(`Successfully registered commands for guild: ${guildId}`);
+    } catch (error) {
+        console.error(`Error registering commands for guild ${guildId}:`, error);
+    }
+}
 
 client.login(process.env.DISCORD_BOT_TOKEN);

@@ -73,7 +73,7 @@ async function calculateWeeklyStats(client) {
 
         if (currentFields >= MAX_FIELDS) {
             // Send the current embed and create a new one
-            client.channels.cache.get("1314680152588026020").send({ embeds: [embed] });
+            client.channels.cache.get("1280923652623306752").send({ embeds: [embed] });
             embed = new EmbedBuilder()
                 .setColor(0x1e90ff)
                 .setTitle("2-week Fame Report")
@@ -91,7 +91,7 @@ async function calculateWeeklyStats(client) {
     });
 
     if (currentFields > 0) {
-        let channel = client.channels.cache.get("1314680152588026020");
+        let channel = client.channels.cache.get("1280923652623306752");
         if (channel && channel.isTextBased()) {
             channel.send({ embeds: [embed] });
         }
