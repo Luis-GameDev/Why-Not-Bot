@@ -32,13 +32,17 @@ module.exports = {
 
         try {
             const searchUrl = `https://gameinfo-ams.albiononline.com/api/gameinfo/search?q=${ign}`;
+            await interaction.reply({
+                content: `Fetching Data from Albion API...`,
+                ephemeral: true
+            });
             const searchResponse = await axios.get(searchUrl);
 
             const player = searchResponse.data.players.find(p => p.Name.toLowerCase() === ign.toLowerCase());
             if (!player) {
-                await interaction.reply({
+                await interaction.followUp({
                     content: `Player with the name "${ign}" doesn't exist.`,
-                    ephemeral: true
+                    ephemeral: true,
                 });
                 return;
             }
@@ -49,9 +53,9 @@ module.exports = {
             const playerData = playerDetailsResponse.data;
 
             if (playerData.GuildName !== guildName) {
-                await interaction.reply({
+                await interaction.followUp({
                     content: `You are not a member of "${guildName}". Link failed.`,
-                    ephemeral: true
+                    ephemeral: true,
                 });
                 return;
             }
@@ -62,15 +66,15 @@ module.exports = {
 
             fs.writeFileSync(userFilePath, JSON.stringify(userData, null, 2));
 
-            await interaction.reply({
+            await interaction.followUp({
                 content: `Your Discord account was successfully linked to "${ign}".`,
-                ephemeral: true
+                ephemeral: true,
             });
         } catch (error) {
             console.error('Error trying to link:', error.message);
-            await interaction.reply({
-                content: 'An error occurred, please try again later or contact the admin.',
-                ephemeral: true
+            await interaction.followUp({
+                content: 'The Albion API is not responding, please try again later.',
+                ephemeral: true,
             });
         }
     },
