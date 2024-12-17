@@ -61,7 +61,12 @@ async function calculateWeeklyStats(client) {
     const MAX_FIELDS = 25;
     
     const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
-    guild.members.fetch()
+    try {
+        guild.members.fetch()
+    } catch {
+        console.log("No members found!")
+    }
+    
 
     results.forEach(user => {
         
@@ -73,7 +78,7 @@ async function calculateWeeklyStats(client) {
 
         if (currentFields >= MAX_FIELDS) {
             // Send the current embed and create a new one
-            client.channels.cache.get("1280923652623306752").send({ embeds: [embed] });
+            client.channels.cache.get(process.env.FAME_REPORT_CHANNEL).send({ embeds: [embed] });
             embed = new EmbedBuilder()
                 .setColor(0x1e90ff)
                 .setTitle("2-week Fame Report")
@@ -91,7 +96,7 @@ async function calculateWeeklyStats(client) {
     });
 
     if (currentFields > 0) {
-        let channel = client.channels.cache.get("1280923652623306752");
+        let channel = client.channels.cache.get(process.env.FAME_REPORT_CHANNEL);
         if (channel && channel.isTextBased()) {
             channel.send({ embeds: [embed] });
         }

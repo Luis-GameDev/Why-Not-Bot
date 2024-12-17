@@ -56,7 +56,7 @@ function getPlusOneData(discordId) {
 
 client.on("messageCreate", async (message) => {
     // will be replaced by a cron-job once it works
-    if (message.content === "--stats") {
+    if (message.content === "--stats" && message.author.id === process.env.OWNER_USER_ID) {
         operateWeeklyStatsTrack()
     }
 
@@ -75,8 +75,12 @@ client.once("ready", () => {
     console.log("Bot is online");
     client.user.setActivity("Albion Online", "PLAYING");
 
-    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
-    guild.members.fetch()
+    try {
+        const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
+        guild.members.fetch()
+    } catch {
+        console.log("No members found!")
+    }
 
     client.guilds.cache.forEach((guild) => {
         deployCommandsForGuild(guild.id);

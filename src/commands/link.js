@@ -38,36 +38,44 @@ module.exports = {
             });
             const searchResponse = await axios.get(searchUrl);
 
-            const player = searchResponse.data.players.find(p => p.Name.toLowerCase() === ign.toLowerCase());
-            if (!player) {
+            const matchingPlayers = searchResponse.data.players.filter(p => p.Name.toLowerCase() === ign.toLowerCase());
+
+            if (!matchingPlayers.length) {
                 await interaction.followUp({
-                    content: `Player with the name "${ign}" doesn't exist.`,
+                    content: `No player with the name "${ign}" found.`,
                     ephemeral: true,
                 });
                 return;
             }
 
-            const playerId = player.Id;
-            const playerDetailsUrl = `https://gameinfo-ams.albiononline.com/api/gameinfo/players/${playerId}`;
-            const playerDetailsResponse = await axios.get(playerDetailsUrl);
-            const playerData = playerDetailsResponse.data;
+            let linkedPlayer = null;
+            for (const player of matchingPlayers) {
+                const playerDetailsUrl = `https://gameinfo-ams.albiononline.com/api/gameinfo/players/${player.Id}`;
+                const playerDetailsResponse = await axios.get(playerDetailsUrl);
+                const playerData = playerDetailsResponse.data;
 
-            if (playerData.GuildName !== guildName) {
+                if (playerData.GuildName === guildName) {
+                    linkedPlayer = { ign: player.Name, playerId: player.Id };
+                    break;
+                }
+            }
+
+            if (!linkedPlayer) {
                 await interaction.followUp({
-                    content: `You are not a member of "${guildName}". Link failed.`,
+                    content: `Player "${ign}" is not a members of "${guildName}". Link failed.`,
                     ephemeral: true,
                 });
                 return;
             }
 
             userData.discordId = discordId;
-            userData.ign = ign;
-            userData.playerId = playerId;
+            userData.ign = linkedPlayer.ign;
+            userData.playerId = linkedPlayer.playerId;
 
             fs.writeFileSync(userFilePath, JSON.stringify(userData, null, 2));
 
             await interaction.followUp({
-                content: `Your Discord account was successfully linked to "${ign}".`,
+                content: `Your Discord account was successfully linked to "${linkedPlayer.ign}".`,
                 ephemeral: true,
             });
         } catch (error) {
