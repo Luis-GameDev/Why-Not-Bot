@@ -18,7 +18,7 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMessageReactions,
-    ],
+    ]
 });
 client.commands = new Collection();
 
@@ -93,6 +93,35 @@ client.on("messageCreate", async (message) => {
     if(message.content === "!regears") {
         message.reply(`PVP Activity regear: T7 gear T8 Weapon. OC break included. Consumables / mounts not included. Ask caller to be sure. WB Regears: https://discord.com/channels/1248205717379354664/1250066776335843389`)
     }
+
+    if (message.content.startsWith("!acceptapply")) {
+        const channel = message.channel;
+        const member = await message.guild.members.fetch(message.author.id);
+    
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+    
+        if (channel.name.includes("ticket")) {
+            const newChannelName = channel.name.replace("ticket", "accepted-ticket");
+            const link = message.content.split(" ")[1];
+    
+            if (link) {
+                const ticketLink = link;
+                await message.reply(`Your Wb application has been accepted. Please follow the following steps:\n- Join the discord linked\n- Bind your murder-ledger\n- Open a ticket and fill the ticket\n- Tag Mendo as vouch. \n ${ticketLink}`);
+            } else {
+                await message.reply("No link provided.");
+            }
+    
+            try {
+                console.log(`Old channel name: ${channel.name}, New channel name: ${newChannelName}`);
+                await channel.setName(newChannelName);
+            } catch (error) {
+                console.error("Error setting the channel name:", error);
+            }
+        }
+    }
+    
 });
 
 client.once("ready", () => {
