@@ -53,6 +53,12 @@ module.exports = {
                         .setDescription('Number of winners to draw')
                         .setRequired(true))),
     async execute(interaction) {
+        //checks if user has officer role
+        const member = await interaction.guild.members.fetch(interaction.user.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+            return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+        }
+
         if (interaction.options.getSubcommand() === 'start') {
             const message = interaction.options.getString('message');
 
