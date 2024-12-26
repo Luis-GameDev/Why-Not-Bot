@@ -124,6 +124,8 @@ client.on("messageCreate", async (message) => {
     
 });
 
+
+
 client.once("ready", () => {
     console.log("Bot is online");
     client.user.setActivity("Albion Online", "PLAYING");
@@ -138,7 +140,23 @@ client.once("ready", () => {
     client.guilds.cache.forEach((guild) => {
         deployCommandsForGuild(guild.id);
     });
+
+    setInterval(checkGiveawayEndTime, 1000); // Check every minute
 });
+
+// Function to check giveaway end time
+function checkGiveawayEndTime() {
+    const giveawayDataPath = path.join(__dirname, 'data/giveawayData.json');
+    if (fs.existsSync(giveawayDataPath)) {
+        const giveawayData = JSON.parse(fs.readFileSync(giveawayDataPath, 'utf8'));
+        const currentTime = new Date().getTime();
+        for (let giveaway in giveawayData) {
+            if (giveawayData[giveaway].endTime && currentTime > new Date(giveawayData[giveaway].endTime).getTime()) {
+                
+            }
+        }
+    }
+}
 
 // cron job for 2-week statsTrack
 

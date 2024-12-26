@@ -39,6 +39,14 @@ module.exports = {
                 .addStringOption(option => 
                     option.setName('message')
                         .setDescription('Message for the giveaway')
+                        .setRequired(true))
+                .addIntegerOption(option =>
+                    option.setName('winners')
+                        .setDescription('Number of winners')
+                        .setRequired(true))
+                .addStringOption(option =>
+                    option.setName('duration')
+                        .setDescription('Duration of the giveaway (e.g., 1h, 2d)')
                         .setRequired(true)))
         .addSubcommand(subcommand =>
             subcommand
@@ -61,10 +69,18 @@ module.exports = {
 
         if (interaction.options.getSubcommand() === 'start') {
             const message = interaction.options.getString('message');
+            const winnersCount = interaction.options.getInteger('winners');
+            const duration = interaction.options.getString('duration');
+            const endTime = new Date(Date.now() + ms(duration)).toISOString();
 
             const embed = new MessageEmbed()
                 .setTitle('🎉 Giveaway! 🎉')
-                .setDescription(`**${message}**\n\nThe more +1s you have the higher your chances are!\nReact with 🎉 to enter!`);
+                .setDescription(`**${message}**\n\nThe more +1s you have the higher your chances are!\nReact with 🎉 to enter!`)
+                .addFields(
+                    { name: 'Winners', value: winnersCount.toString(), inline: false },
+                    { name: 'End Time', value: `<t:${Math.floor(new Date(endTime).getTime() / 1000)}:F>`, inline: false }
+                )
+                .setFooter({ text: `Ends at: ${new Date(endTime).toLocaleString()}` });
 
             const giveawayMessage = await interaction.reply({ embeds: [embed], fetchReply: true });
 
@@ -73,7 +89,10 @@ module.exports = {
             giveawayData[giveawayMessage.id] = {
                 messageId: giveawayMessage.id,
                 channelId: giveawayMessage.channel.id,
-                guildId: giveawayMessage.guild.id
+                guildId: giveawayMessage.guild.id,
+                winnersCount: winnersCount,
+                endTime: endTime,
+                winners: winnersCount,
             };
 
             // Save the updated giveaway data
@@ -82,7 +101,7 @@ module.exports = {
         } else if (interaction.options.getSubcommand() === 'roll') {
             const messageId = interaction.options.getString('message_id');
             const winnersCount = interaction.options.getInteger('winners');
-            const plusonesWeight = 0.4; // Adjust this factor to change the impact of +1 entries
+            const plusonesWeight = 1; // Adjust this factor to change the impact of +1 entries
 
             if (!giveawayData[messageId]) {
                 return interaction.reply('No active giveaway found with the provided message ID.');
