@@ -9,6 +9,8 @@ async function calculateWeeklyStats(client) {
     const usersDir = "./src/data/users";
     const userFiles = fs.readdirSync(usersDir).filter(file => file.endsWith('.json'));
     const results = [];
+    let channel = client.channels.cache.get(process.env.FAME_REPORT_CHANNEL);
+    await channel.send("Calculating weekly stats...");
 
     for (const file of userFiles) {
         const filePath = `${usersDir}/${file}`;
@@ -96,7 +98,6 @@ async function calculateWeeklyStats(client) {
     });
 
     if (currentFields > 0) {
-        let channel = client.channels.cache.get(process.env.FAME_REPORT_CHANNEL);
         if (channel && channel.isTextBased()) {
             channel.send({ embeds: [embed] });
         }
