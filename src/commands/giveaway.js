@@ -103,6 +103,7 @@ module.exports = {
             const messageId = interaction.options.getString('message_id');
             const winnersCount = interaction.options.getInteger('winners');
             const plusonesWeight = 1; // Adjust this factor to change the impact of +1 entries
+            giveawayData[messageId].active = false;
 
             if (!giveawayData[messageId]) {
                 return interaction.reply('No active giveaway found with the provided message ID.');
@@ -156,6 +157,8 @@ module.exports = {
             const winnersList = winners.map(user => user.toString()).join(', ');
 
             interaction.reply(`Congratulations ${winnersList}! You won the giveaway!`);
+            
+            saveGiveawayData();
         }
     },
 };

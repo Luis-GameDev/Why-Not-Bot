@@ -145,14 +145,71 @@ client.once("ready", () => {
 });
 
 // Function to check giveaway end time
-function checkGiveawayEndTime() {
+async function checkGiveawayEndTime() {
     const giveawayDataPath = path.join(__dirname, 'data/giveawayData.json');
     if (fs.existsSync(giveawayDataPath)) {
         const giveawayData = JSON.parse(fs.readFileSync(giveawayDataPath, 'utf8'));
         const currentTime = new Date().getTime();
         for (let giveaway in giveawayData) {
-            if (giveawayData[giveaway].endTime && currentTime > new Date(giveawayData[giveaway].endTime).getTime()) {
+            if (giveawayData[giveaway].active && giveawayData[giveaway].endTime && currentTime > new Date(giveawayData[giveaway].endTime).getTime()) {
+                // roll the giveaway
+                giveawayData[giveaway].active = false;
+                fs.writeFileSync(giveawayDataPath, JSON.stringify(giveawayData, null, 2));
+                const messageId = giveawayData[giveaway].messageId;
+                const giveawaychannel = await client.channels.fetch(giveawayData[giveaway].channelId);
+                            const winnersCount = giveawayData[giveaway].winnersCount || 1;
+                            const plusonesWeight = 1; // Adjust this factor to change the impact of +1 entries
                 
+                            if (!giveawayData[messageId]) return;
+                
+                            const channel = await client.channels.fetch(giveawayData[messageId].channelId);
+                            const message = await channel.messages.fetch(giveawayData[messageId].messageId);
+                
+                            const users = await message.reactions.cache.get('🎉').users.fetch();
+                            const participants = users.filter(user => !user.bot);
+                
+                            // Load plusones data
+                            const plusonesDataFile = path.join(__dirname, '../data/plusones.json');
+                            let plusonesData = {};
+                            if (fs.existsSync(plusonesDataFile)) {
+                                try {
+                                    const data = fs.readFileSync(plusonesDataFile);
+                                    plusonesData = data.length ? JSON.parse(data) : {};
+                                } catch (error) {
+                                    console.error('Error parsing plusones data:', error);
+                                    plusonesData = {};
+                                }
+                            }
+                
+                            // Create an array with weighted participants
+                            let weightedParticipants = [];
+                            participants.forEach(user => {
+                                const plusones = plusonesData[user.id] ? plusonesData[user.id].length : 0;
+                                const weight = 1 + Math.floor(plusones * plusonesWeight);
+                                console.log(`${user.username} has ${plusones} +1s and a weight of ${weight}`);
+                                for (let i = 0; i < weight; i++) {
+                                    weightedParticipants.push(user);
+                                }
+                            });
+                
+                            if (weightedParticipants.length === 0) {
+                                return giveawaychannel.send('No valid participants, no winners can be chosen.');
+                            }
+                
+                            const winners = [];
+                            for (let i = 0; i < winnersCount; i++) {
+                                if (weightedParticipants.length === 0) break;
+                                const winner = weightedParticipants.splice(Math.floor(Math.random() * weightedParticipants.length), 1)[0];
+                                winners.push(winner);
+                            }
+                
+                            if (winners.length === 0) {
+                                return giveawaychannel.send('No valid participants, no winners can be chosen.');
+                            }
+                
+                            const winnersList = winners.map(user => user.toString()).join(', ');
+                
+                            giveawaychannel.send(`Congratulations ${winnersList}! You won the giveaway!`)
             }
         }
     }

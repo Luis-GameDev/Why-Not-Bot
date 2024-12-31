@@ -6,5 +6,50 @@
     "winnersCount": 50,
     "endTime": "2025-01-01T12:51:29.853Z",
     "winners": 50
+  },
+  "1323689411233316897": {
+    "messageId": "1323689411233316897",
+    "channelId": "1314680152588026020",
+    "guildId": "1314680152588026017",
+    "winnersCount": 1,
+    "endTime": "2024-12-31T16:29:18.380Z",
+    "winners": 1,
+    "active": false
+  },
+  "1323690714470682746": {
+    "messageId": "1323690714470682746",
+    "channelId": "1314680152588026020",
+    "guildId": "1314680152588026017",
+    "winnersCount": 1,
+    "endTime": "2024-12-31T16:34:24.089Z",
+    "winners": 1,
+    "active": false
+  },
+  "1323690833530196069": {
+    "messageId": "1323690833530196069",
+    "channelId": "1314680152588026020",
+    "guildId": "1314680152588026017",
+    "winnersCount": 1,
+    "endTime": "2024-12-31T16:35:47.437Z",
+    "winners": 1,
+    "active": false
+  },
+  "1323691812744986715": {
+    "messageId": "1323691812744986715",
+    "channelId": "1314680152588026020",
+    "guildId": "1314680152588026017",
+    "winnersCount": 1,
+    "endTime": "2024-12-31T16:38:50.910Z",
+    "winners": 1,
+    "active": false
+  },
+  "1323692729946865726": {
+    "messageId": "1323692729946865726",
+    "channelId": "1314680152588026020",
+    "guildId": "1314680152588026017",
+    "winnersCount": 1,
+    "endTime": "2024-12-31T19:42:19.607Z",
+    "winners": 1,
+    "active": false
   }
 }
