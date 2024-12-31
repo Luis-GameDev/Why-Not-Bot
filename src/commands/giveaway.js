@@ -93,6 +93,7 @@ module.exports = {
                 winnersCount: winnersCount,
                 endTime: endTime,
                 winners: winnersCount,
+                active: true,
             };
 
             // Save the updated giveaway data
