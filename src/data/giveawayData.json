@@ -51,5 +51,14 @@
     "endTime": "2024-12-31T19:42:19.607Z",
     "winners": 1,
     "active": false
+  },
+  "1324345883424194573": {
+    "messageId": "1324345883424194573",
+    "channelId": "1314680152588026020",
+    "guildId": "1314680152588026017",
+    "winnersCount": 3,
+    "endTime": "2025-01-03T11:57:44.574Z",
+    "winners": 3,
+    "active": false
   }
 }

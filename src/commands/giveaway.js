@@ -143,18 +143,17 @@ module.exports = {
                 return interaction.reply('No valid participants, no winners can be chosen.');
             }
 
-            const winners = [];
-            for (let i = 0; i < winnersCount; i++) {
-                if (weightedParticipants.length === 0) break;
+            const winners = new Set();
+            while (winners.size < winnersCount && weightedParticipants.length > 0) {
                 const winner = weightedParticipants.splice(Math.floor(Math.random() * weightedParticipants.length), 1)[0];
-                winners.push(winner);
+                winners.add(winner);
             }
 
-            if (winners.length === 0) {
+            if (winners.size === 0) {
                 return interaction.reply('No valid participants, no winners can be chosen.');
             }
 
-            const winnersList = winners.map(user => user.toString()).join(', ');
+            const winnersList = Array.from(winners).map(user => user.toString()).join(', ');
 
             interaction.reply(`Congratulations ${winnersList}! You won the giveaway!`);
             
