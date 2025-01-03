@@ -55,7 +55,7 @@ function getPlusOneData(discordId) {
 }
 
 client.on("messageCreate", async (message) => {
-    // will be replaced by a cron-job once it works
+
     if (message.content === "--stats" && message.author.id === process.env.OWNER_USER_ID) {
         operateWeeklyStatsTrack()
     }
