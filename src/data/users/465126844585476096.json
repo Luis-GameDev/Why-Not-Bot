@@ -1,5 +1,11 @@
 {
   "discordId": "465126844585476096",
   "ign": "Hapcool",
-  "playerId": "fGzmxfsKTxSuIlvg4BhlJA"
+  "playerId": "fGzmxfsKTxSuIlvg4BhlJA",
+  "weeklyStats": [
+    {
+      "date": "2025-01-06",
+      "fame": 2225283059
+    }
+  ]
 }

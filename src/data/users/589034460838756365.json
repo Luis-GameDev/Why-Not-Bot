@@ -1,5 +1,11 @@
 {
   "discordId": "589034460838756365",
   "ign": "Doktora",
-  "playerId": "tES6IygpTKm6p7mcnvMPcA"
+  "playerId": "tES6IygpTKm6p7mcnvMPcA",
+  "weeklyStats": [
+    {
+      "date": "2025-01-06",
+      "fame": 3744922311
+    }
+  ]
 }

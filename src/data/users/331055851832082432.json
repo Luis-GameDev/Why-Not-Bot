@@ -1,5 +1,11 @@
 {
   "discordId": "331055851832082432",
   "ign": "NoirBaleze",
-  "playerId": "3NRn-RpvTliKWO8cVZU1Hg"
+  "playerId": "3NRn-RpvTliKWO8cVZU1Hg",
+  "weeklyStats": [
+    {
+      "date": "2025-01-06",
+      "fame": 886328696
+    }
+  ]
 }

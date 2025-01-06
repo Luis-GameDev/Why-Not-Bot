@@ -1,5 +1,11 @@
 {
   "discordId": "591789743822471169",
   "ign": "doodoo",
-  "playerId": "grfB7o7QQ4ifTHxh6W2Uaw"
+  "playerId": "grfB7o7QQ4ifTHxh6W2Uaw",
+  "weeklyStats": [
+    {
+      "date": "2025-01-06",
+      "fame": 305614614
+    }
+  ]
 }

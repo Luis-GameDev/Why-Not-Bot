@@ -1,5 +1,11 @@
 {
   "discordId": "692045277829529641",
   "ign": "Hojolini",
-  "playerId": "NiOpNV8eT828feLgxFahdw"
+  "playerId": "NiOpNV8eT828feLgxFahdw",
+  "weeklyStats": [
+    {
+      "date": "2025-01-06",
+      "fame": 967963415
+    }
+  ]
 }

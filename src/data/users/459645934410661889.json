@@ -1,5 +1,11 @@
 {
   "discordId": "459645934410661889",
   "ign": "Bloodyachilles",
-  "playerId": "jjIYM2oRQg6WaX5JMMvVoQ"
+  "playerId": "jjIYM2oRQg6WaX5JMMvVoQ",
+  "weeklyStats": [
+    {
+      "date": "2025-01-06",
+      "fame": 108857664
+    }
+  ]
 }

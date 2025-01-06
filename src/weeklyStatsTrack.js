@@ -5,14 +5,21 @@ const DISCORD_MINIMUM_FAME = 50000000;
 
 async function calculateWeeklyStats(client) {
     const apiUrl = 'https://gameinfo-ams.albiononline.com/api/gameinfo/players/';
+    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+    try {
+        await guild.members.fetch();
+        await guild.roles.fetch();
+    } catch (error) {
+        console.error("Error fetching guild members or roles: ", error.message);
+    }
 
     const usersDir = "./src/data/users";
     const userFiles = fs.readdirSync(usersDir).filter(file => file.endsWith('.json'));
     const results = [];
     let channel = client.channels.cache.get(process.env.FAME_REPORT_CHANNEL);
-    await channel.send("Calculating weekly stats...");
+    await channel.send(`Calculating weekly stats for ${userFiles.length} users...`);
 
-    for (const file of userFiles) {
+    const promises = userFiles.map(async (file) => {
         const filePath = `${usersDir}/${file}`;
         const userData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
@@ -20,12 +27,13 @@ async function calculateWeeklyStats(client) {
         const playerId = userData.playerId;
         const ign = userData.ign;
 
-        if(!ign) continue;
+        if (!ign) return;
 
         const previousStats = userData.weeklyStats || [];
 
         try {
             const response = await axios.get(`${apiUrl}${playerId}`);
+            await delay(200);
             const currentFame = response.data.LifetimeStatistics.PvE.Total;
             const currentDate = new Date().toISOString().split('T')[0];
 
@@ -44,7 +52,9 @@ async function calculateWeeklyStats(client) {
         } catch (error) {
             console.error(`Error fetching stats for player ID: ${playerId}`, error.message);
         }
-    }
+    });
+
+    await Promise.all(promises);
 
     results.sort((a, b) => {
         if (typeof a.fame === 'number' && typeof b.fame === 'number') {
@@ -61,14 +71,6 @@ async function calculateWeeklyStats(client) {
 
     let currentFields = 0;
     const MAX_FIELDS = 25;
-    
-    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
-    try {
-        guild.members.fetch()
-    } catch {
-        console.log("No members found!")
-    }
-    
 
     results.forEach(user => {
         
@@ -99,9 +101,15 @@ async function calculateWeeklyStats(client) {
 
     if (currentFields > 0) {
         if (channel && channel.isTextBased()) {
-            channel.send({ embeds: [embed] });
+            try {
+                await channel.send({ embeds: [embed] });
+            } catch (error) { "Error calculating weekly stats: ", error.message }
         }
     }
+}
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 module.exports = calculateWeeklyStats;

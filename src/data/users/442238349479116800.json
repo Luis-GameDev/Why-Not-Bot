@@ -1,5 +1,11 @@
 {
   "discordId": "442238349479116800",
   "ign": "Arobass",
-  "playerId": "a1Esf7DSRRSaCaLI3fjl_A"
+  "playerId": "a1Esf7DSRRSaCaLI3fjl_A",
+  "weeklyStats": [
+    {
+      "date": "2025-01-06",
+      "fame": 431111527
+    }
+  ]
 }
