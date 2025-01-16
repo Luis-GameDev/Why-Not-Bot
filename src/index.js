@@ -2,6 +2,7 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const cron = require("node-cron");
+const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
 const calcStats = require("./weeklyStatsTrack.js");
 console.log("Starting bot...");
 
@@ -130,6 +131,66 @@ client.on("messageCreate", async (message) => {
                 console.error("Error setting the channel name:", error);
             }
         }
+    }
+
+    if(message.content.startsWith("!purge")) {
+        const mentionedUsers = message.mentions.users;
+        const member = await message.guild.members.fetch(message.author.id);
+    
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        if (mentionedUsers.size === 0) {
+            return message.reply("No users mentioned.");
+        }
+
+        const botMember = await message.guild.members.fetch(client.user.id);
+        const botHasPermission = botMember.permissions.has("MANAGE_ROLES");
+
+        if (!botHasPermission) {
+            return message.reply("I do not have permission to manage roles.");
+        }
+
+        const failedRolesMap = new Map();
+
+        for (const user of mentionedUsers.values()) {
+            const member = await message.guild.members.fetch(user.id);
+            const roles = member.roles.cache;
+
+            const failedRoles = [];
+
+            for (const role of roles.values()) {
+            try {
+                const botHighestRole = message.guild.members.me.roles.highest;
+                if (role.id !== message.guild.id && role.position < botHighestRole.position) {
+                await member.roles.remove(role);
+                } else if (role.id !== message.guild.id) {
+                failedRoles.push(role);
+                }
+            } catch (error) {
+                console.log("Error removing roles");
+            }
+            }
+
+            if (failedRoles.length > 0) {
+            failedRolesMap.set(user.id, failedRoles);
+            }
+        }
+
+        if (failedRolesMap.size > 0) {
+            const embed = new MessageEmbed()
+            .setTitle('Failed to Remove some Roles')
+            .setDescription(`I couldn't remove the following roles since they are higher in hierarchy than my highest role:`);
+
+            failedRolesMap.forEach((roles, userId) => {
+            embed.addFields({ name: ` `, value: `<@${userId}>: ${roles.map(role => `<@&${role.id}>`).join(' ')}` });
+            });
+
+            message.reply({ embeds: [embed] });
+        }
+
+        message.reply("Roles have been removed from mentioned users.");
     }
     
 });
