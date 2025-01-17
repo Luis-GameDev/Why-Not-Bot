@@ -58,6 +58,70 @@ function getPlusOneData(discordId) {
     return data[discordId] || [];
 }
 
+client.on("messageReactionAdd", async (reaction, user) => {
+
+    originalMessage = reaction.message;
+    
+    let greenCore = {payment: 100000, reaction: "🟢", name: "Green Core"};
+    let blueCore = {payment: 200000, reaction: "🔵", name: "Blue Core"};
+    let purpleCore = {payment: 300000, reaction: "🟣", name: "Purple Core"};
+    let goldCore = {payment: 400000, reaction: "🟡", name: "Gold Core"};
+    
+    let greenVortex = {payment: 100000, reaction: "🟩", name: "Green Vortex"};
+    let blueVortex = {payment: 200000, reaction: "🟦", name: "Blue Vortex"};
+    let purpleVortex = {payment: 300000, reaction: "🟪", name: "Purple Vortex"};
+    let goldVortex = {payment: 400000, reaction: "🟨", name: "Gold Vortex"};
+
+    if (reaction.message.channel.id === process.env.REWARD_CHANNEL) {
+
+        const member = await reaction.message.guild.members.fetch(user.id);
+
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+            return originalMessage.reply("You do not have permission to reward players.");
+        }
+
+        const checkmarkReaction = reaction.message.reactions.cache.find(r => r.emoji.name === "✅");
+        if (checkmarkReaction) return;
+
+        switch (reaction.emoji.name) {
+            case greenCore.reaction:
+                originalMessage.reply(`You have received ${greenCore.payment} for securing the ${greenCore.name}!`);
+                originalMessage.react("✅");
+                break;
+            case blueCore.reaction:
+                originalMessage.reply(`You have received ${blueCore.payment} for securing the ${blueCore.name}!`);
+                originalMessage.react("✅");
+                break;
+            case purpleCore.reaction:
+                originalMessage.reply(`You have received ${purpleCore.payment} for securing the ${purpleCore.name}!`);
+                originalMessage.react("✅");
+                break;
+            case goldCore.reaction:
+                originalMessage.reply(`You have received ${goldCore.payment} for securing the ${goldCore.name}!`);
+                originalMessage.react("✅");
+                break;
+            case greenVortex.reaction:
+                originalMessage.reply(`You have received ${greenVortex.payment} for securing the ${greenVortex.name}!`);
+                originalMessage.react("✅");
+                break;
+            case blueVortex.reaction:
+                originalMessage.reply(`You have received ${blueVortex.payment} for securing the ${blueVortex.name}!`);
+                originalMessage.react("✅");
+                break;
+            case purpleVortex.reaction:
+                originalMessage.reply(`You have received ${purpleVortex.payment} for securing the ${purpleVortex.name}!`);
+                originalMessage.react("✅");
+                break;
+            case goldVortex.reaction:
+                originalMessage.reply(`You have received ${goldVortex.payment} for securing the ${goldVortex.name}!`);
+                originalMessage.react("✅");
+                break;
+            default:
+                break;
+        }
+    }
+});
+
 client.on("messageCreate", async (message) => {
     if (message.content === "--stats" && message.author.id === process.env.OWNER_USER_ID) {
         operateWeeklyStatsTrack()
