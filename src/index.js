@@ -49,6 +49,8 @@ function addPlusOne(discordId, date) {
     data[discordId].push({ date, time });
 
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    
+    return data[discordId].length;
 }
 
 function getPlusOneData(discordId) {
@@ -66,7 +68,17 @@ client.on("messageCreate", async (message) => {
         const parts = message.content.split(" ").slice(1);
         const inputDate = parts.join(" ").trim();
 
-        addPlusOne(userId, inputDate)
+        if(addPlusOne(userId, inputDate) >= 15) {
+           
+            const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+            const member = guild.members.cache.get(userId);
+            const role = guild.roles.cache.get(process.env.RAT_ROLE_ID);
+    
+            if (member && role && !member.roles.cache.has(role.id)) {
+                member.roles.add(role).catch(console.error);
+                message.reply("You now have the Rat role!");
+            }
+        }
         
         message.reply(`<@${userId}>, you now have **${getPlusOneData(userId).length}** +1s.`);
     }
