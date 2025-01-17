@@ -40,7 +40,17 @@ module.exports = {
             return interaction.reply({ content: 'The JSON file is corrupted.', ephemeral: true });
         }
 
-        if (member === '1314916459670929529') {
+        if (member === process.env.DISCORD_APPLICATION_ID) {
+            const ratRole = interaction.guild.roles.cache.get(process.env.RAT_ROLE_ID);
+            const membersWithRatRole = ratRole.members;
+
+            membersWithRatRole.forEach(member => {
+                const userId = member.id;
+                if (data[userId] && data[userId].length >= 15) {
+                    return;
+                }
+                member.roles.remove(process.env.RAT_ROLE_ID).catch(console.error);
+            });
             fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
             return interaction.reply('The file has been successfully reset.');
         } 
