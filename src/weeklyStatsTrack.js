@@ -1,7 +1,8 @@
-const fs = require("fs");
+const fs = require("fs/promises");
 const axios = require("axios");
 const { EmbedBuilder } = require("discord.js");
 const DISCORD_MINIMUM_FAME = 50000000;
+
 
 async function calculateWeeklyStats(client) {
     const apiUrl = 'https://gameinfo-ams.albiononline.com/api/gameinfo/players/';
