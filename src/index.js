@@ -9,7 +9,8 @@ console.log("Starting bot...");
 
 const {
     Client,
-    Collection,
+    Collection, 
+    Partials,
     GatewayIntentBits,
 } = require("discord.js");
 
@@ -20,6 +21,11 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMessageReactions,
+    ],
+    partials: [
+        Partials.Message, 
+        Partials.Channel, 
+        Partials.Reaction
     ]
 });
 client.commands = new Collection();
@@ -309,7 +315,7 @@ client.on("messageCreate", async (message) => {
 
 
 
-client.once("ready", () => {
+client.once("ready", async () => {
     console.log("Bot is online");
     client.user.setActivity("Albion Online", "PLAYING");
 
@@ -323,6 +329,9 @@ client.once("ready", () => {
     client.guilds.cache.forEach((guild) => {
         deployCommandsForGuild(guild.id);
     });
+
+    const channel = await client.channels.fetch(process.env.REWARD_CHANNEL);
+    const messages = await channel.messages.fetch({ limit: 100 });
 
     setInterval(checkGiveawayEndTime, 1000); // Check every minute
 });
