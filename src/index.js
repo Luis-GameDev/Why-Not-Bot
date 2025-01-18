@@ -4,6 +4,7 @@ const path = require("path");
 const cron = require("node-cron");
 const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
 const calcStats = require("./weeklyStatsTrack.js");
+const axios = require('axios');
 console.log("Starting bot...");
 
 const {
@@ -58,6 +59,24 @@ function getPlusOneData(discordId) {
     return data[discordId] || [];
 }
 
+function payMember(userId, amount) {
+    const guild = process.env.DISCORD_GUILD_ID;
+    axios.patch(`https://unbelievaboat.com/api/v1/guilds/${guild}/users/${userId}`, {
+        cash: amount,
+        reason: "Why Bot Payment"
+    }, {
+        headers: {
+            'Authorization': process.env.BALANCE_BOT_API_KEY,
+            'accept': 'application/json',
+            'content-type': 'application/json'
+        }
+    }).then(response => {
+        console.log('Payment successful:', response.data);
+    }).catch(error => {
+        console.error('Error making payment:', error);
+    });
+}
+
 client.on("messageReactionAdd", async (reaction, user) => {
 
     originalMessage = reaction.message;
@@ -86,39 +105,55 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
         switch (reaction.emoji.name) {
             case greenCore.reaction:
-                originalMessage.reply(`You have received **${greenCore.payment}** for securing the ${greenCore.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${greenCore.payment}** for securing the ${greenCore.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, greenCore.payment);
+            break;
+
             case blueCore.reaction:
-                originalMessage.reply(`You have received **${blueCore.payment}** for securing the ${blueCore.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${blueCore.payment}** for securing the ${blueCore.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, blueCore.payment);
+            break;
+
             case purpleCore.reaction:
-                originalMessage.reply(`You have received **${purpleCore.payment}** for securing the ${purpleCore.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${purpleCore.payment}** for securing the ${purpleCore.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, purpleCore.payment);
+            break;
+
             case goldCore.reaction:
-                originalMessage.reply(`You have received **${goldCore.payment}** for securing the ${goldCore.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${goldCore.payment}** for securing the ${goldCore.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, goldCore.payment);
+            break;
+
             case greenVortex.reaction:
-                originalMessage.reply(`You have received **${greenVortex.payment}** for securing the ${greenVortex.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${greenVortex.payment}** for securing the ${greenVortex.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, greenVortex.payment);
+            break;
+
             case blueVortex.reaction:
-                originalMessage.reply(`You have received **${blueVortex.payment}** for securing the ${blueVortex.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${blueVortex.payment}** for securing the ${blueVortex.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, blueVortex.payment);
+            break;
+
             case purpleVortex.reaction:
-                originalMessage.reply(`You have received **${purpleVortex.payment}** for securing the ${purpleVortex.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${purpleVortex.payment}** for securing the ${purpleVortex.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, purpleVortex.payment);
+            break;
+
             case goldVortex.reaction:
-                originalMessage.reply(`You have received **${goldVortex.payment}** for securing the ${goldVortex.name}!`);
-                originalMessage.react("✅");
-                break;
+            originalMessage.reply(`You have received **${goldVortex.payment}** for securing the ${goldVortex.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, goldVortex.payment);
+            break;
+
             default:
-                break;
+            break;
         }
     }
 });
@@ -409,6 +444,7 @@ async function deployCommandsForGuild(guildId) {
 
     commandFiles.forEach((commandFile) => {
         const command = require(`./commands/${commandFile}`);
+const axios = require('axios');
         commands.push(command.data.toJSON());
     });
 
