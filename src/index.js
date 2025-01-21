@@ -83,6 +83,14 @@ function payMember(userId, amount) {
     });
 }
 
+client.on("guildMemberAdd", async (member) => {
+    const publicChannel = await client.channels.fetch(process.env.PUBLIC_CHANNEL_ID);
+
+    publicChannel.send(`Welcome ${member}!\n
+If you joined the guild please follow the instructions pinned here https://discord.com/channels/1248205717379354664/1330900761302929418 to link your account and get full permissions. \n
+Once linked, please read https://discord.com/channels/1248205717379354664/1248250430283190273 and https://discord.com/channels/1248205717379354664/1267166145618640957`);
+});
+
 client.on("messageReactionAdd", async (reaction, user) => {
 
     originalMessage = reaction.message;

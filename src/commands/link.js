@@ -74,6 +74,16 @@ module.exports = {
 
             fs.writeFileSync(userFilePath, JSON.stringify(userData, null, 2));
 
+            const member = await interaction.guild.members.fetch(discordId);
+
+            if (process.env.NOTLINKED_ROLE_ID && member.roles.cache.has(process.env.NOTLINKED_ROLE_ID)) {
+                await member.roles.remove(process.env.NOTLINKED_ROLE_ID);
+
+                if (process.env.WHYNOT_ROLE_ID) {
+                    await member.roles.add(process.env.WHYNOT_ROLE_ID);
+                }
+            }
+
             await interaction.followUp({
                 content: `Your Discord account was successfully linked to "${linkedPlayer.ign}".`,
                 ephemeral: true,

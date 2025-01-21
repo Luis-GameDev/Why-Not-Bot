@@ -1,6 +1,5 @@
 {
   "discordId": "450395254198370314",
-  "ign": "Germany",
   "playerId": "LjVcNAnyR9aS_Hp7VAd3DQ",
   "weeklyStats": [
     {
@@ -11,5 +10,6 @@
       "date": "2025-01-06",
       "fame": 692221154
     }
-  ]
+  ],
+  "ign": "Germany"
 }
