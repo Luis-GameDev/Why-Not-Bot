@@ -10,75 +10,139 @@ module.exports = {
             option.setName('amount')
                 .setDescription('Number of top members to show')
                 .setRequired(true)
+        )
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Choose "rat" or "cta"')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'rat', value: 'rat' },
+                    { name: 'cta', value: 'cta' }
+                )
         ),
 
     async execute(interaction) {
-        const amount = interaction.options.getInteger('amount');
-        const wbRoleId = process.env.WB_ROLE;
-        const guild = interaction.guild;
+        if(interaction.options.getString('type') === 'rat') {
+            const amount = interaction.options.getInteger('amount');
+            const wbRoleId = process.env.WB_ROLE;
+            const guild = interaction.guild;
 
-        // Alle Mitglieder mit der Rolle WB_ROLE sammeln
-        const membersWithRole = guild.members.cache.filter(member => member.roles.cache.has(wbRoleId));
+            const membersWithRole = guild.members.cache.filter(member => member.roles.cache.has(wbRoleId));
 
-        let memberData = [];
+            let memberData = [];
 
-        // Für jedes Mitglied die +1s aus der plusones.json laden
-        for (const member of membersWithRole.values()) {
-            const userFilePath = path.join(__dirname, '../data/plusones.json');
-            const data = JSON.parse(fs.readFileSync(userFilePath, 'utf8'));
-            const plusOneCount = data[member.id] ? data[member.id].length : 0;
+            for (const member of membersWithRole.values()) {
+                const userFilePath = path.join(__dirname, '../data/plusones.json');
+                const data = JSON.parse(fs.readFileSync(userFilePath, 'utf8'));
+                const plusOneCount = data[member.id] ? data[member.id].length : 0;
 
-            memberData.push({
-                user: member,
-                plusOnes: plusOneCount
-            });
-        }
+                memberData.push({
+                    user: member,
+                    plusOnes: plusOneCount
+                });
+            }
 
-        // Sortiere die Mitglieder nach der Anzahl der +1s in absteigender Reihenfolge
-        memberData.sort((a, b) => b.plusOnes - a.plusOnes);
+            memberData.sort((a, b) => b.plusOnes - a.plusOnes);
 
-        // Erstelle die Antwort mit den besten Mitgliedern
-        let replyContent = `Top ${amount} WB Members with the most +1s:\n`;
+            let replyContent = `Top ${amount} WB Members with the most +1s:\n`;
 
-        let count = 0;
-        let embeds = [];
-        let currentEmbed = {
-            title: `Top ${amount} WB Members with the most +1s`,
-            fields: []
-        };
+            let count = 0;
+            let embeds = [];
+            let currentEmbed = {
+                title: `Top ${amount} WB Members with the most +1s`,
+                fields: []
+            };
 
-        // Füge die Mitglieder zum Embed hinzu
-        for (const { user, plusOnes } of memberData) {
-            if (count >= amount) break;
+            for (const { user, plusOnes } of memberData) {
+                if (count >= amount) break;
 
-            currentEmbed.fields.push({
-                name: `${user.user.tag}`,
-                value: `+1s: ${plusOnes}`,
-                inline: false
-            });
+                currentEmbed.fields.push({
+                    name: `${user.user.tag}`,
+                    value: `+1s: ${plusOnes}`,
+                    inline: false
+                });
 
-            count++;
+                count++;
 
-            // Wenn das Limit von 25 Feldern erreicht ist, erstelle ein neues Embed
-            if (currentEmbed.fields.length >= 25) {
+                if (currentEmbed.fields.length >= 25) {
+                    embeds.push(currentEmbed);
+                    currentEmbed = {
+                        title: `Top ${amount} WB Members with the most +1s (cont.)`,
+                        fields: []
+                    };
+                }
+            }
+
+            if (currentEmbed.fields.length > 0) {
                 embeds.push(currentEmbed);
-                currentEmbed = {
-                    title: `Top ${amount} WB Members with the most +1s (cont.)`,
-                    fields: []
-                };
+            }
+
+            if (embeds.length > 1) {
+                await interaction.reply({ content: replyContent, embeds });
+            } else {
+                await interaction.reply({ content: replyContent, embeds: [embeds[0]] });
             }
         }
 
-        // Füge das letzte Embed hinzu, wenn es noch Daten hat
-        if (currentEmbed.fields.length > 0) {
-            embeds.push(currentEmbed);
-        }
+        if(interaction.options.getString('type') === 'cta') {
+            const amount = interaction.options.getInteger('amount');
+            const guild = interaction.guild;
 
-        // Sende die Antwort
-        if (embeds.length > 1) {
-            await interaction.reply({ content: replyContent, embeds });
-        } else {
-            await interaction.reply({ content: replyContent, embeds: [embeds[0]] });
+            const membersWithRole = guild.members.cache.filter(member => member.roles.cache.has(wbRoleId));
+
+            let memberData = [];
+
+            for (const member of membersWithRole.values()) {
+                const userFilePath = path.join(__dirname, '../data/plusones.json');
+                const data = JSON.parse(fs.readFileSync(userFilePath, 'utf8'));
+                const plusOneCount = data[member.id] ? data[member.id].length : 0;
+
+                memberData.push({
+                    user: member,
+                    plusOnes: plusOneCount
+                });
+            }
+
+            memberData.sort((a, b) => b.plusOnes - a.plusOnes);
+
+            let replyContent = `Top ${amount} WB Members with the most +1s:\n`;
+
+            let count = 0;
+            let embeds = [];
+            let currentEmbed = {
+                title: `Top ${amount} WB Members with the most +1s`,
+                fields: []
+            };
+
+            for (const { user, plusOnes } of memberData) {
+                if (count >= amount) break;
+
+                currentEmbed.fields.push({
+                    name: `${user.user.tag}`,
+                    value: `+1s: ${plusOnes}`,
+                    inline: false
+                });
+
+                count++;
+
+                if (currentEmbed.fields.length >= 25) {
+                    embeds.push(currentEmbed);
+                    currentEmbed = {
+                        title: `Top ${amount} WB Members with the most +1s (cont.)`,
+                        fields: []
+                    };
+                }
+            }
+
+            if (currentEmbed.fields.length > 0) {
+                embeds.push(currentEmbed);
+            }
+
+            if (embeds.length > 1) {
+                await interaction.reply({ content: replyContent, embeds });
+            } else {
+                await interaction.reply({ content: replyContent, embeds: [embeds[0]] });
+            }
         }
     }
 };
