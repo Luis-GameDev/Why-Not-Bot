@@ -47,9 +47,14 @@ function getCtaPlus(userId) {
     return data[userId] || []
 }
 
+function updateUserName(userId) {
+    const points = 1 // update user name based on all plus ones with multipliers and all that shit
+}
+
 module.exports = {
     addRatPlus,
     addCtaPlus,
     getRatPlus,
-    getCtaPlus
+    getCtaPlus,
+    updateUserName
 };
