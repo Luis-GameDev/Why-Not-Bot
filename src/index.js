@@ -156,32 +156,6 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 client.on("messageCreate", async (message) => {
 
-    // test here
-    if (message.content.startsWith("--fetchCta")) {
-        let member = message.author.id
-        let plus = Plusones.getCtaPlus(member)
-        message.reply(`${plus.length}`)
-    }
-    if (message.content.startsWith("--fetchRat")) {
-        let member = message.author.id
-        let plus = Plusones.getRatPlus(member)
-        message.reply(`${plus.length}`)
-    }
-    if (message.content.startsWith("--setCta")) {
-        let member = message.author.id
-        let caller = message.author.id
-        let plus = Plusones.addCtaPlus(member, caller)
-        message.reply(`Added 1 to cta, caller: ${caller}`)
-    }
-    if (message.content.startsWith("--setRat")) {
-        let member = message.author.id;
-        let date = "added by test";
-        let plus = Plusones.addRatPlus(member, date)
-        message.reply(`Added 1 to rat`)
-    }
-
-
-
     if (message.content === "--stats" && message.author.id === process.env.OWNER_USER_ID) {
         operateWeeklyStatsTrack()
     }

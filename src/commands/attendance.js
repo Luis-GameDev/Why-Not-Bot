@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const path = require("path");
 const fs = require("fs");
+const Plusones = require("../plusones.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -21,25 +22,11 @@ module.exports = {
         }
 
         const members = channel.members;
-        
-
-        // adding +1 logic
-        const dataFilePath = path.join(__dirname, '../data/ctaplusones.json');
-        const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-        let time = new Date().getTime();
         let caller = interaction.user.id;
         
         members.forEach(member => {
-            let discordId = member.id;
-
-            if (!data[discordId]) {
-                data[discordId] = [];
-            }
-        
-            data[discordId].push({ time, caller });
+            Plusones.addCtaPlus(member.id, caller)
         })
-
-        fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
 
         await interaction.reply(`Tracked attendance for ${members.size} Members in your Voice Channel.`);
     },

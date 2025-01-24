@@ -1,8 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
+const Plusone = require("../plusones.js");
 
-const dataFilePath = path.join(__dirname, '../data/plusones.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,15 +15,7 @@ module.exports = {
         const member = interaction.options.getUser('member');
         const discordId = member.id;
 
-        if (!fs.existsSync(dataFilePath)) {
-            return interaction.reply({
-                content: 'No data file found.',
-                ephemeral: true
-            });
-        }
-
-        const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-        const plusOnes = data[discordId] || [];
+        const plusOnes = Plusone.getRatPlus(discordId);
 
         if (plusOnes.length === 0) {
             return interaction.reply({
