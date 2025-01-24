@@ -4,6 +4,7 @@ const path = require("path");
 const cron = require("node-cron");
 const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
 const calcStats = require("./weeklyStatsTrack.js");
+const Plusones = require("./plusones.js");
 const axios = require('axios');
 console.log("Starting bot...");
 
@@ -45,26 +46,6 @@ commandFiles.forEach((commandFile) => {
 
 const botChannelId = process.env.BOT_CHANNEL; 
 const dataFilePath = path.join(__dirname, './data/plusones.json');
-
-function addPlusOne(discordId, date) {
-    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-    let time = new Date().getTime();
-
-    if (!data[discordId]) {
-        data[discordId] = [];
-    }
-
-    data[discordId].push({ date, time });
-
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-    
-    return data[discordId].length;
-}
-
-function getPlusOneData(discordId) {
-    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
-    return data[discordId] || [];
-}
 
 function payMember(userId, amount) {
     const guild = process.env.DISCORD_GUILD_ID;
@@ -174,6 +155,33 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("messageCreate", async (message) => {
+
+    // test here
+    if (message.content.startsWith("--fetchCta")) {
+        let member = message.author.id
+        let plus = Plusones.getCtaPlus(member)
+        message.reply(`${plus.length}`)
+    }
+    if (message.content.startsWith("--fetchRat")) {
+        let member = message.author.id
+        let plus = Plusones.getRatPlus(member)
+        message.reply(`${plus.length}`)
+    }
+    if (message.content.startsWith("--setCta")) {
+        let member = message.author.id
+        let caller = message.author.id
+        let plus = Plusones.addCtaPlus(member, caller)
+        message.reply(`Added 1 to cta, caller: ${caller}`)
+    }
+    if (message.content.startsWith("--setRat")) {
+        let member = message.author.id;
+        let date = "added by test";
+        let plus = Plusones.addRatPlus(member, date)
+        message.reply(`Added 1 to rat`)
+    }
+
+
+
     if (message.content === "--stats" && message.author.id === process.env.OWNER_USER_ID) {
         operateWeeklyStatsTrack()
     }
@@ -183,7 +191,9 @@ client.on("messageCreate", async (message) => {
         const parts = message.content.split(" ").slice(1);
         const inputDate = parts.join(" ").trim();
 
-        if(addPlusOne(userId, inputDate) >= 15) {
+        const plusamount = Plusones.addRatPlus(userId, inputDate)
+
+        if(plusamount >= 15) {
            
             const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
             const member = guild.members.cache.get(userId);
@@ -195,7 +205,7 @@ client.on("messageCreate", async (message) => {
             }
         }
         
-        message.reply(`<@${userId}>, you now have **${getPlusOneData(userId).length}** +1s.`);
+        message.reply(`<@${userId}>, you now have **${plusamount}** +1s.`);
     }
 
     if (message.content.startsWith("!wb")) {
