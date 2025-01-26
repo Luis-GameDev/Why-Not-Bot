@@ -77,15 +77,15 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
     originalMessage = reaction.message;
     
-    let greenCore = {payment: 200000, reaction: "🟢", name: "Green Core"};
-    let blueCore = {payment: 400000, reaction: "🔵", name: "Blue Core"};
-    let purpleCore = {payment: 500000, reaction: "🟣", name: "Purple Core"};
-    let goldCore = {payment: 750000, reaction: "🟡", name: "Gold Core"};
+    let greenCore = {payment: 100000, reaction: "🟢", name: "Green Core"};
+    let blueCore = {payment: 200000, reaction: "🔵", name: "Blue Core"};
+    let purpleCore = {payment: 250000, reaction: "🟣", name: "Purple Core"};
+    let goldCore = {payment: 400000, reaction: "🟡", name: "Gold Core"};
     
-    let greenVortex = {payment: 300000, reaction: "🟩", name: "Green Vortex"};
-    let blueVortex = {payment: 500000, reaction: "🟦", name: "Blue Vortex"};
-    let purpleVortex = {payment: 1000000, reaction: "🟪", name: "Purple Vortex"};
-    let goldVortex = {payment: 1500000, reaction: "🟨", name: "Gold Vortex"};
+    let greenVortex = {payment: 150000, reaction: "🟩", name: "Green Vortex"};
+    let blueVortex = {payment: 250000, reaction: "🟦", name: "Blue Vortex"};
+    let purpleVortex = {payment: 500000, reaction: "🟪", name: "Purple Vortex"};
+    let goldVortex = {payment: 750000, reaction: "🟨", name: "Gold Vortex"};
 
     if (reaction.message.channel.id === process.env.REWARD_CHANNEL && !user.bot) {
 
