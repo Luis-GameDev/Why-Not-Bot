@@ -42,12 +42,16 @@ module.exports = {
                         inline: true
                     },
                     {
-                        name: "UID:",
+                        name: "User ID:",
                         value: member.user.id,
                     },
                     {
                         name: "+1s:",
-                        value: `Rat: ${Plusones.getRatPlus(member.id).length} \nCta: ${Plusones.getCtaPlus(member.id).length} \nContent: ${Plusones.getContentPlus(member.id).length} \nFocus: ${Plusones.getFocusPlus(member.id).length} \nTotal: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length}`
+                        value: `Rat: ${Plusones.getRatPlus(member.id).length} 
+                        Cta: ${Plusones.getCtaPlus(member.id).length} 
+                        Content: ${Plusones.getContentPlus(member.id).length} 
+                        Focus: ${Plusones.getFocusPlus(member.id).length} 
+                        Total: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length}`
                     },
                     {
                         name: "Link:",
