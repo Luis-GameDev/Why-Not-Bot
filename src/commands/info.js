@@ -23,7 +23,9 @@ module.exports = {
             let userData;
             if (fs.existsSync(filePath)) {
                 userData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            } 
+            } else {
+                userData = {ign: undefined};
+            }
             const userIgn = userData.ign === undefined ? "Not Linked" : `IGN - ${userData.ign}`
 
             interaction.reply({embeds: [
@@ -45,7 +47,7 @@ module.exports = {
                     },
                     {
                         name: "+1s:",
-                        value: `Rat: ${Plusones.getRatPlus(member.id).length} \nCta: ${Plusones.getCtaPlus(member.id).length} \nTotal: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length}`
+                        value: `Rat: ${Plusones.getRatPlus(member.id).length} \nCta: ${Plusones.getCtaPlus(member.id).length} \nContent: ${Plusones.getContentPlus(member.id).length} \nTotal: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length}`
                     },
                     {
                         name: "Link:",

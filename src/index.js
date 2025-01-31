@@ -45,7 +45,6 @@ commandFiles.forEach((commandFile) => {
 });
 
 const botChannelId = process.env.BOT_CHANNEL; 
-const dataFilePath = path.join(__dirname, './data/plusones.json');
 
 function payMember(userId, amount) {
     const guild = process.env.DISCORD_GUILD_ID;
@@ -311,7 +310,8 @@ client.on("messageCreate", async (message) => {
 client.once("ready", async () => {
     console.log("Bot is online");
     client.user.setActivity("Albion Online", "PLAYING");
-
+    Plusones.setClient(client);
+    
     try {
         const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
         guild.members.fetch()
@@ -464,3 +464,5 @@ const axios = require('axios');
 }
 
 client.login(process.env.DISCORD_BOT_TOKEN);
+
+module.exports = client;

@@ -13,10 +13,11 @@ module.exports = {
         )
         .addStringOption(option =>
             option.setName('type')
-                .setDescription('Choose "rat" or "cta"')
+                .setDescription('Choose "rat", "content" or "cta"')
                 .setRequired(true)
                 .addChoices(
                     { name: 'rat', value: 'rat' },
+                    { name: 'content', value: 'content' },
                     { name: 'cta', value: 'cta' }
                 )
         ),
@@ -131,6 +132,64 @@ module.exports = {
 
             return interaction.reply({
                 content: `Listing all CTA +1s for <@${discordId}>...`,
+                ephemeral: true
+            });
+        }
+
+        if(interaction.options.getString('type') === 'content') {
+            let dataFilePath = path.join(__dirname, '../data/contentplusones.json');
+
+            let member = interaction.options.getUser('member');
+            let discordId = member.id;
+
+            if (!fs.existsSync(dataFilePath)) {
+                return interaction.reply({
+                    content: 'No data file found.',
+                    ephemeral: true
+                });
+            }
+
+            let data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+            let plusOnes = data[discordId] || [];
+
+            if (plusOnes.length === 0) {
+                return interaction.reply({
+                    content: `<@${discordId}> has no Content +1s recorded.`,
+                    ephemeral: true
+                });
+            }
+
+            let embeds = [];
+            let currentEmbed = new EmbedBuilder()
+                .setTitle(`${plusOnes.length} +1s for ${member.username}`)
+                .setColor(0x1e90ff)
+                .setTimestamp();
+
+            plusOnes.forEach((entry, index) => {
+                let time = new Date(entry.time).toLocaleString();
+                let caller = entry.caller;
+
+                let fieldValue = `#${index + 1}: Caller - <@${caller}> at ${time}`;
+
+                if (currentEmbed.data.fields?.length === 25) {
+                    embeds.push(currentEmbed);
+                    currentEmbed = new EmbedBuilder()
+                        .setTitle(`${plusOnes.length} Content +1s for ${member.username}`)
+                        .setColor(0x1e90ff)
+                        .setTimestamp();
+                }
+
+                currentEmbed.addFields({ name: '\u200B', value: fieldValue });
+            });
+
+            embeds.push(currentEmbed);
+
+            for (let embed of embeds) {
+                await interaction.channel.send({ embeds: [embed] });
+            }
+
+            return interaction.reply({
+                content: `Listing all Content +1s for <@${discordId}>...`,
                 ephemeral: true
             });
         }
