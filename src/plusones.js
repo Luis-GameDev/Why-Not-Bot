@@ -58,6 +58,23 @@ function addContentPlus(userId, caller) {
     return data[userId].length; // returns total amount of +1s
 }
 
+function addFocusPlus(userId) {
+    const dataFilePath = path.join(__dirname, './data/focusplusones.json');
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+    let time = new Date().getTime();
+
+    if (!data[userId]) {
+        data[userId] = [];
+    }
+
+    data[userId].push({ time });
+
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    updateUserName(userId);
+    
+    return data[userId].length; // returns total amount of +1s
+}
+
 function getRatPlus(userId) {
     const dataFilePath = path.join(__dirname, './data/plusones.json');
     const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
@@ -79,6 +96,13 @@ function getContentPlus(userId) {
     return data[userId] || []
 }
 
+function getFocusPlus(userId) {
+    const dataFilePath = path.join(__dirname, './data/focusplusones.json');
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+
+    return data[userId] || []
+}
+
 async function updateUserName(userId) {
     const guild = await clientInstance.guilds.fetch(process.env.DISCORD_GUILD_ID).catch(() => null);
     if (!guild) return;
@@ -86,15 +110,14 @@ async function updateUserName(userId) {
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) return;
 
-    const points = (getRatPlus(userId).length * 3) + (getCtaPlus(userId).length * 2) + (getContentPlus(userId).length);
+    const points = (getRatPlus(userId).length * 2) + (getCtaPlus(userId).length * 5) + (getContentPlus(userId).length);
 
-    const nameWithoutBrackets = member.displayName.replace(/\[\d+\]$/, '').trim(); // Remove existing [number] if present
+    const nameWithoutBrackets = member.displayName.replace(/\[\d+\]$/, '').trim(); 
     try {
         await member.setNickname(`${nameWithoutBrackets} [${points}]`).catch(console.error);
     } catch (error) {
         console.error("Error updating nickname for: " + userId);
-    }
-    
+    }   
 }
 
 
@@ -103,9 +126,11 @@ module.exports = {
     addRatPlus,
     addCtaPlus,
     addContentPlus,
+    addFocusPlus,
     getRatPlus,
     getCtaPlus,
     getContentPlus,
+    getFocusPlus,
     updateUserName,
     setClient
 };

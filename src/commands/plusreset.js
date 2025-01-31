@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const Plusones = require("../plusones.js");
+const client = require('../index.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,13 +34,20 @@ module.exports = {
             dataFilePath = path.join(__dirname, '../data/contentplusones.json');
         }
 
+        const members = await interaction.guild.members.fetch();
+
         if (dataFilePath) {
             fs.writeFile(dataFilePath, JSON.stringify({}), (err) => {
                 if (err) {
-                    console.error(err);
                     return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
                 }
+
                 interaction.reply({ content: `The ${fileType} file has been reset.`, ephemeral: true });
+
+                members.forEach(member => {
+                    Plusones.updateUserName(member.id);
+                });
+
             });
         } else {
             interaction.reply({ content: 'Invalid file type.', ephemeral: true });
