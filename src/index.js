@@ -171,7 +171,7 @@ client.on("messageCreate", async (message) => {
             const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
             const member = guild.members.cache.get(userId);
             const role = guild.roles.cache.get(process.env.RAT_ROLE_ID);
-    
+            
             if (member && role && !member.roles.cache.has(role.id)) {
                 member.roles.add(role).catch(console.error);
                 message.reply("You now have the Rat role!");
@@ -311,7 +311,7 @@ client.once("ready", async () => {
     console.log("Bot is online");
     client.user.setActivity("Albion Online", "PLAYING");
     Plusones.setClient(client);
-    
+
     try {
         const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
         guild.members.fetch()

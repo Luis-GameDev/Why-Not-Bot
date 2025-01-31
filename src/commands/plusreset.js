@@ -15,7 +15,9 @@ module.exports = {
                 .addChoices(
                     { name: 'rat', value: 'rat' },
                     { name: 'content', value: 'content' },
-                    { name: 'cta', value: 'cta' }
+                    { name: 'cta', value: 'cta' },
+                    { name: 'focus', value: 'focus' },
+                    { name: 'vod', value: 'vod' }
                 )
         ),
     async execute(interaction) {
@@ -32,6 +34,10 @@ module.exports = {
             dataFilePath = path.join(__dirname, '../data/ctaplusones.json');
         } else if (fileType === 'content') {
             dataFilePath = path.join(__dirname, '../data/contentplusones.json');
+        } else if (fileType === 'focus') {
+            dataFilePath = path.join(__dirname, '../data/focusplusones.json');
+        } else if (fileType === 'vod') {
+            dataFilePath = path.join(__dirname, '../data/vodplusones.json');
         }
 
         const members = await interaction.guild.members.fetch();
