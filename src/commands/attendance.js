@@ -2,6 +2,8 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const path = require("path");
 const fs = require("fs");
 const Plusones = require("../plusones.js");
+const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('@discordjs/builders');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -55,6 +57,16 @@ module.exports = {
             members.forEach(member => {
                 Plusones.addContentPlus(member.id, caller)
             })
+
+            // logging logic 
+            const embed = new EmbedBuilder()
+                .setTitle(`Content-Attendance logged by ${interaction.user.username}`)
+                .setDescription(members.map(member => member.user).join('\n'))
+                
+            const logChannel = interaction.guild.channels.cache.get(process.env.LOGS_CHANNEL_ID);
+            if (logChannel) {
+                logChannel.send({ embeds: [embed] });
+            }
 
             await interaction.reply(`Tracked Content-attendance for ${members.size} Members in your Voice Channel.`);
         }

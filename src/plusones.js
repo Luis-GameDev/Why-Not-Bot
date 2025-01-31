@@ -75,6 +75,23 @@ function addFocusPlus(userId) {
     return data[userId].length; // returns total amount of +1s
 }
 
+function addVodPlus(userId, reviewer) {
+    const dataFilePath = path.join(__dirname, './data/vodplusones.json');
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+    let time = new Date().getTime();
+
+    if (!data[userId]) {
+        data[userId] = [];
+    }
+
+    data[userId].push({ time, reviewer });
+
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    updateUserName(userId);
+    
+    return data[userId].length; // returns total amount of +1s
+}
+
 function getRatPlus(userId) {
     const dataFilePath = path.join(__dirname, './data/plusones.json');
     const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
@@ -103,6 +120,13 @@ function getFocusPlus(userId) {
     return data[userId] || []
 }
 
+function getVodPlus(userId) {
+    const dataFilePath = path.join(__dirname, './data/vodplusones.json');
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+
+    return data[userId] || []
+}
+
 async function updateUserName(userId) {
     const guild = await clientInstance.guilds.fetch(process.env.DISCORD_GUILD_ID).catch(() => null);
     if (!guild) return;
@@ -110,7 +134,7 @@ async function updateUserName(userId) {
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) return;
 
-    const points = (getRatPlus(userId).length * 2) + (getCtaPlus(userId).length * 5) + (getContentPlus(userId).length);
+    const points = (getRatPlus(userId).length * 2) + (getCtaPlus(userId).length * 5) + (getContentPlus(userId).length) + (getFocusPlus(userId).length * 2) + (getVodPlus(userId).length);
 
     const nameWithoutBrackets = member.displayName.replace(/\[\d+\]$/, '').trim(); 
     try {
@@ -127,10 +151,12 @@ module.exports = {
     addCtaPlus,
     addContentPlus,
     addFocusPlus,
+    addVodPlus,
     getRatPlus,
     getCtaPlus,
     getContentPlus,
     getFocusPlus,
+    getVodPlus,
     updateUserName,
     setClient
 };

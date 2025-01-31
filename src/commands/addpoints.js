@@ -65,6 +65,22 @@ module.exports = {
                 .addUserOption(option => 
                     option.setName('user')
                         .setDescription('User to add points to')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('vod')
+                .setDescription('Add +1s to VOD category')
+                .addIntegerOption(option => 
+                    option.setName('points')
+                        .setDescription('Number of points to add')
+                        .setRequired(true))
+                .addUserOption(option => 
+                    option.setName('user')
+                        .setDescription('User to add points to')
+                        .setRequired(true))
+                .addUserOption(option => 
+                    option.setName('reviewer')
+                        .setDescription('User who reviewed the VOD')
                         .setRequired(true))),
     async execute(interaction) {
 
@@ -108,6 +124,14 @@ module.exports = {
 
                 for (let i = 0; i < points; i++) {
                     Plusones.addFocusPlus(user.id);
+                }
+                break;
+            case 'vod':
+                response = `Added **${points}**x +1s to ${user} in VOD category.`;
+                const reviewer = interaction.options.getUser('reviewer');
+                
+                for (let i = 0; i < points; i++) {
+                    Plusones.addVodPlus(user.id, reviewer.id);
                 }
                 break;
         }
