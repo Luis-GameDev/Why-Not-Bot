@@ -88,8 +88,10 @@ module.exports = {
                 content: `Your Discord account was successfully linked to "${linkedPlayer.ign}".`,
                 ephemeral: true,
             });
+            await member.setNickname(linkedPlayer.ign).catch(console.log("Error: Could not set nickname"));
+
         } catch (error) {
-            console.error('Error trying to link:', error.message);
+            console.error('Error trying to link or change nickname:', error.message);
             await interaction.followUp({
                 content: 'The Albion API is not responding, please try again later.',
                 ephemeral: true,

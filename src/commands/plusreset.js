@@ -17,7 +17,8 @@ module.exports = {
                     { name: 'content', value: 'content' },
                     { name: 'cta', value: 'cta' },
                     { name: 'focus', value: 'focus' },
-                    { name: 'vod', value: 'vod' }
+                    { name: 'vod', value: 'vod' },
+                    { name: 'all', value: 'all' }
                 )
         ),
     async execute(interaction) {
@@ -38,6 +39,33 @@ module.exports = {
             dataFilePath = path.join(__dirname, '../data/focusplusones.json');
         } else if (fileType === 'vod') {
             dataFilePath = path.join(__dirname, '../data/vodplusones.json');
+        } else if (fileType === 'all') {
+            fs.writeFile(path.join(__dirname, '../data/plusones.json'), JSON.stringify({}), (err) => {
+                if (err) {
+                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
+                }
+            });
+            fs.writeFile(path.join(__dirname, '../data/ctaplusones.json'), JSON.stringify({}), (err) => {
+                if (err) {
+                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
+                }
+            });
+            fs.writeFile(path.join(__dirname, '../data/contentplusones.json'), JSON.stringify({}), (err) => {
+                if (err) {
+                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
+                }
+            });
+            fs.writeFile(path.join(__dirname, '../data/focusplusones.json'), JSON.stringify({}), (err) => {
+                if (err) {
+                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
+                }
+            });
+            fs.writeFile(path.join(__dirname, '../data/vodplusones.json'), JSON.stringify({}), (err) => {
+                if (err) {
+                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
+                }
+            });
+            interaction.reply({ content: `All +1 files have been reset.`, ephemeral: true });
         }
 
         const members = await interaction.guild.members.fetch();
@@ -50,13 +78,11 @@ module.exports = {
 
                 interaction.reply({ content: `The ${fileType} file has been reset.`, ephemeral: true });
 
-                members.forEach(member => {
-                    Plusones.updateUserName(member.id);
-                });
-
             });
-        } else {
-            interaction.reply({ content: 'Invalid file type.', ephemeral: true });
-        }
+        } 
+
+        members.forEach(member => {
+            Plusones.updateUserName(member.id);
+        });
     }
 };

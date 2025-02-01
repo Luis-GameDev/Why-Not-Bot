@@ -43,7 +43,7 @@ module.exports = {
         if(typeOption === 'officer') {
             let embed = new EmbedBuilder()
                 .setTitle('Officer Commands')
-                .setDescription('Here are the commands available for members:')
+                .setDescription('Here are the commands available for officers:')
                 .setColor(0x1e90ff)
                 .addFields(
                     { name: '/giveaway start', value: 'Creates a giveaway that has increased winning chances based on +1s.' },
@@ -53,6 +53,7 @@ module.exports = {
                     { name: '/plusreset', value: 'Resets the whole +1 file.' },
                     { name: '/unlink', value: 'Unlinks a specified user from his Ingame-name.' },
                     { name: '!purge', value: 'Removes all roles from all tagged members.' },
+                    { name: '/addpoints type', value: 'Adds X amount of +1s to a specific category.' },
                 )
                 .setTimestamp();
 
