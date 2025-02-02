@@ -10,6 +10,19 @@ module.exports = {
             option.setName('member')
                 .setDescription('The user or @everyone')
                 .setRequired(true))
+        .addStringOption(option =>
+            option.setName('type')
+                .setDescription('Choose the type of +1 to delete')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'rat', value: 'rat' },
+                    { name: 'content', value: 'content' },
+                    { name: 'cta', value: 'cta' },
+                    { name: 'focus', value: 'focus' },
+                    { name: 'vod', value: 'vod' },
+                    { name: 'scout', value: 'scout' }
+                )
+        )
         .addStringOption(option => 
             option.setName('index')
                 .setDescription('Index of the entry or "all" for all')
@@ -19,7 +32,29 @@ module.exports = {
         let member = interaction.options.getUser('member');
         member = member.id
         let index = interaction.options.getString('index');
-        const filePath = path.join(__dirname, '../data/plusones.json');
+        const type = interaction.options.getString('type');
+        let filePath;
+
+        switch (type) {   
+            case 'rat':
+                filePath = path.join(__dirname, '../data/plusones.json');
+                break;
+            case 'content':
+                filePath = path.join(__dirname, '../data/contentplusones.json');
+                break;
+            case 'cta':
+                filePath = path.join(__dirname, '../data/ctaplusones.json');
+                break;
+            case 'focus':
+                filePath = path.join(__dirname, '../data/focusplusones.json');
+                break;
+            case 'vod':
+                filePath = path.join(__dirname, '../data/vodplusones.json');
+                break;
+            case 'scout':
+                filePath = path.join(__dirname, '../data/scoutplusones.json');
+                break;
+        }
 
         // check for perms
         const sender = interaction.guild.members.cache.get(interaction.user.id);
@@ -40,7 +75,7 @@ module.exports = {
             return interaction.reply({ content: 'The JSON file is corrupted.', ephemeral: true });
         }
 
-        if (member === process.env.DISCORD_APPLICATION_ID) {
+        /*if (member === process.env.DISCORD_APPLICATION_ID) {
             const ratRole = interaction.guild.roles.cache.get(process.env.RAT_ROLE_ID);
             const membersWithRatRole = ratRole.members;
 
@@ -53,7 +88,7 @@ module.exports = {
             });
             fs.writeFileSync(filePath, JSON.stringify({}, null, 2));
             return interaction.reply('The file has been successfully reset.');
-        } 
+        } */
 
         if (!data[member]) {
             return interaction.reply({ content: `The user <@${member}> does not exist in the file.`, ephemeral: true });
@@ -66,9 +101,9 @@ module.exports = {
         } 
 
         if (index) {
-            const parsedIndex = parseInt(index, 10) +1;
+            const parsedIndex = parseInt(index, 10)-1;
 
-            if (isNaN(parsedIndex) || parsedIndex < 0 || parsedIndex >= data[member].length) {
+            if (isNaN(parsedIndex) || parsedIndex < 1 || parsedIndex > data[member].length) {
                 return interaction.reply({ content: 'The specified index is invalid.', ephemeral: true });
             }
 
