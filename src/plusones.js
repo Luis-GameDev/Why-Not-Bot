@@ -175,7 +175,7 @@ async function updateUserName(userId) {
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) return;
 
-    const points = (getRatPlus(userId).length * 2) + (getCtaPlus(userId).length * 5) + (getContentPlus(userId).length) + (getFocusPlus(userId).length * 2) + (getVodPlus(userId).length) + (getScoutPlus(userId).length);
+    const points = (getRatPlus(userId).length * 2) + (getCtaPlus(userId).length * 5) + (getContentPlus(userId).length) + (getFocusPlus(userId).length * 2) + (getVodPlus(userId).length) + (getScoutPlus(userId).length * 4);
 
     if(points >= 35 && member.roles.cache.has(process.env.TRIAL_ROLE_ID)) {
         await member.roles.remove(process.env.TRIAL_ROLE_ID).catch(console.error);
