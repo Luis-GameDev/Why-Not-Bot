@@ -52,7 +52,8 @@ module.exports = {
                         Content: ${Plusones.getContentPlus(member.id).length} 
                         Focus: ${Plusones.getFocusPlus(member.id).length} 
                         VOD: ${Plusones.getVodPlus(member.id).length} 
-                        Total: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length + Plusones.getVodPlus(member.id).length}`
+                        Scout: ${Plusones.getScoutPlus(member.id).length} 
+                        Total: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length + Plusones.getVodPlus(member.id).length + Plusones.getScoutPlus(member.id).length}`
                     },
                     {
                         name: "Link:",

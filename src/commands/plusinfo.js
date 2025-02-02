@@ -110,8 +110,9 @@ module.exports = {
             plusOnes.forEach((entry, index) => {
                 let time = new Date(entry.time).toLocaleString();
                 let caller = entry.caller;
+                let link = entry.link ? entry.link : ' ';
 
-                let fieldValue = `#${index + 1}: Caller - <@${caller}> at ${time}`;
+                let fieldValue = `#${index + 1}: Caller - <@${caller}> at ${time}: ${link}`;
 
                 if (currentEmbed.data.fields?.length === 25) {
                     embeds.push(currentEmbed);

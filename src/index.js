@@ -45,6 +45,8 @@ commandFiles.forEach((commandFile) => {
 });
 
 const botChannelId = process.env.BOT_CHANNEL; 
+const scoutChannelId = process.env.SCOUT_CHANNEL_ID;
+const ctacheckChannelId = process.env.CTA_CHECK_CHANNEL_ID;
 
 function payMember(userId, amount) {
     const guild = process.env.DISCORD_GUILD_ID;
@@ -159,6 +161,37 @@ client.on("messageCreate", async (message) => {
         operateWeeklyStatsTrack()
     }
 
+    if (message.channel.id === ctacheckChannelId && message.content.startsWith("+1") && !message.author.bot) {
+        const userId = message.author.id;
+        const parts = message.content.split(" ");
+        let caller = parts[1];
+        const link = parts[2];
+
+        if (!caller || !link || !link.startsWith("https://discord.com/channels/")) {
+            return message.reply("Please provide a caller and a valid link.");
+        }
+
+        if (caller.startsWith('<@') && caller.endsWith('>')) {
+            caller = caller.slice(2, -1);
+            if (caller.startsWith('!')) {
+                caller = caller.slice(1);
+            }
+        }
+
+        const plusamount = Plusones.addCtaManuallyPlus(userId, caller, link);
+        message.reply(`<@${userId}>, you now have **${plusamount}** CTA +1s.`);
+    }
+
+    if (message.channel.id === scoutChannelId && message.content.startsWith("+1") && !message.author.bot) {
+        const userId = message.author.id;
+        const parts = message.content.split(" ").slice(1);
+        const inputDate = parts.join(" ").trim();
+
+        const plusamount = Plusones.addScoutPlus(userId, inputDate)
+        
+        message.reply(`<@${userId}>, you now have **${plusamount}** Scout +1s.`);
+    }
+
     if (message.channel.id === botChannelId && message.content.startsWith("+1") && !message.author.bot) {
         const userId = message.author.id;
         const parts = message.content.split(" ").slice(1);
@@ -178,7 +211,7 @@ client.on("messageCreate", async (message) => {
             }
         }
         
-        message.reply(`<@${userId}>, you now have **${plusamount}** +1s.`);
+        message.reply(`<@${userId}>, you now have **${plusamount}** Rat +1s.`);
     }
 
     if (message.content.startsWith("!wb")) {
