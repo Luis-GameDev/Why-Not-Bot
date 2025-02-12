@@ -68,7 +68,7 @@ function payMember(userId, amount) {
 
 client.on("guildMemberAdd", async (member) => {
     const publicChannel = await client.channels.fetch(process.env.PUBLIC_CHANNEL_ID);
-
+    await member.roles.add(process.env.NOTLINKED_ROLE_ID).catch(console.error);
     publicChannel.send(`Welcome ${member}!\n
 If you joined the guild please follow the instructions pinned here https://discord.com/channels/1248205717379354664/1330900761302929418 to link your account and get full permissions. \n
 Once linked, please read https://discord.com/channels/1248205717379354664/1248250430283190273 and https://discord.com/channels/1248205717379354664/1267166145618640957`);
@@ -79,8 +79,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
     originalMessage = reaction.message;
     
     let greenCore = {payment: 100000, reaction: "🟢", name: "Green Core"};
-    let blueCore = {payment: 200000, reaction: "🔵", name: "Blue Core"};
-    let purpleCore = {payment: 250000, reaction: "🟣", name: "Purple Core"};
+    let blueCore = {payment: 150000, reaction: "🔵", name: "Blue Core"};
+    let purpleCore = {payment: 300000, reaction: "🟣", name: "Purple Core"};
     let goldCore = {payment: 400000, reaction: "🟡", name: "Gold Core"};
     
     let greenVortex = {payment: 150000, reaction: "🟩", name: "Green Vortex"};
@@ -92,58 +92,85 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
         const member = await reaction.message.guild.members.fetch(user.id);
 
-        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
-            originalMessage.reply("You do not have permission to reward players.");
-            return;
-        }
-
         const checkmarkReaction = reaction.message.reactions.cache.find(r => r.emoji.name === "✅");
         if (checkmarkReaction) return;
 
         switch (reaction.emoji.name) {
             case greenCore.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${greenCore.payment}** for securing the ${greenCore.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, greenCore.payment);
             break;
 
             case blueCore.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${blueCore.payment}** for securing the ${blueCore.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, blueCore.payment);
             break;
 
             case purpleCore.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${purpleCore.payment}** for securing the ${purpleCore.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, purpleCore.payment);
             break;
 
             case goldCore.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${goldCore.payment}** for securing the ${goldCore.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, goldCore.payment);
             break;
 
             case greenVortex.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${greenVortex.payment}** for securing the ${greenVortex.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, greenVortex.payment);
             break;
 
             case blueVortex.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${blueVortex.payment}** for securing the ${blueVortex.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, blueVortex.payment);
             break;
 
             case purpleVortex.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${purpleVortex.payment}** for securing the ${purpleVortex.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, purpleVortex.payment);
             break;
 
             case goldVortex.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
             originalMessage.reply(`You have received **${goldVortex.payment}** for securing the ${goldVortex.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, goldVortex.payment);

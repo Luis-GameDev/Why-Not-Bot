@@ -40,6 +40,16 @@ module.exports = {
                 Plusones.addCtaPlus(member.id, caller)
             })
 
+            // logging logic 
+            const embed = new EmbedBuilder()
+                .setTitle(`CTA-Attendance logged by ${interaction.user.username}`)
+                .setDescription(members.map(member => member.user).join('\n'))
+                
+            const logChannel = interaction.guild.channels.cache.get(process.env.LOGS_CHANNEL_ID);
+            if (logChannel) {
+                logChannel.send({ embeds: [embed] });
+            }
+
             await interaction.reply(`Tracked CTA-attendance for ${members.size} Members in your Voice Channel.`);
         }
 

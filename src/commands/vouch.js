@@ -34,8 +34,8 @@ module.exports = {
         const targetId = targetUser.id;
         const executorId = interaction.user.id;
 
-        if (!interaction.member.roles.cache.has(process.env.WB_ROLE)) {
-            return interaction.reply({ content: "Only WB-Members can vouch!", ephemeral: true });
+        if (!interaction.member.roles.cache.has(process.env.WHYNOT_ROLE_ID) || !interaction.member.roles.cache.has(process.env.VOUCH_ROLE_ID)) {
+            return interaction.reply({ content: "Only Why Not Members with 45 Points can vouch!", ephemeral: true });
         }
 
         if (targetId === executorId) {

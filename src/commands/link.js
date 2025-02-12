@@ -80,7 +80,8 @@ module.exports = {
                 await member.roles.remove(process.env.NOTLINKED_ROLE_ID);
 
                 if (process.env.WHYNOT_ROLE_ID) {
-                    await member.roles.add(process.env.WHYNOT_ROLE_ID);
+                    await member.roles.add(process.env.WHYNOT_ROLE_ID).catch(console.error);
+                    await member.roles.add(process.env.TRIAL_ROLE_ID).catch(console.error);
                 }
             }
 
