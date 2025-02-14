@@ -84,7 +84,10 @@ module.exports = {
                         .setRequired(true))),
     async execute(interaction) {
 
-        if (!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+        if (!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && interaction.options.getSubcommand() !== 'vod') {
+            await interaction.reply('You do not have the required permission to use this command.');
+            return;
+        } else if (!interaction.member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && interaction.options.getSubcommand() === 'vod') {
             await interaction.reply('You do not have the required permission to use this command.');
             return;
         }
