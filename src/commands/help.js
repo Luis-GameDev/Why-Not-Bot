@@ -46,7 +46,7 @@ module.exports = {
                 .setDescription('Here are the commands available for officers:')
                 .setColor(0x1e90ff)
                 .addFields(
-                    { name: '/giveaway start', value: 'Creates a giveaway that has increased winning chances based on +1s.' },
+                    { name: '/giveaway start', value: 'Creates a giveaway that has increased winning chances based on rat +1s.' },
                     { name: '/giveaway roll', value: 'Manually rolls a giveaway.' },
                     { name: '/attendance cta', value: 'Tracks every user within your voice channel, this command may only be used by the CTA caller himself.' },
                     { name: '/plusdelete', value: 'Deletes a +1 of a user based on the provided index.' },
@@ -54,6 +54,7 @@ module.exports = {
                     { name: '/unlink', value: 'Unlinks a specified user from his Ingame-name.' },
                     { name: '!purge', value: 'Removes all roles from all tagged members.' },
                     { name: '/addpoints type', value: 'Adds X amount of +1s to a specific category.' },
+                    { name: '!split amount members', value: 'Adds the specified amount to the mentioned members balances.' },
                 )
                 .setTimestamp();
 

@@ -334,9 +334,9 @@ client.on("messageCreate", async (message) => {
             try {
                 const botHighestRole = message.guild.members.me.roles.highest;
                 if (role.id !== message.guild.id && role.position < botHighestRole.position) {
-                await member.roles.remove(role);
+                    await member.roles.remove(role);
                 } else if (role.id !== message.guild.id) {
-                failedRoles.push(role);
+                    failedRoles.push(role);
                 }
             } catch (error) {
                 console.log("Error removing roles");
@@ -362,7 +362,38 @@ client.on("messageCreate", async (message) => {
 
         message.reply("Roles have been removed from mentioned users.");
     }
-    
+
+    if (message.content.startsWith("!split")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        const mentionedUsers = message.mentions.users;
+        const amount = parseInt(message.content.split(" ")[1].replace(/[.,]/g, ''));
+
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        if (isNaN(amount)) {
+            return message.reply("Please provide a valid amount.");
+        }
+
+        if (mentionedUsers.size === 0) {
+            return message.reply("No users mentioned.");
+        }
+
+        mentionedUsers.forEach(user => {
+            payMember(user.id, amount);
+        });
+
+        message.reply("Payment successful.");
+
+        const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+
+        const embed = new MessageEmbed()
+            .setTitle('Lootsplit Payment')
+            .setDescription(`Split payment of **${message.content.split(" ")[1]}** to ${mentionedUsers.map(user => user).join(' ')}`)
+
+        logChannel.send({ embeds: [embed] });
+    }
 });
 
 

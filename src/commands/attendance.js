@@ -35,6 +35,9 @@ module.exports = {
 
             const members = channel.members;
             let caller = interaction.user.id;
+
+            // add double for caller
+            Plusones.addCtaPlus(caller, caller)
             
             members.forEach(member => {
                 Plusones.addCtaPlus(member.id, caller)
@@ -63,6 +66,9 @@ module.exports = {
 
             const members = channel.members;
             let caller = interaction.user.id;
+
+            // add double for caller
+            Plusones.addContentPlus(caller, caller)
             
             members.forEach(member => {
                 Plusones.addContentPlus(member.id, caller)
