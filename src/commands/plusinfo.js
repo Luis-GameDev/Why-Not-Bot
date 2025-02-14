@@ -54,67 +54,59 @@ module.exports = {
             break;
         }
 
+        let embeds = [];
+        let currentEmbed = new EmbedBuilder()
+            .setTitle(`${plusones.length} ${type} +1s for ${member.username}`)
+            .setColor(0x1e90ff)
+            .setTimestamp();
+
+        plusones.forEach((entry, index) => {
         
-
-            let embeds = [];
-            let currentEmbed = new EmbedBuilder()
-                .setTitle(`${plusones.length} ${type} +1s for ${member.username}`)
-                .setColor(0x1e90ff)
-                .setTimestamp();
-
-            plusones.forEach((entry, index) => {
-            
-                switch (type) {
-                    case 'rat':
-                    fieldInfo = `${entry.date}`;
-                    break;
-                    case 'cta':
-                    date = new Date(entry.time);
-                    fieldInfo = `Caller: <@${entry.caller}> at ${date.toLocaleString()}`;
-                    if (entry.link) {
-                        fieldInfo += `: ${entry.link}`;
-                    }
-                    break;
-                    case 'content':
-                    date = new Date(entry.time);
-                    fieldInfo = `Caller: <@${entry.caller}> at ${date.toLocaleString()}`;
-                    break;
-                    case 'focus':
-                    date = new Date(entry.time);
-                    fieldInfo = `${date.toLocaleString()}`;
-                    break;
-                    case 'vod':
-                    date = new Date(entry.time);
-                    fieldInfo = `Reviewed by <@${entry.reviewer}> at ${date.toLocaleString()}`;
-                    break;
-                    case 'scout':
-                    date = new Date(entry.time);
-                    fieldInfo = `${entry.date} at ${date.toLocaleString()}`;
-                    break;
+            switch (type) {
+                case 'rat':
+                fieldInfo = `${entry.date}`;
+                break;
+                case 'cta':
+                date = new Date(entry.time);
+                fieldInfo = `Caller: <@${entry.caller}> at ${date.toLocaleString()}`;
+                if (entry.link) {
+                    fieldInfo += `: ${entry.link}`;
                 }
-                let fieldValue = `#${index + 1}: ${fieldInfo}`;
+                break;
+                case 'content':
+                date = new Date(entry.time);
+                fieldInfo = `Caller: <@${entry.caller}> at ${date.toLocaleString()}`;
+                break;
+                case 'focus':
+                date = new Date(entry.time);
+                fieldInfo = `${date.toLocaleString()}`;
+                break;
+                case 'vod':
+                date = new Date(entry.time);
+                fieldInfo = `Reviewed by <@${entry.reviewer}> at ${date.toLocaleString()}`;
+                break;
+                case 'scout':
+                date = new Date(entry.time);
+                fieldInfo = `${entry.date} at ${date.toLocaleString()}`;
+                break;
+            }
+            let fieldValue = `#${index + 1}: ${fieldInfo}`;
 
-                if (currentEmbed.data.fields?.length === 25) {
-                    embeds.push(currentEmbed);
-                    currentEmbed = new EmbedBuilder()
-                        .setTitle(`${plusones.length} ${type} +1s for ${member.username}`)
-                        .setColor(0x1e90ff)
-                        .setTimestamp();
-                }
-
-                currentEmbed.addFields({ name: '\u200B', value: fieldValue });
-            });
-
-            embeds.push(currentEmbed);
-
-            for (let embed of embeds) {
-                await interaction.channel.send({ embeds: [embed] });
+            if (currentEmbed.data.fields?.length === 25) {
+                embeds.push(currentEmbed);
+                currentEmbed = new EmbedBuilder()
+                    .setTitle(`${plusones.length} ${type} +1s for ${member.username}`)
+                    .setColor(0x1e90ff)
+                    .setTimestamp();
             }
 
-            return interaction.reply({
-                content: `Listing all ${type} +1s for <@${discordId}>...`,
-                ephemeral: true
-            });
-        
+            currentEmbed.addFields({ name: '\u200B', value: fieldValue });
+        });
+
+        embeds.push(currentEmbed);
+
+        for (let embed of embeds) {
+            await interaction.reply({ embeds: [embed] });
+        }
     }
 };
