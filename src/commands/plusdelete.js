@@ -20,7 +20,8 @@ module.exports = {
                     { name: 'cta', value: 'cta' },
                     { name: 'focus', value: 'focus' },
                     { name: 'vod', value: 'vod' },
-                    { name: 'scout', value: 'scout' }
+                    { name: 'scout', value: 'scout' },
+                    { name: 'random', value: 'random' }
                 )
         )
         .addStringOption(option => 
@@ -53,6 +54,9 @@ module.exports = {
                 break;
             case 'scout':
                 filePath = path.join(__dirname, '../data/scoutplusones.json');
+                break;
+            case 'random':
+                filePath = path.join(__dirname, '../data/randomplusones.json');
                 break;
         }
 

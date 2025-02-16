@@ -22,7 +22,8 @@ module.exports = {
                     { name: 'cta', value: 'cta' },
                     { name: 'focus', value: 'focus' },
                     { name: 'vod', value: 'vod' },
-                    { name: 'scout', value: 'scout' }
+                    { name: 'scout', value: 'scout' },
+                    { name: 'random', value: 'random' }
                 )
         ),
     async execute(interaction) {
@@ -51,6 +52,9 @@ module.exports = {
             break;
             case 'scout':
             plusones = Plusones.getScoutPlus(discordId);
+            break;
+            case 'random':
+            plusones = Plusones.getRandomPlus(discordId);
             break;
         }
 
@@ -89,6 +93,9 @@ module.exports = {
                 date = new Date(entry.time);
                 fieldInfo = `${entry.date} at ${date.toLocaleString()}`;
                 break;
+                case 'random':
+                date = new Date(entry.time);
+                fieldInfo = `Description: **${entry.description}**, given at ${date.toLocaleString()}`;
             }
             let fieldValue = `#${index + 1}: ${fieldInfo}`;
 

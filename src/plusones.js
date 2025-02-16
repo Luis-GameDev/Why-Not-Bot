@@ -126,6 +126,23 @@ function addScoutPlus(userId, date) {
     return data[userId].length; // returns total amount of +1s
 }
 
+function addRandomPlus(userId, description) {
+    const dataFilePath = path.join(__dirname, './data/randomplusones.json');
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+    let time = new Date().getTime();
+
+    if (!data[userId]) {
+        data[userId] = [];
+    }
+
+    data[userId].push({ time, description });
+
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    updateUserName(userId);
+    
+    return data[userId].length; // returns total amount of +1s
+}
+
 function getRatPlus(userId) {
     const dataFilePath = path.join(__dirname, './data/plusones.json');
     const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
@@ -168,6 +185,13 @@ function getScoutPlus(userId) {
     return data[userId] || []
 }
 
+function getRandomPlus(userId) {
+    const dataFilePath = path.join(__dirname, './data/randomplusones.json');
+    const data = JSON.parse(fs.readFileSync(dataFilePath, 'utf8'));
+
+    return data[userId] || []
+}
+
 async function updateUserName(userId) {
     const guild = await clientInstance.guilds.fetch(process.env.DISCORD_GUILD_ID).catch(() => null);
     if (!guild) return;
@@ -175,7 +199,7 @@ async function updateUserName(userId) {
     const member = await guild.members.fetch(userId).catch(() => null);
     if (!member) return;
 
-    const points = (getRatPlus(userId).length) + (getCtaPlus(userId).length * 3) + (getContentPlus(userId).length) + (getFocusPlus(userId).length * 2) + (getVodPlus(userId).length) + (getScoutPlus(userId).length * 4);
+    const points = (getRatPlus(userId).length) + (getCtaPlus(userId).length * 3) + (getContentPlus(userId).length) + (getFocusPlus(userId).length * 2) + (getVodPlus(userId).length) + (getScoutPlus(userId).length * 4) + (getRandomPlus(userId).length);
 
     if(points >= 35 && member.roles.cache.has(process.env.TRIAL_ROLE_ID)) {
         await member.roles.remove(process.env.TRIAL_ROLE_ID).catch(console.error);
@@ -202,12 +226,14 @@ module.exports = {
     addFocusPlus,
     addVodPlus,
     addScoutPlus,
+    addRandomPlus,
     getRatPlus,
     getCtaPlus,
     getContentPlus,
     getFocusPlus,
     getVodPlus,
     getScoutPlus,
+    getRandomPlus,
     updateUserName,
     setClient
 };

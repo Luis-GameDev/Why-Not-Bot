@@ -82,6 +82,22 @@ module.exports = {
                 .addUserOption(option => 
                     option.setName('reviewer')
                         .setDescription('User who reviewed the VOD')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('random')
+                .setDescription('Add +1s to random category')
+                .addIntegerOption(option => 
+                    option.setName('points')
+                        .setDescription('Number of points to add')
+                        .setRequired(true))
+                .addUserOption(option => 
+                    option.setName('user')
+                        .setDescription('User to add points to')
+                        .setRequired(true))
+                .addStringOption(option => 
+                    option.setName('description')
+                        .setDescription('Description of the random +1')
                         .setRequired(true))),
     async execute(interaction) {
 
@@ -113,6 +129,14 @@ module.exports = {
                 
                 for (let i = 0; i < points; i++) {
                     Plusones.addCtaPlus(user.id, callerCTA.id);
+                }
+                break;
+            case 'random':
+                response = `Added **${points}**x +1s to ${user} in Random category.`;
+                const description = interaction.options.getString('description');
+
+                for (let i = 0; i < points; i++) {
+                    Plusones.addRandomPlus(user.id, description);
                 }
                 break;
             case 'content':

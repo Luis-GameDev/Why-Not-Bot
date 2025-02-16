@@ -18,6 +18,8 @@ module.exports = {
                     { name: 'cta', value: 'cta' },
                     { name: 'focus', value: 'focus' },
                     { name: 'vod', value: 'vod' },
+                    { name: 'scout', value: 'scout' },
+                    { name: 'random', value: 'random' },
                     { name: 'all', value: 'all' }
                 )
         ),
@@ -29,43 +31,47 @@ module.exports = {
         let dataFilePath;
         const fileType = interaction.options.getString('file');
 
-        if (fileType === 'rat') {
+        switch (fileType) {
+            case 'rat':
             dataFilePath = path.join(__dirname, '../data/plusones.json');
-        } else if (fileType === 'cta') {
+            break;
+            case 'cta':
             dataFilePath = path.join(__dirname, '../data/ctaplusones.json');
-        } else if (fileType === 'content') {
+            break;
+            case 'scout':
+            dataFilePath = path.join(__dirname, '../data/scoutplusones.json');
+            break;
+            case 'random':
+            dataFilePath = path.join(__dirname, '../data/randomplusones.json');
+            break;
+            case 'content':
             dataFilePath = path.join(__dirname, '../data/contentplusones.json');
-        } else if (fileType === 'focus') {
+            break;
+            case 'focus':
             dataFilePath = path.join(__dirname, '../data/focusplusones.json');
-        } else if (fileType === 'vod') {
+            break;
+            case 'vod':
             dataFilePath = path.join(__dirname, '../data/vodplusones.json');
-        } else if (fileType === 'all') {
-            fs.writeFile(path.join(__dirname, '../data/plusones.json'), JSON.stringify({}), (err) => {
+            break;
+            case 'all':
+            const filesToReset = [
+                '../data/plusones.json',
+                '../data/ctaplusones.json',
+                '../data/contentplusones.json',
+                '../data/focusplusones.json',
+                '../data/vodplusones.json',
+                '../data/scoutplusones.json',
+                '../data/randomplusones.json'
+            ];
+            filesToReset.forEach(file => {
+                fs.writeFile(path.join(__dirname, file), JSON.stringify({}), (err) => {
                 if (err) {
                     return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
                 }
-            });
-            fs.writeFile(path.join(__dirname, '../data/ctaplusones.json'), JSON.stringify({}), (err) => {
-                if (err) {
-                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
-                }
-            });
-            fs.writeFile(path.join(__dirname, '../data/contentplusones.json'), JSON.stringify({}), (err) => {
-                if (err) {
-                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
-                }
-            });
-            fs.writeFile(path.join(__dirname, '../data/focusplusones.json'), JSON.stringify({}), (err) => {
-                if (err) {
-                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
-                }
-            });
-            fs.writeFile(path.join(__dirname, '../data/vodplusones.json'), JSON.stringify({}), (err) => {
-                if (err) {
-                    return interaction.reply({ content: 'There was an error resetting the file.', ephemeral: true });
-                }
+                });
             });
             interaction.reply({ content: `All +1 files have been reset.`, ephemeral: true });
+            break;
         }
 
         const members = await interaction.guild.members.fetch();
