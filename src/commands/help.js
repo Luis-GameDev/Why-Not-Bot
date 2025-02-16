@@ -25,7 +25,7 @@ module.exports = {
                 .addFields(
                     { name: '/plusinfo', value: 'Displays all +1s of a specified user.' },
                     { name: '/plustop', value: 'Lists the top members with the most +1s.' },
-                    { name: '/attendance content', value: 'Tracks every user within your voice channel and adds a content +1 to them, this command may only be used by the caller of the content.' },
+                    { name: '/attendance content', value: 'Tracks every user within your voice channel and adds a content +1 to them, this command may only be used by the caller of the content as he will get double points.' },
                     { name: '/link', value: 'Links your discord account to your Albion Account, this command may only be used if you are already part of the guild ingame.' },
                     { name: '/plusedit', value: 'Lets you edit the time of your selfgiven Rat +1s.' },
                     { name: '/eatdick', value: 'Shows proof of a specified member eating dick.' },
@@ -48,12 +48,12 @@ module.exports = {
                 .addFields(
                     { name: '/giveaway start', value: 'Creates a giveaway that has increased winning chances based on rat +1s.' },
                     { name: '/giveaway roll', value: 'Manually rolls a giveaway.' },
-                    { name: '/attendance cta', value: 'Tracks every user within your voice channel, this command may only be used by the CTA caller himself.' },
-                    { name: '/plusdelete', value: 'Deletes a +1 of a user based on the provided index.' },
+                    { name: '/attendance cta', value: 'Tracks every user within your voice channel, this command may only be used by the CTA caller himself as he will get double points.' },
+                    { name: '/plusdelete', value: 'Deletes a +1 of a user based on the provided index. The index of a +1 is displayed next to it when running /plusinfo.' },
                     { name: '/plusreset', value: 'Resets the whole +1 file.' },
                     { name: '/unlink', value: 'Unlinks a specified user from his Ingame-name.' },
                     { name: '!purge', value: 'Removes all roles from all tagged members.' },
-                    { name: '/addpoints type', value: 'Adds X amount of +1s to a specific category.' },
+                    { name: '/addpoints type', value: 'Adds X amount of +1s to a specific category and member.' },
                     { name: '!split amount members', value: 'Adds the specified amount to the mentioned members balances.' },
                 )
                 .setTimestamp();

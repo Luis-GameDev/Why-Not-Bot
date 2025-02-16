@@ -7,7 +7,7 @@ const dataFilePath = path.join(__dirname, '../data/plusones.json');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('plusedit')
-        .setDescription('Edit a +1 entry of a user.')
+        .setDescription('Edit a +1 rat entry of a user.')
         .addUserOption(option =>
             option.setName('member')
                 .setDescription('The member whose +1 entry you want to edit')

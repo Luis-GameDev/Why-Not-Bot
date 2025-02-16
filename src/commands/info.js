@@ -53,7 +53,9 @@ module.exports = {
                         Focus: ${Plusones.getFocusPlus(member.id).length} 
                         VOD: ${Plusones.getVodPlus(member.id).length} 
                         Scout: ${Plusones.getScoutPlus(member.id).length} 
-                        Total: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length + Plusones.getVodPlus(member.id).length + Plusones.getScoutPlus(member.id).length}`
+                        Random: ${Plusones.getRandomPlus(member.id).length}
+
+                        Total: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length + Plusones.getVodPlus(member.id).length + Plusones.getScoutPlus(member.id).length + Plusones.getRandomPlus(member.id).length}`,
                     },
                     {
                         name: "Link:",
