@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { CommandInteraction } = require('discord.js');
 const Plusones = require("../plusones.js");
+const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -87,7 +88,7 @@ module.exports = {
         if (!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && interaction.options.getSubcommand() !== 'vod') {
             await interaction.reply('You do not have the required permission to use this command.');
             return;
-        } else if (!interaction.member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && interaction.options.getSubcommand() === 'vod') {
+        } else if (!interaction.member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.VODREVIEWER_ROLE_ID) && interaction.options.getSubcommand() === 'vod') {
             await interaction.reply('You do not have the required permission to use this command.');
             return;
         }
@@ -132,6 +133,15 @@ module.exports = {
             case 'vod':
                 response = `Added **${points}**x +1s to ${user} in VOD category.`;
                 const reviewer = interaction.options.getUser('reviewer');
+
+                const logChannel = interaction.guild.channels.cache.get(process.env.LOGS_CHANNEL_ID);
+                if (logChannel) {
+                    const embed = new MessageEmbed()
+                        .setTitle('VOD Points Added')
+                        .setDescription(`User ${interaction.user} added **${points}** points to ${user} in VOD category, reviewed by ${reviewer}.`)
+                        .setTimestamp();
+                    logChannel.send({ embeds: [embed] });
+                }
                 
                 for (let i = 0; i < points; i++) {
                     Plusones.addVodPlus(user.id, reviewer.id);
