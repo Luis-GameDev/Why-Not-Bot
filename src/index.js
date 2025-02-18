@@ -3,8 +3,10 @@ const fs = require("fs");
 const path = require("path");
 const cron = require("node-cron");
 const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
+const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
+const Ticketsystem = require("./ticketsystem.js");
 const axios = require('axios');
 console.log("Starting bot...");
 
@@ -12,7 +14,7 @@ const {
     Client,
     Collection, 
     Partials,
-    GatewayIntentBits,
+    GatewayIntentBits
 } = require("discord.js");
 
 const client = new Client({
@@ -394,6 +396,25 @@ client.on("messageCreate", async (message) => {
 
         logChannel.send({ embeds: [embed] });
     }
+
+    if(message.content.startsWith("--ticket_init")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('open_ticket')
+                .setLabel('Open Ticket')
+                .setStyle('Success'),
+        );
+
+        message.channel.send({ components: [row] });
+
+        //message.channel.send(row);
+    }
 });
 
 
@@ -510,6 +531,13 @@ function operateWeeklyStatsTrack() {
 }
 
 client.on("interactionCreate", async (interaction) => {
+    if (interaction.isButton() && interaction.customId === 'open_ticket') {
+        Ticketsystem.createTicket(interaction);
+        await interaction.reply({ content: 'Ticket opened!', ephemeral: true });
+        return;
+    }
+
+
     if (!interaction.isCommand()) return;
 
     const command = client.commands.get(interaction.commandName);
