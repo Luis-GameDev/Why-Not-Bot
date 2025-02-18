@@ -397,23 +397,54 @@ client.on("messageCreate", async (message) => {
         logChannel.send({ embeds: [embed] });
     }
 
-    if(message.content.startsWith("--ticket_init")) {
+    if(message.content.startsWith("--ticket_init_regear")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+        const embed = new MessageEmbed()
+            .setTitle('REGEAR')
+            .setDescription('Click the button below to open a regear ticket in case you died during a regearable content session! Make sure to send a screenshot of the death and specify the below information...')
+            .addFields(
+                { name: ' ', value: '- Content \n - Caller \n - Time of Death (UTC)' },
+                { name: '**RULES**', value: '1. Only approved builds will be regarded.\n2. If the regear ticket is opened after 24hrs has passed from the actual death, the regear will be denied.\n3. All regears must be withdrawn from chest within 24hrs from when the Regear Officer posted your regear chest.' }
+            )
+            .setColor(0x00FF00);
+
+        const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+            .setCustomId('open_ticket_regear')
+            .setLabel('Open Ticket')
+            .setStyle('Success'),
+        );
+
+        message.channel.send({ embeds: [embed], components: [row] });
+    }
+    if(message.content.startsWith("--ticket_init_drama")) {
         const member = await message.guild.members.fetch(message.author.id);
         if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
             return message.reply("You do not have permission to use this command.");
         }
 
+        const embed = new MessageEmbed()
+            .setTitle('WORLD BOSS ACCESS')
+            .setDescription('In order to access World Boss content or solve WB related issues, please open a ticket sending the below information.')
+            .addFields(
+                { name: 'REQUIREMENTS', value: '- Ability to create an alt account (scout) \n- Screenshot on 100 spec on weapon and offhand or 100 spec armor if offtank. \n- Good english understanding and speaking in order to provide information from scout and be understood by the party. \n- Vouch of WB Member (not mandatory) \n- Willing to rat in case its needed. The rat presence is tracked by the guild. \n- Deposit of a Cautional Fee of 10 million silver. \n- Willingness to do at least 50m PVE fame each 14 days (equivalent fame amount of 2 hrs of WB). \n\nCautional Fee is NOT a payment: Its a caution we ask to ensure good behavior and rules abiding.\nYou will recieve the 10 million cautional fee if all the following conditions are met:\n1) You did not get kicked from the guild and you didnt systematically break rules\n2) Asked a WB Officer to have the fee back before leaving. We are humans, we cant and wont chase you. Officers are humans playing a game in their free time and for fun. Please respect that.' }
+            )
+            .setColor(0xFF0000);
+
+
         const row = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
-                .setCustomId('open_ticket')
+                .setCustomId('open_ticket_drama')
                 .setLabel('Open Ticket')
-                .setStyle('Success'),
+                .setStyle('Danger'),
         );
 
-        message.channel.send({ components: [row] });
-
-        //message.channel.send(row);
+        message.channel.send({ embeds: [embed], components: [row] });
     }
 });
 
@@ -531,9 +562,8 @@ function operateWeeklyStatsTrack() {
 }
 
 client.on("interactionCreate", async (interaction) => {
-    if (interaction.isButton() && interaction.customId === 'open_ticket') {
+    if (interaction.isButton() && interaction.customId.startsWith('open_ticket')) {
         Ticketsystem.createTicket(interaction);
-        await interaction.reply({ content: 'Ticket opened!', ephemeral: true });
         return;
     }
 
