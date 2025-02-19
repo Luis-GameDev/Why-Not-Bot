@@ -8,6 +8,7 @@ async function createTicket(interaction) {
     const channel = await guild.channels.create({
         name: `ticket-${member.user.username}`,
         type: ChannelType.GuildText,
+        parent: interaction.channel.parentId,
         permissionOverwrites: [
             {
                 id: guild.roles.everyone.id,
@@ -62,7 +63,7 @@ async function createTicket(interaction) {
     }
 
     channel.send({ embeds: [embed], components: [row] });
-    await interaction.reply({ content: 'Ticket created!', ephemeral: true });
+    await interaction.reply({ content: `Ticket created! ${channel.url}`, ephemeral: true });
 }
 
 module.exports = { createTicket };

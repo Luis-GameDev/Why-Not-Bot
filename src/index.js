@@ -566,7 +566,12 @@ client.on("interactionCreate", async (interaction) => {
         Ticketsystem.createTicket(interaction);
         return;
     }
-
+    if(interaction.isButton() && interaction.customId === 'close_ticket') {
+        if (interaction.channel.name.startsWith("ticket")) {
+            interaction.channel.delete().catch(console.error);
+            return;
+        }
+    }
 
     if (!interaction.isCommand()) return;
 
