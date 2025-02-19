@@ -399,7 +399,7 @@ client.on("messageCreate", async (message) => {
 
     if(message.content.startsWith("--ticket_init_regear")) {
         const member = await message.guild.members.fetch(message.author.id);
-        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID)) {
             return message.reply("You do not have permission to use this command.");
         }
         const embed = new MessageEmbed()
@@ -423,7 +423,7 @@ client.on("messageCreate", async (message) => {
     }
     if(message.content.startsWith("--ticket_init_drama")) {
         const member = await message.guild.members.fetch(message.author.id);
-        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID)) {
             return message.reply("You do not have permission to use this command.");
         }
 
@@ -566,10 +566,31 @@ client.on("interactionCreate", async (interaction) => {
         Ticketsystem.createTicket(interaction);
         return;
     }
-    if(interaction.isButton() && interaction.customId === 'close_ticket') {
-        if (interaction.channel.name.startsWith("ticket")) {
+    if(interaction.isButton() && interaction.customId === 'delete_ticket') {
+        if (interaction.channel.name.startsWith("ticket") || interaction.channel.name.startsWith("archived")) {
             interaction.channel.delete().catch(console.error);
             return;
+        }
+    }
+    if(interaction.isButton() && interaction.customId === 'close_ticket') {
+        if (interaction.channel.name.startsWith("ticket")) {
+            const newChannelName = interaction.channel.name.replace("ticket", "archived");
+            await interaction.channel.setName(newChannelName);
+
+            const everyoneRole = interaction.guild.roles.everyone;
+            await interaction.channel.permissionOverwrites.set([
+                {
+                  id: everyoneRole,
+                  deny: ['ViewChannel']
+                }
+            ]);
+            
+            if (interaction.guild.id === process.env.DISCORD_GUILD_ID) {
+                await interaction.channel.setParent(process.env.DISCORD_ARCHIVED_CATEGORY_ID);
+            } else if (interaction.guild.id === process.env.RECRUITMENTDISCORD_GUILD_ID) {
+                await interaction.channel.setParent(process.env.RECRUITMENTDISCORD_ARCHIVED_CATEGORY_ID);
+            }
+            return interaction.reply({ content: "Ticket was archived successfully!", ephemeral: true });
         }
     }
 
