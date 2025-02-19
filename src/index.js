@@ -8,6 +8,7 @@ const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
 const Ticketsystem = require("./ticketsystem.js");
 const axios = require('axios');
+
 console.log("Starting bot...");
 
 const {
@@ -604,7 +605,7 @@ client.on("interactionCreate", async (interaction) => {
         } catch (error) {
             console.log(error);
             if (interaction.deferred || interaction.replied) {
-                interaction.editReply("ERROR trying to execute the command!");
+                interaction.editReply({content: "ERROR trying to execute the command!", ephemeral: true});
             }
         }
     }
