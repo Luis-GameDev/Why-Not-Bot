@@ -34,6 +34,7 @@ module.exports = {
                     { name: '/removevouch', value: 'Removes the vouch you gave to another member.' },
                     { name: '/plusweekly', value: 'Shows the +1s you have received within the past 7 days.' },
                     { name: '/info', value: 'Shows an info-card of the specified member including +1s, Ingame-Name, Roles and much more.' },
+                    { name: '/music', value: 'Plays the song of a specific country in your channel.' }
                 )
                 .setTimestamp();
 

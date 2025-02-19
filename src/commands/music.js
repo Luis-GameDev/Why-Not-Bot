@@ -7,13 +7,14 @@ const {
     entersState, 
     VoiceConnectionStatus 
 } = require('@discordjs/voice');
-const ytdl = require('ytdl-core');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('music')
-        .setDescription('Plays a predefined song based on the selected country')
+        .setDescription('Plays a predefined local song based on the selected country')
         .addStringOption(option =>
             option.setName('country')
                 .setDescription('Select a country')
@@ -33,22 +34,26 @@ module.exports = {
         }
 
         const country = interaction.options.getString('country');
-        let url;
+        let filePath;
         switch (country) {
             case 'germany':
-                url = 'https://www.youtube.com/watch?v=cH3Cihr6FWo'; 
+                filePath = path.join(__dirname, '..', 'data', 'songs', 'germany_song.mp3'); 
                 break;
             case 'poland':
-                url = 'https://www.youtube.com/watch?v=OyDyOweu-PA'; 
+                filePath = path.join(__dirname, '..', 'data', 'songs', 'poland_song.mp3');
                 break;
             case 'turkey':
-                url = 'https://www.youtube.com/watch?v=FdNl8KxuY24'; 
+                filePath = path.join(__dirname, '..', 'data', 'songs', 'turkey_song.mp3'); 
                 break;
             case 'italy':
-                url = 'https://www.youtube.com/watch?v=0aUav1lx3rA'; 
+                filePath = path.join(__dirname, '..', 'data', 'songs', 'italy_song.mp3'); 
                 break;
             default:
                 return interaction.editReply({ content: 'Invalid country selection.', ephemeral: true });
+        }
+
+        if (!fs.existsSync(filePath)) {
+            return interaction.editReply({ content: 'The selected song file does not exist.' });
         }
 
         const connection = joinVoiceChannel({
@@ -67,17 +72,29 @@ module.exports = {
         const player = createAudioPlayer();
         connection.subscribe(player);
 
-        const stream = ytdl(url, { filter: 'audioonly' });
-        const resource = createAudioResource(stream);
+        const resource = createAudioResource(fs.createReadStream(filePath), {
+            inputType: 'arbitrary', 
+        });
 
         player.play(resource);
 
         await interaction.editReply(`Now playing the ${country} song.`);
 
-        player.on(AudioPlayerStatus.Idle, () => connection.destroy());
+        let isConnectionDestroyed = false;
+
+        player.on(AudioPlayerStatus.Idle, () => {
+            if (!isConnectionDestroyed) {
+                connection.destroy();
+                isConnectionDestroyed = true;
+            }
+        });
+
         player.on('error', error => {
             console.error('Audio player error:', error);
-            connection.destroy();
+            if (!isConnectionDestroyed) {
+                connection.destroy();
+                isConnectionDestroyed = true;
+            }
         });
     },
 };
