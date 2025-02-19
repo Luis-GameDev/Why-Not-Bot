@@ -371,7 +371,7 @@ client.on("messageCreate", async (message) => {
         const mentionedUsers = message.mentions.users;
         const amount = parseInt(message.content.split(" ")[1].replace(/[.,]/g, ''));
 
-        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID)) {
             return message.reply("You do not have permission to use this command.");
         }
 
