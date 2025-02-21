@@ -5,21 +5,83 @@ async function createTicket(interaction) {
     const guild = interaction.guild;
     const member = interaction.member;
 
-    const channel = await guild.channels.create({
-        name: `ticket-${member.user.username}`,
-        type: ChannelType.GuildText,
-        parent: interaction.channel.parentId,
-        permissionOverwrites: [
-            {
-                id: guild.roles.everyone.id,
-                deny: ['ViewChannel'],
-            },
-            {
-                id: member.id,
-                allow: ['ViewChannel', 'SendMessages'],
-            },
-        ],
-    });
+    let officer;
+    let ticketofficer;
+    let channel;
+
+    if(interaction.guild.id == process.env.DISCORD_GUILD_ID && interaction.customId !== 'open_ticket_issues') {
+        officer = process.env.OFFICER_ROLE_ID;
+        ticketofficer = process.env.TICKET_OFFICER_ROLE_ID;
+
+        channel = await guild.channels.create({
+            name: `ticket-${member.user.username}`,
+            type: ChannelType.GuildText,
+            parent: interaction.channel.parentId,
+            permissionOverwrites: [
+                {
+                    id: guild.roles.everyone.id,
+                    deny: ['ViewChannel'],
+                },
+                {
+                    id: member.id,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
+                {
+                    id: officer,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
+                {
+                    id: ticketofficer,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
+            ],
+        });
+    } else if (interaction.guild.id == process.env.RECRUITMENTDISCORD_GUILD_ID) {
+        officer = process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID;
+
+        channel = await guild.channels.create({
+            name: `ticket-${member.user.username}`,
+            type: ChannelType.GuildText,
+            parent: interaction.channel.parentId,
+            permissionOverwrites: [
+                {
+                    id: guild.roles.everyone.id,
+                    deny: ['ViewChannel'],
+                },
+                {
+                    id: member.id,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
+                {
+                    id: officer,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
+            ],
+        });
+    } else if(interaction.customId === 'open_ticket_issues' && interaction.guild.id == process.env.DISCORD_GUILD_ID) {
+        officer = process.env.OFFICER_ROLE_ID;
+        ticketofficer = process.env.TICKET_OFFICER_ROLE_ID;
+
+        channel = await guild.channels.create({
+            name: `ticket-${member.user.username}`,
+            type: ChannelType.GuildText,
+            parent: interaction.channel.parentId,
+            permissionOverwrites: [
+                {
+                    id: guild.roles.everyone.id,
+                    deny: ['ViewChannel'],
+                },
+                {
+                    id: member.id,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
+                {
+                    id: officer,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
+            ],
+        });
+    }
     
     let embed;
     let row;
@@ -65,8 +127,29 @@ async function createTicket(interaction) {
                 .setLabel('Delete')
                 .setStyle('Danger'),
             );
-        }
-    else if(interaction.customId !== 'open_ticket_regear' || interaction.customId !== 'open_ticket_drama') {
+    }
+    else if(interaction.customId === 'open_ticket_issues') {
+        embed = new MessageEmbed()
+                .setTitle('Issues & Suggestions')
+                .setDescription('Thank you for opening a ticket, please follow the format written below!')
+                .addFields(
+                    { name: ' ', value: '- Type: \"Issue/Suggestion/Point system\"\n- Description: \"A description of your thoughts on the matter\"' }
+                )
+                .setColor(0xFFFF00);
+    
+            row = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                .setCustomId('close_ticket')
+                .setLabel('Close')
+                .setStyle('Danger'),
+                new ButtonBuilder()
+                .setCustomId('delete_ticket')
+                .setLabel('Delete')
+                .setStyle('Danger'),
+            );
+    }
+    else if(interaction.customId !== 'open_ticket_regear' || interaction.customId !== 'open_ticket_drama' || interaction.customId !== 'open_ticket_issues') {
         return interaction.reply({ content: 'An error occured while creating the ticket.', ephemeral: true });
     }
 

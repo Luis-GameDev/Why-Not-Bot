@@ -447,6 +447,31 @@ client.on("messageCreate", async (message) => {
 
         message.channel.send({ embeds: [embed], components: [row] });
     }
+    if(message.content.startsWith("--ticket_init_issues")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        const embed = new MessageEmbed()
+            .setTitle('ISSUES & SUGGESTIONS')
+            .setDescription('Click the button below to open a ticket. Make sure to follow the below format and be patient for your reply from the officer that will handle your ticket!')
+            .addFields(
+                { name: ' ', value: '- Type: \"Issue/Suggestion/Point system\"\n- Description: \"A description of your thoughts on the matter\"' }
+            )
+            .setColor(0xFFFF00);
+
+
+        const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('open_ticket_issues')
+                .setLabel('Open Ticket')
+                .setStyle('Secondary'),
+        );
+
+        message.channel.send({ embeds: [embed], components: [row] });
+    }
 });
 
 
@@ -578,12 +603,26 @@ client.on("interactionCreate", async (interaction) => {
             const newChannelName = interaction.channel.name.replace("ticket", "archived");
             await interaction.channel.setName(newChannelName);
 
+            let officer;
+            let ticketofficer;
+
+            if(interaction.guild.id == process.env.DISCORD_GUILD_ID) {
+                officer = process.env.OFFICER_ROLE_ID;
+                ticketofficer = process.env.TICKET_OFFICER_ROLE_ID;
+            } else if (interaction.guild.id == process.env.RECRUITMENTDISCORD_GUILD_ID) {
+                officer = process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID;
+            }
+
             const everyoneRole = interaction.guild.roles.everyone;
             await interaction.channel.permissionOverwrites.set([
                 {
-                  id: everyoneRole,
-                  deny: ['ViewChannel']
-                }
+                    id: everyoneRole,
+                    deny: ['ViewChannel']
+                },
+                {
+                    id: officer,
+                    allow: ['ViewChannel', 'SendMessages'],
+                },
             ]);
             
             if (interaction.guild.id === process.env.DISCORD_GUILD_ID) {

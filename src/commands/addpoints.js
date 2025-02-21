@@ -101,14 +101,6 @@ module.exports = {
                         .setRequired(true))),
     async execute(interaction) {
 
-        if (!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && interaction.options.getSubcommand() !== 'vod') {
-            await interaction.reply('You do not have the required permission to use this command.');
-            return;
-        } else if (!interaction.member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.VODREVIEWER_ROLE_ID) && interaction.options.getSubcommand() === 'vod') {
-            await interaction.reply('You do not have the required permission to use this command.');
-            return;
-        }
-
         const subcommand = interaction.options.getSubcommand();
         const points = interaction.options.getInteger('points');
         let response = '';
@@ -116,6 +108,9 @@ module.exports = {
 
         switch (subcommand) {
             case 'rat':
+                if(!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    return interaction.reply('You do not have the required permission to use this command.');
+                }
                 response = `Added **${points}**x +1s to ${user} in Rat category.`;
                 const date = interaction.options.getString('date');
 
@@ -124,6 +119,9 @@ module.exports = {
                 }
                 break;
             case 'cta':
+                if(!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    return interaction.reply('You do not have the required permission to use this command.');
+                }
                 response = `Added **${points}**x +1s to ${user} in CTA category.`;
                 const callerCTA = interaction.options.getUser('caller');
                 
@@ -132,6 +130,9 @@ module.exports = {
                 }
                 break;
             case 'random':
+                if(!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID)) {
+                    return interaction.reply('You do not have the required permission to use this command.');
+                }
                 response = `Added **${points}**x +1s to ${user} in Random category.`;
                 const description = interaction.options.getString('description');
 
@@ -140,6 +141,9 @@ module.exports = {
                 }
                 break;
             case 'content':
+                if(!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    return interaction.reply('You do not have the required permission to use this command.');
+                }
                 response = `Added **${points}**x +1s to ${user} in Content category.`;
                 const callerContent = interaction.options.getUser('caller');
                 
@@ -148,6 +152,9 @@ module.exports = {
                 }
                 break;
             case 'focus':
+                if(!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID)) {
+                    return interaction.reply('You do not have the required permission to use this command.');
+                }
                 response = `Added **${points}**x +1s to ${user} in Focus category.`;
 
                 for (let i = 0; i < points; i++) {
@@ -155,22 +162,26 @@ module.exports = {
                 }
                 break;
             case 'vod':
+                if(!interaction.member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.VODREVIEWER_ROLE_ID)) {
+                    return interaction.reply('You do not have the required permission to use this command.');
+                }
                 response = `Added **${points}**x +1s to ${user} in VOD category.`;
                 const reviewer = interaction.options.getUser('reviewer');
-
-                const logChannel = interaction.guild.channels.cache.get(process.env.LOGS_CHANNEL_ID);
-                if (logChannel) {
-                    const embed = new MessageEmbed()
-                        .setTitle('VOD Points Added')
-                        .setDescription(`User ${interaction.user} added **${points}** points to ${user} in VOD category, reviewed by ${reviewer}.`)
-                        .setTimestamp();
-                    logChannel.send({ embeds: [embed] });
-                }
                 
                 for (let i = 0; i < points; i++) {
                     Plusones.addVodPlus(user.id, reviewer.id);
                 }
                 break;
+        }
+
+        const logChannel = interaction.guild.channels.cache.get(process.env.LOGS_CHANNEL_ID);
+
+        if (logChannel) {
+            const embed = new MessageEmbed()
+                .setTitle(`${subcommand} points added`)
+                .setDescription(`User ${interaction.user} added **${points}** points to ${user} in ${subcommand} category.`)
+                .setTimestamp();
+            logChannel.send({ embeds: [embed] });
         }
 
         await interaction.reply(response);
