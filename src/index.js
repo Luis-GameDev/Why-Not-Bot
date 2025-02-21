@@ -472,6 +472,34 @@ client.on("messageCreate", async (message) => {
 
         message.channel.send({ embeds: [embed], components: [row] });
     }
+    if(message.content.startsWith("--ticket_init_apply")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        const embed = new MessageEmbed()
+            .setTitle('WHY NOT Application')
+            .setDescription('Click on the button below to apply for membership in WHY NOT!')
+            .addFields(
+                { name: 'REQUIREMENTS EU', value: '- Type: \"Issue/Suggestion/Point system\"\n- Description: \"A description of your thoughts on the matter\"' }
+            )
+            .addFields(
+                { name: ' ', value: '(If you are thinking of the applying in the guild just so you can fame up on World Boss and then logout till the next World Boss session save yourself the trouble of applying. We do not need World Boss slaves but people that are interested on doing content and dive into our community)'}
+            )
+            .setColor(0xFFFF00);
+
+
+        const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('open_ticket_issues')
+                .setLabel('Open Ticket')
+                .setStyle('Secondary'),
+        );
+
+        message.channel.send({ embeds: [embed], components: [row] });
+    }
 });
 
 
