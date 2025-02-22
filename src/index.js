@@ -482,18 +482,18 @@ client.on("messageCreate", async (message) => {
             .setTitle('WHY NOT Application')
             .setDescription('Click on the button below to apply for membership in WHY NOT!')
             .addFields(
-                { name: 'REQUIREMENTS EU', value: '- Type: \"Issue/Suggestion/Point system\"\n- Description: \"A description of your thoughts on the matter\"' }
+                { name: 'REQUIREMENTS EU', value: '- 60m pve fame\n- 20m pvp fame (exceptions can be made if vods are provided)\n- IGN + Screenshot of your Characters Stats (EU)\n- Ability to play 2 pvp roles and to record your game.\n- Speaking English, being able to join Voice channels and follow calls\n- Willingness to learn, improve, behave correctly with other people and be part of our community. We do not like guild hoppers / leechers.' }
             )
             .addFields(
                 { name: ' ', value: '(If you are thinking of the applying in the guild just so you can fame up on World Boss and then logout till the next World Boss session save yourself the trouble of applying. We do not need World Boss slaves but people that are interested on doing content and dive into our community)'}
             )
-            .setColor(0xFFFF00);
+            .setColor(0xFF0000);
 
 
         const row = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
-                .setCustomId('open_ticket_issues')
+                .setCustomId('open_ticket_apply')
                 .setLabel('Open Ticket')
                 .setStyle('Secondary'),
         );

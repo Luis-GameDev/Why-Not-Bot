@@ -149,7 +149,28 @@ async function createTicket(interaction) {
                 .setStyle('Danger'),
             );
     }
-    else if(interaction.customId !== 'open_ticket_regear' || interaction.customId !== 'open_ticket_drama' || interaction.customId !== 'open_ticket_issues') {
+    else if(interaction.customId === 'open_ticket_apply') {
+        embed = new MessageEmbed()
+                .setTitle('Application')
+                .setDescription('A recruiter will be with you shortly.\nSend the following information while waiting for support!')
+                .addFields(
+                    { name: ' ', value: '- Age\n- Country\n- Active timer\n- Ingame Name\n- Stats screenshot (EU). Provide Asia / West if you played there too.\n- English level (written and spoken)\n- Do you have a vouch? Who?\n- Whats your favorite content?\n- Why are you applying to Why not?\n- How you think you can contribute to the guild?\n- Are you willing to attend mandatory content if necessary?\n- Are you aware that Worldboss isnt granted on access?\n- What PVP roles you can play? No roles = deny.\n- Are you able to record the game while playing and posting VODs on a regular basis?' }
+                )
+                .setColor(0xFF0000);
+    
+            row = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                .setCustomId('close_ticket')
+                .setLabel('Close')
+                .setStyle('Danger'),
+                new ButtonBuilder()
+                .setCustomId('delete_ticket')
+                .setLabel('Delete')
+                .setStyle('Danger'),
+            );
+    }
+    else if(interaction.customId !== 'open_ticket_regear' || interaction.customId !== 'open_ticket_drama' || interaction.customId !== 'open_ticket_issues' || interaction.customId !== 'open_ticket_apply') {
         return interaction.reply({ content: 'An error occured while creating the ticket.', ephemeral: true });
     }
 
