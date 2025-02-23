@@ -27,8 +27,8 @@ const questions = [
     correct: 2,
   },
   {
-    question: "Which of the following does not belong: apple, banana, carrot, grape?",
-    choices: ["apple", "banana", "carrot", "grape"],
+    question: "Which of the following does not belong: apple, strawberry, carrot, grape?",
+    choices: ["apple", "strawberry", "carrot", "grape"],
     correct: 2,
   },
   {
@@ -129,11 +129,11 @@ module.exports = {
 
     collector.on('end', (collected, reason) => {
       if (reason !== 'completed') {
-        interaction.editReply({
+        interaction.channel.send({
           embeds: [
             new EmbedBuilder()
               .setTitle('IQ Test Ended')
-              .setDescription(`Time's up! You scored ${score} out of ${total}.`)
+              .setDescription(`Time's up! ${interaction.user} scored ${score} out of ${total}.`)
               .setColor(0xff0000)
           ],
           components: []
