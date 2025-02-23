@@ -62,7 +62,7 @@ module.exports = {
 
             if (!linkedPlayer) {
                 await interaction.followUp({
-                    content: `Player "${ign}" is not a members of "${guildName}". Link failed.`,
+                    content: `Player "${ign}" is not a member of "${guildName}". Link failed.`,
                     ephemeral: true,
                 });
                 return;
