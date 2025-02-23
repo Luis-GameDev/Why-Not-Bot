@@ -156,6 +156,9 @@ async function createTicket(interaction) {
                 .addFields(
                     { name: ' ', value: '- Age\n- Country\n- Active timer\n- Ingame Name\n- Stats screenshot (EU). Provide Asia / West if you played there too.\n- English level (written and spoken)\n- Do you have a vouch? Who?\n- Whats your favorite content?\n- Why are you applying to Why not?\n- How you think you can contribute to the guild?\n- Are you willing to attend mandatory content if necessary?\n- Are you aware that Worldboss isnt granted on access?\n- What PVP roles you can play? No roles = deny.\n- Are you able to record the game while playing and posting VODs on a regular basis?' }
                 )
+                .addFields(
+                    { name: ' ', value: 'Additionally complete an IQ-Test using the /iq command in order to prove your mental capability which is required to perform good in our guild.'}
+                )
                 .setColor(0xFF0000);
     
             row = new ActionRowBuilder()
