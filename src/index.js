@@ -55,49 +55,26 @@ let rateLimitReset = 0;
 async function payMember(userId, amount) {
     const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
     const guild = process.env.DISCORD_GUILD_ID;
-    const now = Date.now();
-
-    // If we're currently rate limited, wait until the rate limit resets before making the call.
-    if (now < rateLimitReset) {
-        const waitTime = rateLimitReset - now;
-        console.log(`Rate limited. Waiting ${waitTime}ms before retrying.`);
-        logChannel.send(`Rate limited on payment to <@${userId}>. Retrying in ${waitTime}ms.`);
-        return setTimeout(() => payMember(userId, amount), waitTime);
-    }
-
-    try {
-        const response = await axios.patch(
-            `https://unbelievaboat.com/api/v1/guilds/${guild}/users/${userId}`,
-            {
-                cash: amount,
-                reason: "Why Bot Payment"
-            },
-            {
-                headers: {
-                    'Authorization': process.env.BALANCE_BOT_API_KEY,
-                    'accept': 'application/json',
-                    'content-type': 'application/json'
-                }
-            }
-        );
-        console.log('Payment successful:', response.data);
-    } catch (error) {
-        if (error.response && error.response.status === 429) {
-
-            const retryAfter = error.response.data.retry_after || error.response.headers['retry-after'];
-            const delay = retryAfter ? parseFloat(retryAfter) * 1000 : 1000;
-
-            rateLimitReset = Date.now() + delay;
-            console.error(`Rate limited. Retrying after ${delay}ms.`);
-            logChannel.send(`Rate limited on payment to <@${userId}>. Retrying in ${delay}ms.`);
-            setTimeout(() => payMember(userId, amount), delay);
-        } else {
-            console.error('Error making payment:', error.message);
-            logChannel.send(`Error making payment to <@${userId}>: ${error.message}`);
-
-            setTimeout(() => payMember(userId, amount), 1000);
+    axios.patch(`https://unbelievaboat.com/api/v1/guilds/${guild}/users/${userId}`, {
+        cash: amount,
+        reason: "Why Bot Reward-Payment"
+    }, {
+        headers: {
+            'Authorization': process.env.BALANCE_BOT_API_KEY,
+            'accept': 'application/json',
+            'content-type': 'application/json'
         }
-    }
+    }).then(response => {
+        console.log('Payment successful:', response.data);
+    }).catch(error => {
+        console.error('Error making payment:', error);
+        const embed = new MessageEmbed()
+            .setTitle('Payment Error')
+            .setDescription(`Error making payment to <@${userId}>, please pay him manually.`)
+            .addField('Error', error.message)
+            .setColor(0xFF0000);
+        logChannel.send({ embeds: [embed] });
+    });
 }
 
 client.on("guildMemberAdd", async (member) => {
@@ -401,42 +378,62 @@ client.on("messageCreate", async (message) => {
         const member = await message.guild.members.fetch(message.author.id);
         const mentionedUsers = message.mentions.users;
         const amount = parseInt(message.content.split(" ")[1].replace(/[.,]/g, ''));
-
-        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID)) {
+    
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && 
+            !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID)) {
             return message.reply("You do not have permission to use this command.");
         }
-
+    
         if (isNaN(amount)) {
             return message.reply("Please provide a valid amount.");
         }
-
+    
         if (mentionedUsers.size === 0) {
             return message.reply("No users mentioned.");
         }
-
-        let earlyReply = message.reply(`Processing payment, this will take approximately ${mentionedUsers.size * 0.5} seconds.`);
-
-        let index = 0;
-        const interval = setInterval(() => {
-            if (index >= mentionedUsers.size) {
-            clearInterval(interval);
-            message.reply("Payment was successful.");
-            earlyReply.then(reply => reply.delete());
-            return;
-            }
-            const user = mentionedUsers.at(index);
-            payMember(user.id, amount);
-            index++;
-        }, 500);
-
+    
         const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
-
+        const guildId = process.env.DISCORD_GUILD_ID;
+        
+        // Build an array of update objects for each mentioned user.
+        const updates = [];
+        mentionedUsers.forEach(user => {
+            updates.push({
+                userId: user.id,
+                cash: amount,
+                reason: "Why Bot Split-Payment"
+            });
+        });
+    
+        // Send one bulk PATCH request to update all users
+        axios.patch(`https://unbelievaboat.com/api/v1/guilds/${guildId}/users`, 
+            { updates: updates }, 
+            {
+                headers: {
+                    'Authorization': process.env.BALANCE_BOT_API_KEY,
+                    'accept': 'application/json',
+                    'content-type': 'application/json'
+                }
+            }
+        ).then(response => {
+            console.log('Payment successful:', response.data);
+        }).catch(error => {
+            console.error('Error making payment:', error);
+            const embed = new MessageEmbed()
+                .setTitle('Payment Error')
+                .setDescription(`Error making payment for the split. Please pay manually.`)
+                .addFields({name: ' ', value: `Error: ${error.message}`})
+                .setColor(0xFF0000);
+            logChannel.send({ embeds: [embed] });
+        });
+    
         const embed = new MessageEmbed()
             .setTitle('Lootsplit Payment')
-            .setDescription(`Split payment of **${message.content.split(" ")[1]}** to ${mentionedUsers.map(user => user).join(' ')}`)
-
+            .setDescription(`Split payment of **${message.content.split(" ")[1]}** to ${[...mentionedUsers.values()].map(user => user.toString()).join(' ')}`);
+    
         logChannel.send({ embeds: [embed] });
     }
+    
 
     if(message.content.startsWith("--ticket_init_regear")) {
         const member = await message.guild.members.fetch(message.author.id);
