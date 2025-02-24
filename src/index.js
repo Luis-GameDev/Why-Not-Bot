@@ -50,23 +50,54 @@ commandFiles.forEach((commandFile) => {
 const botChannelId = process.env.BOT_CHANNEL; 
 const scoutChannelId = process.env.SCOUT_CHANNEL_ID;
 const ctacheckChannelId = process.env.CTA_CHECK_CHANNEL_ID;
+let rateLimitReset = 0;
 
-function payMember(userId, amount) {
+async function payMember(userId, amount) {
+    const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
     const guild = process.env.DISCORD_GUILD_ID;
-    axios.patch(`https://unbelievaboat.com/api/v1/guilds/${guild}/users/${userId}`, {
-        cash: amount,
-        reason: "Why Bot Payment"
-    }, {
-        headers: {
-            'Authorization': process.env.BALANCE_BOT_API_KEY,
-            'accept': 'application/json',
-            'content-type': 'application/json'
-        }
-    }).then(response => {
+    const now = Date.now();
+
+    // If we're currently rate limited, wait until the rate limit resets before making the call.
+    if (now < rateLimitReset) {
+        const waitTime = rateLimitReset - now;
+        console.log(`Rate limited. Waiting ${waitTime}ms before retrying.`);
+        logChannel.send(`Rate limited on payment to <@${userId}>. Retrying in ${waitTime}ms.`);
+        return setTimeout(() => payMember(userId, amount), waitTime);
+    }
+
+    try {
+        const response = await axios.patch(
+            `https://unbelievaboat.com/api/v1/guilds/${guild}/users/${userId}`,
+            {
+                cash: amount,
+                reason: "Why Bot Payment"
+            },
+            {
+                headers: {
+                    'Authorization': process.env.BALANCE_BOT_API_KEY,
+                    'accept': 'application/json',
+                    'content-type': 'application/json'
+                }
+            }
+        );
         console.log('Payment successful:', response.data);
-    }).catch(error => {
-        console.error('Error making payment:', error);
-    });
+    } catch (error) {
+        if (error.response && error.response.status === 429) {
+
+            const retryAfter = error.response.data.retry_after || error.response.headers['retry-after'];
+            const delay = retryAfter ? parseFloat(retryAfter) * 1000 : 1000;
+
+            rateLimitReset = Date.now() + delay;
+            console.error(`Rate limited. Retrying after ${delay}ms.`);
+            logChannel.send(`Rate limited on payment to <@${userId}>. Retrying in ${delay}ms.`);
+            setTimeout(() => payMember(userId, amount), delay);
+        } else {
+            console.error('Error making payment:', error.message);
+            logChannel.send(`Error making payment to <@${userId}>: ${error.message}`);
+
+            setTimeout(() => payMember(userId, amount), 1000);
+        }
+    }
 }
 
 client.on("guildMemberAdd", async (member) => {
@@ -383,11 +414,20 @@ client.on("messageCreate", async (message) => {
             return message.reply("No users mentioned.");
         }
 
-        mentionedUsers.forEach(user => {
-            payMember(user.id, amount);
-        });
+        let earlyReply = message.reply(`Processing payment, this will take approximately ${mentionedUsers.size * 0.5} seconds.`);
 
-        message.reply("Payment successful.");
+        let index = 0;
+        const interval = setInterval(() => {
+            if (index >= mentionedUsers.size) {
+            clearInterval(interval);
+            message.reply("Payment was successful.");
+            earlyReply.then(reply => reply.delete());
+            return;
+            }
+            const user = mentionedUsers.at(index);
+            payMember(user.id, amount);
+            index++;
+        }, 500);
 
         const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
 
