@@ -133,7 +133,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
     }
     
 
-
+    let greenCore = {payment: 100000, reaction: "🟢", name: "Green Core"};
     let blueCore = {payment: 150000, reaction: "🔵", name: "Blue Core"};
     let purpleCore = {payment: 300000, reaction: "🟣", name: "Purple Core"};
     let goldCore = {payment: 400000, reaction: "🟡", name: "Gold Core"};
