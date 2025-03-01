@@ -112,7 +112,7 @@ async function createTicket(interaction) {
                 .setTitle('WB & Drama Ticket')
                 .setDescription('Thank you for opening a ticket to request access for World Boss, please send us the required information:')
                 .addFields(
-                    { name: ' ', value: '1. Ability to have and use scout\n2. Screenshot on 100 spec on weapon and offhand from WB builds\n3. Good english understanding and speaking in order to provide information from scout and be understood by the party\n4. Vouch of WB Member (not mandatory)\n5. Willing to rat in case its needed. The rat presence is tracked by the guild\n6. Deposit of a Cautional Fee of 10 million silver\n7. Willingness to do at least 50m PVE fame each 14 days' }
+                    { name: ' ', value: '1. Ability and willingness to scout and give proper information in English. Scouting is rewarded with priority\n2. Screenshot on 100 spec on weapon and offhand from WB builds\n3. Good english understanding and speaking in order to provide information from scout and be understood by the party\n4. Vouch of WB Member (not mandatory)\n5. Willing to rat in case its needed. The rat presence is tracked by the guild\n6. Deposit of a Cautional Fee of 10 million silver\n7. Willingness to do at least 50m PVE fame each 14 days' }
                 )
                 .setColor(0xFF0000);
     

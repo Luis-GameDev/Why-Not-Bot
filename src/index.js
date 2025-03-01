@@ -8,6 +8,8 @@ const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
 const Ticketsystem = require("./ticketsystem.js");
 const axios = require('axios');
+const { Client: UnbClient } = require('unb-api');
+const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
 
 console.log("Starting bot...");
 
@@ -50,31 +52,24 @@ commandFiles.forEach((commandFile) => {
 const botChannelId = process.env.BOT_CHANNEL; 
 const scoutChannelId = process.env.SCOUT_CHANNEL_ID;
 const ctacheckChannelId = process.env.CTA_CHECK_CHANNEL_ID;
-let rateLimitReset = 0;
 
 async function payMember(userId, amount) {
     const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
     const guild = process.env.DISCORD_GUILD_ID;
-    axios.patch(`https://unbelievaboat.com/api/v1/guilds/${guild}/users/${userId}`, {
-        cash: amount,
-        reason: "Why Bot Reward-Payment"
-    }, {
-        headers: {
-            'Authorization': process.env.BALANCE_BOT_API_KEY,
-            'accept': 'application/json',
-            'content-type': 'application/json'
-        }
-    }).then(response => {
-        console.log('Payment successful:', response.data);
+    balanceBotAPI.editUserBalance(guild, userId, { cash: amount }, "Why Bot Reward-Payment").then(response => {
+        const embed = new MessageEmbed()
+            .setTitle('Payment')
+            .setDescription(`Added ${amount} to <@${userId}> balance.`)
+            .setColor(0x00FF00);
+        logChannel.send({ embeds: [embed] });
     }).catch(error => {
-        console.error('Error making payment:', error);
         const embed = new MessageEmbed()
             .setTitle('Payment Error')
-            .setDescription(`Error making payment to <@${userId}>, please pay him manually.`)
+            .setDescription(`Error making payment of ${amount} to <@${userId}>, please pay him manually.`)
             .addField('Error', error.message)
             .setColor(0xFF0000);
         logChannel.send({ embeds: [embed] });
-    });
+    })
 }
 
 client.on("guildMemberAdd", async (member) => {
@@ -88,8 +83,57 @@ Once linked, please read https://discord.com/channels/1248205717379354664/124825
 client.on("messageReactionAdd", async (reaction, user) => {
 
     originalMessage = reaction.message;
+
+    if (reaction.emoji.name === "❌" && reaction.message.channel.id === process.env.STANDING_CHECK_CHANNEL_ID) {
+        const member = await reaction.message.guild.members.fetch(user.id);
+        if (!member.roles.cache.has(process.env.WB_CALLER_ROLE_ID)) {
+            return;
+        }
     
-    let greenCore = {payment: 100000, reaction: "🟢", name: "Green Core"};
+        const mentionedUsers = reaction.message.mentions.users;
+        const scoutPrioRole = reaction.message.guild.roles.cache.get(process.env.SCOUT_PRIO_ROLE_ID);
+    
+        if (!scoutPrioRole) {
+            return reaction.message.reply("Scout prio role not found.");
+        }
+    
+        for (const [userId] of mentionedUsers) {
+            const mentionedMember = await reaction.message.guild.members.fetch(userId).catch(() => null);
+            if (mentionedMember && mentionedMember.roles.cache.has(scoutPrioRole.id)) {
+                await mentionedMember.roles.remove(scoutPrioRole);
+            }
+        }
+    
+        await reaction.message.reply("Scout prio role has been removed from mentioned users.");
+        return;
+    }
+    
+    if (reaction.emoji.name === "✅" && reaction.message.channel.id === process.env.STANDING_CHECK_CHANNEL_ID) {
+        const member = await reaction.message.guild.members.fetch(user.id);
+        if (!member.roles.cache.has(process.env.WB_CALLER_ROLE_ID)) {
+            return;
+        }
+    
+        const mentionedUsers = reaction.message.mentions.users;
+        const scoutPrioRole = reaction.message.guild.roles.cache.get(process.env.SCOUT_PRIO_ROLE_ID);
+    
+        if (!scoutPrioRole) {
+            return reaction.message.reply("Scout prio role not found.");
+        }
+    
+        for (const [userId] of mentionedUsers) {
+            const mentionedMember = await reaction.message.guild.members.fetch(userId).catch(() => null);
+            if (mentionedMember && !mentionedMember.roles.cache.has(scoutPrioRole.id)) {
+                await mentionedMember.roles.add(scoutPrioRole);
+            }
+        }
+    
+        await reaction.message.reply("Scout prio role has been added to mentioned users.");
+        return;
+    }
+    
+
+
     let blueCore = {payment: 150000, reaction: "🔵", name: "Blue Core"};
     let purpleCore = {payment: 300000, reaction: "🟣", name: "Purple Core"};
     let goldCore = {payment: 400000, reaction: "🟡", name: "Gold Core"};
@@ -260,6 +304,10 @@ client.on("messageCreate", async (message) => {
         message.reply(`Guild rewards a various set of activities, like delivering Power Cores to hideout or killing enemies in Unhallowed Cloister. To check what we redeem, https://discord.com/channels/1248205717379354664/1300766799209431101. \nTo redeem rewards, you can ask any Officer.`);
     }
 
+    if(message.content.startsWith("!macro")) {
+        message.reply(`https://discord.com/channels/1248205717379354664/1284834513280831540/1311125721128767488`);
+    }
+
     if (message.content.startsWith("!info")) {
         message.reply(`https://discord.com/channels/1248205717379354664/1274422719168909323 = Apply for Worldboss member role / issue WB releted complains. \nhttps://discord.com/channels/1248205717379354664/1248254004962525255 = Why not builds for WB \nhttps://discord.com/channels/1248205717379354664/1319310140222079006 = DPS and other tutorials made by our members. Follow these to get GOOD at your weapon and learn your rotations for WB. \nhttps://discord.com/channels/1248205717379354664/1267166145618640957 = NAPs \n"How to redeem balance? 💸 " - Contact any officer that is online and request your Discord Balance.`);
     }
@@ -393,43 +441,15 @@ client.on("messageCreate", async (message) => {
         }
     
         const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
-        const guildId = process.env.DISCORD_GUILD_ID;
         
-        // Build an array of update objects for each mentioned user.
-        const updates = [];
         mentionedUsers.forEach(user => {
-            updates.push({
-                userId: user.id,
-                cash: amount,
-                reason: "Why Bot Split-Payment"
-            });
-        });
-    
-        // Send one bulk PATCH request to update all users
-        axios.patch(`https://unbelievaboat.com/api/v1/guilds/${guildId}/users`, 
-            { updates: updates }, 
-            {
-                headers: {
-                    'Authorization': process.env.BALANCE_BOT_API_KEY,
-                    'accept': 'application/json',
-                    'content-type': 'application/json'
-                }
-            }
-        ).then(response => {
-            console.log('Payment successful:', response.data);
-        }).catch(error => {
-            console.error('Error making payment:', error);
-            const embed = new MessageEmbed()
-                .setTitle('Payment Error')
-                .setDescription(`Error making payment for the split. Please pay manually.`)
-                .addFields({name: ' ', value: `Error: ${error.message}`})
-                .setColor(0xFF0000);
-            logChannel.send({ embeds: [embed] });
+            payMember(user.id, amount);
         });
     
         const embed = new MessageEmbed()
             .setTitle('Lootsplit Payment')
-            .setDescription(`Split payment of **${message.content.split(" ")[1]}** to ${[...mentionedUsers.values()].map(user => user.toString()).join(' ')}`);
+            .setDescription(`Split payment of **${message.content.split(" ")[1]}** to ${[...mentionedUsers.values()].map(user => user.toString()).join(' ')}`)
+            .setColor(0x00FF00);
     
         logChannel.send({ embeds: [embed] });
     }
@@ -469,7 +489,7 @@ client.on("messageCreate", async (message) => {
             .setTitle('WORLD BOSS ACCESS')
             .setDescription('In order to access World Boss content or solve WB related issues, please open a ticket sending the below information.')
             .addFields(
-                { name: 'REQUIREMENTS', value: '- Ability to create an alt account (scout) \n- Screenshot on 100 spec on weapon and offhand or 100 spec armor if offtank. \n- Good english understanding and speaking in order to provide information from scout and be understood by the party. \n- Vouch of WB Member (not mandatory) \n- Willing to rat in case its needed. The rat presence is tracked by the guild. \n- Deposit of a Cautional Fee of 10 million silver. \n- Willingness to do at least 50m PVE fame each 14 days (equivalent fame amount of 2 hrs of WB). \n\nCautional Fee is NOT a payment: Its a caution we ask to ensure good behavior and rules abiding.\nYou will recieve the 10 million cautional fee if all the following conditions are met:\n1) You did not get kicked from the guild and you didnt systematically break rules\n2) Asked a WB Officer to have the fee back before leaving. We are humans, we cant and wont chase you. Officers are humans playing a game in their free time and for fun. Please respect that.' }
+                { name: 'REQUIREMENTS', value: '- Ability and willingness to scout and give proper information in English. \n- Screenshot on 100 spec on weapon and offhand or 100 spec armor if offtank. \n- Good english understanding and speaking in order to provide information from scout and be understood by the party. \n- Vouch of WB Member (not mandatory) \n- Willing to rat in case its needed. The rat presence is tracked by the guild. \n- Deposit of a Cautional Fee of 10 million silver. \n- Willingness to do at least 50m PVE fame each 14 days (equivalent fame amount of 2 hrs of WB). \n\nCautional Fee is NOT a payment: Its a caution we ask to ensure good behavior and rules abiding.\nYou will recieve the 10 million cautional fee if all the following conditions are met:\n1) You did not get kicked from the guild and you didnt systematically break rules\n2) Asked a WB Officer to have the fee back before leaving. We are humans, we cant and wont chase you. Officers are humans playing a game in their free time and for fun. Please respect that.' }
             )
             .setColor(0xFF0000);
 
@@ -633,6 +653,24 @@ async function checkGiveawayEndTime() {
         }
     }
 }
+
+// Cron job to archive channels every day at midnight if the archive process was not done (in case the bot was offline, need to fix that later)
+
+cron.schedule('0 0 * * *', async () => {
+    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+    const archivedCategory = guild.channels.cache.get(process.env.DISCORD_ARCHIVED_CATEGORY_ID);
+
+    if (!archivedCategory) {
+        console.error("Archived category not found");
+        return;
+    }
+
+    guild.channels.cache.forEach(channel => {
+        if (channel.name.startsWith("archived") && channel.parentId !== process.env.DISCORD_ARCHIVED_CATEGORY_ID) {
+            channel.setParent(process.env.DISCORD_ARCHIVED_CATEGORY_ID).catch(console.error);
+        }
+    });
+});
 
 // cron job for 2-week statsTrack
 

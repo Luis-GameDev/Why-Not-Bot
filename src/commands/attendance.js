@@ -65,9 +65,14 @@ module.exports = {
             }
 
             const members = channel.members;
-            let caller = interaction.user.id;
+
+            if(members.size < 7) {
+                await interaction.reply('You need at least 7 members in your voice channel to use this command.');
+                return;
+            }
 
             // add double for caller
+            let caller = interaction.user.id;
             Plusones.addContentPlus(caller, caller)
             
             members.forEach(member => {

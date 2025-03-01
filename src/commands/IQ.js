@@ -2,9 +2,9 @@ const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, EmbedBuilder } = r
 
 const questions = [
   {
-    question: "What is 2 + 2?",
-    choices: ["3", "4", "5", "6"],
-    correct: 1,
+    question: "Where is the sun rising from on the northern hemisphere?",
+    choices: ["East", "West", "North", "South"],
+    correct: 0,
   },
   {
     question: "Spell 'cat' backwards.",
