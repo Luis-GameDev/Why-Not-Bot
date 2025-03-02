@@ -1,0 +1,31 @@
+[2025-03-01T23:36:45.068Z] Error: Tickets are currently disabled due to a bug, please wait while we are looking into the issue!
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:718:15)
+    at Client.emit (node:events:519:28)
+    at InteractionCreateAction.handle (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\actions\InteractionCreate.js:97:12)
+    at module.exports [as INTERACTION_CREATE] (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\handlers\INTERACTION_CREATE.js:4:36)
+    at WebSocketManager.handlePacket (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:348:31)
+    at WebSocketManager.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:232:12)
+    at WebSocketManager.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1190:51)
+    at WebSocketShard.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.onMessage (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1007:14)
+
+[2025-03-02T13:37:10.746Z] DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:727:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async BurstHandler.runRequest (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:831:23)
+    at async _REST.request (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:1272:22)
+    at async ButtonInteraction.reply (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:194:22)
+
+[2025-03-02T13:37:55.994Z] DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:727:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async BurstHandler.runRequest (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:831:23)
+    at async _REST.request (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:1272:22)
+    at async ButtonInteraction.reply (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:194:22)
+
+[2025-03-02T13:56:11.733Z] Error [InteractionAlreadyReplied]: The reply to this interaction has already been sent or deferred.
+    at ButtonInteraction.reply (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:163:46)
+    at Object.createTicket (C:\Users\mccre\Desktop\Why-Not-Bot\src\ticketsystem.js:97:28)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+

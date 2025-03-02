@@ -445,6 +445,8 @@ client.on("messageCreate", async (message) => {
         mentionedUsers.forEach(user => {
             payMember(user.id, amount);
         });
+
+        message.reply("Payment was successful.");
     
         const embed = new MessageEmbed()
             .setTitle('Lootsplit Payment')
@@ -690,52 +692,66 @@ function operateWeeklyStatsTrack() {
     }
 }
 
+// ERROR HANDLING
+const logFilePath = path.join(__dirname, 'logs.txt');
+
+function logError(error) {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] ${error.stack || error}\n\n`;
+
+    fs.appendFile(logFilePath, logMessage, (err) => {
+        if (err) console.error("Failed to write to log file:", err);
+    });
+}
+
+process.on('uncaughtException', (error) => {
+    console.error("Uncaught Exception:", error);
+    logError(error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error("Unhandled Promise Rejection:", reason);
+    logError(reason);
+});
+// END OF ERROR HANDLING
+
 client.on("interactionCreate", async (interaction) => {
     if (interaction.isButton() && interaction.customId.startsWith('open_ticket')) {
+        await interaction.deferReply({ ephemeral: true });
+
         Ticketsystem.createTicket(interaction);
         return;
     }
-    if(interaction.isButton() && interaction.customId === 'delete_ticket') {
-        if (interaction.channel.name.startsWith("ticket") || interaction.channel.name.startsWith("archived")) {
-            interaction.channel.delete().catch(console.error);
-            return;
+    
+    if (interaction.isButton() && interaction.customId === 'delete_ticket') {
+        await interaction.deferUpdate();
+
+        const thread = interaction.channel;
+        if (thread.isThread()) {
+            thread.delete().catch(console.error);
         }
+        return;
     }
-    if(interaction.isButton() && interaction.customId === 'close_ticket') {
-        if (interaction.channel.name.startsWith("ticket")) {
-            const newChannelName = interaction.channel.name.replace("ticket", "archived");
-            await interaction.channel.setName(newChannelName);
+    
+    if (interaction.isButton() && interaction.customId === 'close_ticket') {
+        await interaction.deferReply({ ephemeral: true });
 
-            let officer;
-            let ticketofficer;
+        const thread = interaction.channel;
+        
+        if (thread.isThread()) {
+            try {
+                await thread.setLocked(true);
+                await thread.setArchived(true);
 
-            if(interaction.guild.id == process.env.DISCORD_GUILD_ID) {
-                officer = process.env.OFFICER_ROLE_ID;
-                ticketofficer = process.env.TICKET_OFFICER_ROLE_ID;
-            } else if (interaction.guild.id == process.env.RECRUITMENTDISCORD_GUILD_ID) {
-                officer = process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID;
+                await interaction.editReply({ content: "Ticket has been closed successfully!", ephemeral: true });
+            } catch (error) {
+                console.error("Error closing ticket:", error);
+                await interaction.editReply({ content: "Failed to close the ticket.", ephemeral: true });
             }
-
-            const everyoneRole = interaction.guild.roles.everyone;
-            await interaction.channel.permissionOverwrites.set([
-                {
-                    id: everyoneRole,
-                    deny: ['ViewChannel']
-                },
-                {
-                    id: officer,
-                    allow: ['ViewChannel', 'SendMessages'],
-                },
-            ]);
-            
-            if (interaction.guild.id === process.env.DISCORD_GUILD_ID) {
-                await interaction.channel.setParent(process.env.DISCORD_ARCHIVED_CATEGORY_ID);
-            } else if (interaction.guild.id === process.env.RECRUITMENTDISCORD_GUILD_ID) {
-                await interaction.channel.setParent(process.env.RECRUITMENTDISCORD_ARCHIVED_CATEGORY_ID);
-            }
-            return interaction.reply({ content: "Ticket was archived successfully!", ephemeral: true });
         }
+        return;
     }
+    
 
     if (!interaction.isCommand()) return;
 
