@@ -73,6 +73,8 @@ async function payMember(userId, amount) {
 }
 
 client.on("guildMemberAdd", async (member) => {
+    if (member.guild.id !== process.env.DISCORD_GUILD_ID) return;
+    
     const publicChannel = await client.channels.fetch(process.env.PUBLIC_CHANNEL_ID);
     await member.roles.add(process.env.NOTLINKED_ROLE_ID).catch(console.error);
     publicChannel.send(`Welcome ${member}!\n
@@ -133,15 +135,20 @@ client.on("messageReactionAdd", async (reaction, user) => {
     }
     
 
-    let greenCore = {payment: 100000, reaction: "🟢", name: "Green Core"};
-    let blueCore = {payment: 150000, reaction: "🔵", name: "Blue Core"};
-    let purpleCore = {payment: 300000, reaction: "🟣", name: "Purple Core"};
-    let goldCore = {payment: 400000, reaction: "🟡", name: "Gold Core"};
+    let greenCore = {payment: 50000, reaction: "🟢", name: "Green Core in Lowland"};
+    let blueCore = {payment: 75000, reaction: "🔵", name: "Blue Core in Lowland"};
+    let purpleCore = {payment: 150000, reaction: "🟣", name: "Purple Core in Lowland"};
+    let goldCore = {payment: 300000, reaction: "🟡", name: "Gold Core in Lowland"};
     
     let greenVortex = {payment: 150000, reaction: "🟩", name: "Green Vortex"};
     let blueVortex = {payment: 250000, reaction: "🟦", name: "Blue Vortex"};
     let purpleVortex = {payment: 500000, reaction: "🟪", name: "Purple Vortex"};
     let goldVortex = {payment: 750000, reaction: "🟨", name: "Gold Vortex"};
+
+    let greenCoreRavine = {payment: 100000, reaction: "💚", name: "Green Core in Ravine"};
+    let blueCoreRavine = {payment: 150000, reaction: "💙", name: "Blue Core in Ravine"};
+    let purpleCoreRavine = {payment: 300000, reaction: "💜", name: "Purple Core in Ravine"};
+    let goldCoreRavine = {payment: 500000, reaction: "💛", name: "Gold Core in Ravine"};
 
     if (reaction.message.channel.id === process.env.REWARD_CHANNEL && !user.bot) {
 
@@ -229,6 +236,46 @@ client.on("messageReactionAdd", async (reaction, user) => {
             originalMessage.reply(`You have received **${goldVortex.payment}** for securing the ${goldVortex.name}!`);
             originalMessage.react("✅");
             payMember(reaction.message.author.id, goldVortex.payment);
+            break;
+
+            case greenCoreRavine.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
+            originalMessage.reply(`You have received **${greenCoreRavine.payment}** for securing the ${greenCoreRavine.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, greenCoreRavine.payment);
+            break;
+
+            case blueCoreRavine.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
+            originalMessage.reply(`You have received **${blueCoreRavine.payment}** for securing the ${blueCoreRavine.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, blueCoreRavine.payment);
+            break;
+
+            case purpleCoreRavine.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
+            originalMessage.reply(`You have received **${purpleCoreRavine.payment}** for securing the ${purpleCoreRavine.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, purpleCoreRavine.payment);
+            break;
+
+            case goldCoreRavine.reaction:
+                if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
+                    return;
+                }
+            originalMessage.reply(`You have received **${goldCoreRavine.payment}** for securing the ${goldCoreRavine.name}!`);
+            originalMessage.react("✅");
+            payMember(reaction.message.author.id, goldCoreRavine.payment);
             break;
 
             default:
