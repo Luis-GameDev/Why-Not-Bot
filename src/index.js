@@ -10,6 +10,7 @@ const Ticketsystem = require("./ticketsystem.js");
 const axios = require('axios');
 const { Client: UnbClient } = require('unb-api');
 const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
+const { processSignup } = require('./signupHandler.js');
 
 console.log("Starting bot...");
 
@@ -475,7 +476,9 @@ client.on("messageCreate", async (message) => {
         const amount = parseInt(message.content.split(" ")[1].replace(/[.,]/g, ''));
     
         if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && 
-            !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID)) {
+            !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID) && 
+            !member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID)) {
+
             return message.reply("You do not have permission to use this command.");
         }
     
@@ -538,7 +541,7 @@ client.on("messageCreate", async (message) => {
             .setTitle('WORLD BOSS ACCESS')
             .setDescription('In order to access World Boss content or solve WB related issues, please open a ticket sending the below information.')
             .addFields(
-                { name: 'REQUIREMENTS', value: '- Ability and willingness to scout and give proper information in English. \n- Screenshot on 100 spec on weapon and offhand or 100 spec armor if offtank. \n- Good english understanding and speaking in order to provide information from scout and be understood by the party. \n- Vouch of WB Member (not mandatory) \n- Willing to rat in case its needed. The rat presence is tracked by the guild. \n- Deposit of a Cautional Fee of 10 million silver. \n- Willingness to do at least 50m PVE fame each 14 days (equivalent fame amount of 2 hrs of WB). \n\nCautional Fee is NOT a payment: Its a caution we ask to ensure good behavior and rules abiding.\nYou will recieve the 10 million cautional fee if all the following conditions are met:\n1) You did not get kicked from the guild and you didnt systematically break rules\n2) Asked a WB Officer to have the fee back before leaving. We are humans, we cant and wont chase you. Officers are humans playing a game in their free time and for fun. Please respect that.' }
+                { name: 'REQUIREMENTS', value: '- Ability and willingness to scout and rat. \n- Screenshot on 100 spec on weapon and offhand or 100 spec armor if offtank. \n- Good english understanding and speaking in order to provide information from scout and be understood by the party. \n- Vouch of WB Member (not mandatory) \n- Willing to rat in case its needed. The rat presence is tracked by the guild. \n- Deposit of a Cautional Fee of 10 million silver. \n- Willingness to do at least 50m PVE fame each 14 days (equivalent fame amount of 2 hrs of WB). \n\nCautional Fee is NOT a payment: Its a caution we ask to ensure good behavior and rules abiding.\nYou will recieve the 10 million cautional fee if all the following conditions are met:\n1) You did not get kicked from the guild and you didnt systematically break rules\n2) Asked a WB Officer to have the fee back before leaving. We are humans, we cant and wont chase you. Officers are humans playing a game in their free time and for fun. Please respect that.' }
             )
             .setColor(0xFF0000);
 
@@ -798,8 +801,12 @@ client.on("interactionCreate", async (interaction) => {
         }
         return;
     }
-    
 
+    if (interaction.isModalSubmit() && interaction.customId === 'signupModal') {
+        await processSignup(interaction);
+        return;
+    }
+    
     if (!interaction.isCommand()) return;
 
     const command = client.commands.get(interaction.commandName);

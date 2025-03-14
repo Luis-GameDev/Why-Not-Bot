@@ -98,6 +98,22 @@ module.exports = {
                 .addStringOption(option => 
                     option.setName('description')
                         .setDescription('Description of the random +1')
+                        .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('negative')
+                .setDescription('Add +1s to negative category')
+                .addIntegerOption(option => 
+                    option.setName('points')
+                        .setDescription('Number of points to add')
+                        .setRequired(true))
+                .addUserOption(option => 
+                    option.setName('user')
+                        .setDescription('User to add points to')
+                        .setRequired(true))
+                .addStringOption(option => 
+                    option.setName('reason')
+                        .setDescription('Reason of the negative +1')
                         .setRequired(true))),
     async execute(interaction) {
 
@@ -138,6 +154,17 @@ module.exports = {
 
                 for (let i = 0; i < points; i++) {
                     Plusones.addRandomPlus(user.id, description);
+                }
+                break;
+            case 'negative':
+                if(!interaction.member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !interaction.member.roles.cache.has(process.env.WB_CALLER_ROLE_ID)) {
+                    return interaction.reply('You do not have the required permission to use this command.');
+                }
+                response = `Added **${points}**x +1s to ${user} in Negative category.`;
+                const reason = interaction.options.getString('reason');
+
+                for (let i = 0; i < points; i++) {
+                    Plusones.addNegativePlus(user.id, reason);
                 }
                 break;
             case 'content':

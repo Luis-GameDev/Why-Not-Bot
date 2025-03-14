@@ -29,3 +29,13 @@
     at Object.createTicket (C:\Users\mccre\Desktop\Why-Not-Bot\src\ticketsystem.js:97:28)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 
+[2025-03-14T15:47:00.819Z] TypeError: Cannot read properties of undefined (reading 'edit')
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:62:37)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:806:9)
+
+[2025-03-14T15:49:17.090Z] TypeError: Cannot read properties of undefined (reading 'edit')
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:62:37)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:806:9)
+

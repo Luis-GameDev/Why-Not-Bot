@@ -45,7 +45,7 @@ async function createTicket(interaction) {
                 .setDescription('Thank you for opening a ticket to request access for World Boss. Please send us the required information:')
                 .addFields({
                     name: ' ',
-                    value: '1. Ability and willingness to scout and give proper information in English.\n' +
+                    value: '1. Ability and willingness to scout and rat.\n' +
                         '2. Screenshot on 100 spec on weapon and offhand from WB builds.\n' +
                         '3. Good English understanding and speaking to provide information from scout and be understood by the party.\n' +
                         '4. Vouch of WB Member (not mandatory).\n' +
