@@ -1,131 +1,239 @@
 const { 
-    ChannelType, 
-    ActionRowBuilder, 
-    ButtonBuilder, 
-    EmbedBuilder 
-  } = require('discord.js');
-  const { scheduleJob } = require('node-schedule');
-  
-  async function processSignup(interaction) {
-    // Parse modal inputs:
-    const timerStartStr = interaction.fields.getTextInputValue('timerStart'); // z.B. "14:00" (UTC)
-    const timerEndStr = interaction.fields.getTextInputValue('timerEnd');     // z.B. "16:00" (UTC)
-    const friendUserInput = interaction.fields.getTextInputValue('friendUser'); // erwartet z. B. eine ID oder Mention
-    const roleIndexStr = interaction.fields.getTextInputValue('roleIndex');   // Zahl zwischen 1 und 10
-  
-    // Validate role index:
-    const roleIndex = parseInt(roleIndexStr, 10);
-    if (isNaN(roleIndex) || roleIndex < 1 || roleIndex > 10) {
-      return interaction.reply({ content: 'Ungültiger Rollenindex. Bitte gebe eine Zahl zwischen 1 und 10 ein.', ephemeral: true });
-    }
-  
-    // Parse timer times (angenommen im Format "HH:mm", UTC)
-    const now = new Date();
-    const [startHour, startMinute] = timerStartStr.split(':').map(Number);
-    const [endHour, endMinute] = timerEndStr.split(':').map(Number);
-    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const timerStart = new Date(todayUTC);
-    timerStart.setUTCHours(startHour, startMinute, 0, 0);
-    const timerEnd = new Date(todayUTC);
-    timerEnd.setUTCHours(endHour, endMinute, 0, 0);
-  
-    // Build the header line using today’s date
-    const dateString = todayUTC.toISOString().split('T')[0]; // "YYYY-MM-DD"
-  
-    // Static template for roles list (always the same)
-const rolesListTemplate = 
-`1️⃣  Main Tank: 
-2️⃣  Off Tank: 
-3️⃣  Main Healer: 
-4️⃣  Looter GA: 
-5️⃣  Supp Frost/Shadowcaller: 
-6️⃣  DPS: 
-7️⃣  DPS Frost / Blazing: 
-8️⃣  Leech / DPS: 
-9️⃣  DPS / LC: 
-🔟  Lizard: `;
+  ChannelType,
+  EmbedBuilder
+} = require('discord.js');
+const { scheduleJob } = require('node-schedule');
 
-// Split the template into lines (an array of 10 strings)
-let rolesListLines = rolesListTemplate.split('\n');
+/**
+ * A global Map storing the original signup message per thread ID
+ * so we can later edit it in prio selection.
+ */
+const ticketMessages = new Map();
 
-// If a friend is provided, update the selected role line
-if (friendUserInput) {
-  let friendMention = friendUserInput.trim();
-  if (!friendMention.startsWith('<@')) {
-    friendMention = `<@${friendMention}>`;
-  }
-  // Replace the corresponding line with the friend mention appended
-  rolesListLines[roleIndex - 1] = rolesListLines[roleIndex - 1] + friendMention;
+/**
+ * A global Map storing signups for each thread.
+ * signups.get(threadId) => Map<userId, number[]>
+ */
+const signups = new Map();
+
+/**
+ * Dummy function: returns a numeric prio points value for a user.
+ * Replace this with your actual logic.
+ */
+function getPrioPoints(userId) {
+  return Math.floor(Math.random() * 200);
 }
 
-// Join the lines back to form the final roles list string
-const roleList = rolesListLines.join('\n');
+/**
+ * Checks if the user has the scout prio role. Replace with your own role check.
+ */
+function hasScoutPrioRole(member) {
+  // e.g. process.env.SCOUT_PRIO_ROLE_ID is your role ID
+  return member.roles?.cache?.has(process.env.SCOUT_PRIO_ROLE_ID) || false;
+}
 
-// Then build your embed description using the static role list:
-const embedDescription =
-  `${interaction.user}'s WB Party ${timerStartStr} - ${timerEndStr} (${dateString} UTC)\n` +
-  `Unhallowed Cloister ${dateString}\n` +
-  `<@&${process.env.WB_MEMBER_ROLE_ID}>\n\n` +
-  "----\n\n" +
-  "Prio: Scout prio > by points\n" +
-  "T9+ DPS\n" +
-  "Prio to Why Not members / Why Not Rat attendance\n\n" +
-  roleList + "\n\n" +
-  "----\n\n" +
-  "Roaming rats:\n" +
-  "🐀 Roaming Rat:\n" +
-  "🐀 Roaming Rat:\n" +
-  "🐀 Roaming Rat:";
+/**
+ * Called when the user submits the "signupModal".
+ * Creates a public thread with an initial embed (no user signups yet).
+ */
+async function processSignup(interaction) {
+  const guild = interaction.guild;
+  const member = interaction.member;
 
-const embed = new EmbedBuilder()
-  .setTitle(`${interaction.user.username}'s WB Party`)
-  .setDescription(embedDescription)
-  .setColor(0x00AAFF);
+  // Parse modal fields
+  const timerStartStr = interaction.fields.getTextInputValue('timerStart'); // e.g. "14:00"
+  const timerEndStr   = interaction.fields.getTextInputValue('timerEnd');   // e.g. "16:00"
 
-  
-    // Send the embed in the same channel as the modal was submitted
-    const signupMessage = await interaction.channel.send({ embeds: [embed] });
-  
-    // Create a private thread on that message (the ticket)
-    const thread = await signupMessage.startThread({
-      name: `ticket-${interaction.user.username}`,
-      type: ChannelType.PrivateThread,
-      reason: 'WB Party Signup'
+  // Convert the times to a Date in UTC for scheduling
+  const now = new Date();
+  const [startHour, startMinute] = timerStartStr.split(':').map(Number);
+  const [endHour, endMinute]     = timerEndStr.split(':').map(Number);
+  const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  const timerStart = new Date(todayUTC);
+  timerStart.setUTCHours(startHour, startMinute, 0, 0);
+
+  const timerEnd = new Date(todayUTC);
+  timerEnd.setUTCHours(endHour, endMinute, 0, 0);
+
+  const dateString = todayUTC.toISOString().split('T')[0];
+
+  // Build the embed's text
+  const embedDescription =
+`${member.user}'s WB Party ${timerStartStr} - ${timerEndStr} (${dateString} UTC)
+Unhallowed Cloister ${dateString}
+<@&${process.env.WB_MEMBER_ROLE_ID}>
+
+----
+Prio: Scout prio > by points
+T9+ DPS
+Prio to Why Not members / Why Not Rat attendance
+
+----
+1️⃣  Main Tank:
+2️⃣  Off Tank:
+3️⃣  Main Healer:
+4️⃣  Looter GA:
+5️⃣  Supp Frost/Shadowcaller:
+6️⃣  DPS:
+7️⃣  DPS Frost / Blazing:
+8️⃣  Leech / DPS:
+9️⃣  DPS / LC:
+🔟  Lizard:
+
+----
+Roaming rats:
+🐀 Roaming Rat:
+🐀 Roaming Rat:
+🐀 Roaming Rat:`;
+
+  const embed = new EmbedBuilder()
+    .setTitle(`${member.user.username}'s WB Party`)
+    .setDescription(embedDescription)
+    .setColor(0x00AAFF);
+
+  // Send the signup embed
+  const signupMessage = await interaction.channel.send({ embeds: [embed] });
+
+  // Create a public thread so everyone can sign up by typing e.g. "1/7/2/8"
+  const thread = await signupMessage.startThread({
+    name: `ticket-${member.user.username}`,
+    type: ChannelType.PublicThread,
+    reason: 'WB Party Signup'
+  });
+
+  // Store the signupMessage in our map so we can edit it on prio selection
+  ticketMessages.set(thread.id, signupMessage);
+
+  // Initialize an empty map for signups in this thread
+  signups.set(thread.id, new Map());
+
+  // 30 minutes before timerStart, do final prio selection
+  const selectionTime = new Date(timerStart.getTime() - 30 * 60 * 1000);
+  if (selectionTime > new Date()) {
+    scheduleJob(selectionTime, async () => {
+      await initPrioSelection(thread);
     });
-  
-    // Grant the ticket creator access silently.
-    await thread.permissionOverwrites.edit(interaction.user.id, {
-      ViewChannel: true,
-      SendMessages: true
-    });
-  
-    // Also add the friend user, if provided.
-    if (friendUserInput) {
-      let friendId = friendUserInput.trim();
-      if (friendId.startsWith('<@') && friendId.endsWith('>')) {
-        friendId = friendId.replace(/<@!?/, '').replace('>', '');
-      }
-      await thread.permissionOverwrites.edit(friendId, {
-        ViewChannel: true,
-        SendMessages: true
-      });
-    }
-  
-    // Schedule the priority selection 30 minutes before timerStart
-    const selectionTime = new Date(timerStart.getTime() - 30 * 60 * 1000);
-    if (selectionTime > new Date()) {
-      scheduleJob(selectionTime, async () => {
-        // TODO: Implement your selection logic based on prio points and scout prio role.
-        // For now, append a placeholder line.
-        const updatedDescription = embed.data.description + "\n\nSelected: @User1, @User2";
-        const updatedEmbed = EmbedBuilder.from(embed).setDescription(updatedDescription);
-        await signupMessage.edit({ embeds: [updatedEmbed] });
-      });
-    }
-  
-    // Finally, reply to the modal submission so that the modal closes.
-    await interaction.reply({ content: `Signup initiated! Check the thread: ${thread.url}`, ephemeral: true });
   }
-  
-  module.exports = { processSignup };
-  
+
+  // Close the modal
+  await interaction.reply({ content: `Signup initiated! Check the thread: ${thread.url}`, ephemeral: true });
+}
+
+/**
+ * Called whenever a user types something in the thread. If it's a pattern like "1/7/2/8",
+ * we parse it as roles and store it in signups.
+ */
+async function handleThreadMessage(message) {
+  const thread = message.channel;
+  if (!thread.isThread()) return;
+  if (!signups.has(thread.id)) return; // This thread wasn't created by signup?
+
+  // e.g. user typed "1/7/2/8"
+  const content = message.content.trim();
+  // Check if it matches a pattern like "^\d+(?:/\d+)*$"
+  const pattern = /^\d+(?:\/\d+)*$/;
+  if (!pattern.test(content)) return; // not a role list
+
+  // Parse into an array of numbers
+  const roleNumbers = content.split('/').map(str => parseInt(str, 10)).filter(x => x >= 1 && x <= 10);
+
+  // Store it in signups
+  signups.get(thread.id).set(message.author.id, roleNumbers);
+
+  // Optionally confirm
+  await message.reply({ content: `Your roles [${roleNumbers.join(', ')}] have been recorded.`, allowedMentions: { repliedUser: false } });
+}
+
+/**
+ * Called when someone types "--init" in the thread or automatically 30 min before start.
+ * Sorts by (ScoutPrio + prio points), then tries to fill the 10 roles based on each user's preference list.
+ */
+async function initPrioSelection(thread) {
+  // get the original signup message
+  const parentMessage = ticketMessages.get(thread.id);
+  if (!parentMessage) {
+    console.error("Parent message not found for thread", thread.id);
+    return;
+  }
+
+  // get the signup map for this thread
+  const threadSignups = signups.get(thread.id);
+  if (!threadSignups) return;
+
+  // We need to fetch members so we can check who has the scout prio role
+  const membersCollection = await thread.members.fetch();
+
+  // Build an array of { userId, roles: number[], prio: number, isScout: boolean }
+  let signupArray = [];
+  for (const [userId, roleNumbers] of threadSignups.entries()) {
+    const member = membersCollection.get(userId);
+    if (!member) continue; // user not in thread or no longer available
+
+    const prioValue = getPrioPoints(userId);
+    const scoutPrio = hasScoutPrioRole(member);
+    signupArray.push({
+      userId,
+      roles: roleNumbers, // array of numbers e.g. [1,7,2,8]
+      prio: prioValue,
+      isScout: scoutPrio
+    });
+  }
+
+  // Sort: first isScout, then descending prio
+  signupArray.sort((a, b) => {
+    if (a.isScout && !b.isScout) return -1;
+    if (!a.isScout && b.isScout) return 1;
+    return b.prio - a.prio;
+  });
+
+  // We'll fill the 10 roles from 1..10. We'll store them in an array of strings
+  // If a role is not assigned, it's empty. We'll fill it with <@userId> once assigned.
+  const finalRoles = new Array(10).fill("");
+
+  // For each user in sorted order, check each of their roles in order. If free, assign.
+  for (const signup of signupArray) {
+    for (const roleNum of signup.roles) {
+      if (!finalRoles[roleNum - 1]) {
+        // fill
+        finalRoles[roleNum - 1] = `<@${signup.userId}>`;
+        break; // assigned one role, move on to next user
+      }
+    }
+  }
+
+  // Build a string representation for the final 10 roles
+  // (We keep the same format as the embed)
+  const rolesTemplate =
+`1️⃣  Main Tank:
+2️⃣  Off Tank:
+3️⃣  Main Healer:
+4️⃣  Looter GA:
+5️⃣  Supp Frost/Shadowcaller:
+6️⃣  DPS:
+7️⃣  DPS Frost / Blazing:
+8️⃣  Leech / DPS:
+9️⃣  DPS / LC:
+🔟  Lizard:`;
+  let lines = rolesTemplate.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (finalRoles[i]) {
+      lines[i] = lines[i] + ' ' + finalRoles[i];
+    }
+  }
+  const finalRolesString = lines.join('\n');
+
+  // update the embed in the parentMessage
+  const oldEmbed = parentMessage.embeds[0];
+  if (!oldEmbed) return;
+  const updatedDescription = oldEmbed.data.description + `\n\n**Selected Participants:**\n${finalRolesString}`;
+  const updatedEmbed = EmbedBuilder.from(oldEmbed).setDescription(updatedDescription);
+
+  await parentMessage.edit({ embeds: [updatedEmbed] });
+}
+
+module.exports = {
+  processSignup,
+  handleThreadMessage,
+  initPrioSelection
+};

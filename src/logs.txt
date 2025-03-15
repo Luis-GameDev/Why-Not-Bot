@@ -39,3 +39,42 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:806:9)
 
+[2025-03-14T16:11:02.571Z] TypeError: Cannot read properties of undefined (reading 'edit')
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:101:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:811:9)
+
+[2025-03-14T16:23:43.781Z] TypeError: Cannot read properties of undefined (reading 'edit')
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:102:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:811:9)
+
+[2025-03-14T16:25:08.200Z] TypeError: Cannot read properties of undefined (reading 'edit')
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:102:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:812:9)
+
+[2025-03-14T16:25:42.517Z] ReferenceError: initPrioSelection is not defined
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:295:9)
+    at Client.emit (node:events:519:28)
+    at MessageCreateAction.handle (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\actions\MessageCreate.js:32:14)
+    at module.exports [as MESSAGE_CREATE] (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\handlers\MESSAGE_CREATE.js:4:32)
+    at WebSocketManager.handlePacket (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:348:31)
+    at WebSocketManager.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:232:12)
+    at WebSocketManager.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1190:51)
+    at WebSocketShard.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.onMessage (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1007:14)
+
+[2025-03-14T16:26:59.012Z] TypeError: Cannot read properties of undefined (reading 'cache')
+    at C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:144:36
+    at Array.map (<anonymous>)
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:142:40)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:295:9)
+
+[2025-03-14T16:40:03.765Z] TypeError: Cannot read properties of undefined (reading 'edit')
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:102:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:812:9)
+

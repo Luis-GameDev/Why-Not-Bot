@@ -10,7 +10,7 @@ const Ticketsystem = require("./ticketsystem.js");
 const axios = require('axios');
 const { Client: UnbClient } = require('unb-api');
 const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
-const { processSignup } = require('./signupHandler.js');
+const { processSignup, initPrioSelection } = require('./signupHandler.js');
 
 console.log("Starting bot...");
 
@@ -290,6 +290,11 @@ client.on("messageCreate", async (message) => {
     if (message.content === "--stats" && message.author.id === process.env.OWNER_USER_ID) {
         operateWeeklyStatsTrack()
     }
+
+    if (message.channel.isThread() && message.content.trim() === '--init') {
+        await initPrioSelection(message.channel);
+        message.reply("Prio selection has been executed.");
+      }
 
     if (message.channel.id === ctacheckChannelId && message.content.startsWith("+1") && !message.author.bot) {
         const userId = message.author.id;
@@ -803,6 +808,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     if (interaction.isModalSubmit() && interaction.customId === 'signupModal') {
+        //await interaction.deferUpdate({ ephemeral: true });
         await processSignup(interaction);
         return;
     }
