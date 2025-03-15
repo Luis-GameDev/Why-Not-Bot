@@ -4,30 +4,82 @@ const {
 } = require('discord.js');
 const { scheduleJob } = require('node-schedule');
 const Plusones = require("./plusones.js");
+const path = require('path');
+const worldbossDataFile = path.join(__dirname, './data/worldbossData.json');
+const fs = require('fs');
 
 const ticketMessages = new Map();
-
 const signups = new Map();
+
+let member;
+let timerStartStr;
+let timerEndStr;
+let timerStart;
+let timerEnd;
 
 function hasScoutPrioRole(member) {
   return member.roles?.cache?.has(process.env.SCOUT_PRIO_ROLE_ID) || false;
 }
 
-async function processSignup(interaction) {
-  const member = interaction.member;
+function ensureDataStructure(messageId) {
+    let worldbossData = {};
 
-  const timerStartStr = interaction.fields.getTextInputValue('timerStart'); 
-  const timerEndStr   = interaction.fields.getTextInputValue('timerEnd');   
+    if (fs.existsSync(worldbossDataFile)) {
+        try {
+            const data = fs.readFileSync(worldbossDataFile);
+            worldbossData = data.length ? JSON.parse(data) : {};
+        } catch (error) {
+            console.error('Error parsing worldboss data:', error);
+            worldbossData = {};
+        }
+    }
+
+    worldbossData[messageId] = {
+      hostUID: member.id,
+      startUTC: timerStartStr,
+      endUTC: timerEndStr,
+      startTime: Math.floor(timerStart.getTime() / 1000),
+      endTime: Math.floor(timerEnd.getTime() / 1000),
+      roles: {}
+    };
+
+    fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
+}
+
+function assignPrioToRoles(messageId, userId, role) {
+    if (role < 1 || role > 10) return;
+
+    let worldbossData = {};
+
+    if (fs.existsSync(worldbossDataFile)) {
+        try {
+          const data = fs.readFileSync(worldbossDataFile);
+          worldbossData = data.length ? JSON.parse(data) : {};
+        } catch (error) {
+          console.error('Error parsing worldboss data:', error);
+          worldbossData = {};
+        }
+    }
+
+    worldbossData[messageId].roles[role] = userId;
+    fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
+}
+
+async function processSignup(interaction) {
+  member = interaction.member;
+
+  timerStartStr = interaction.fields.getTextInputValue('timerStart'); 
+  timerEndStr   = interaction.fields.getTextInputValue('timerEnd');   
 
   const now = new Date();
   const [startHour, startMinute] = timerStartStr.split(':').map(Number);
   const [endHour, endMinute]     = timerEndStr.split(':').map(Number);
   const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-  let timerStart = new Date(todayUTC);
+  timerStart = new Date(todayUTC);
   timerStart.setUTCHours(startHour, startMinute, 0, 0);
 
-  let timerEnd = new Date(todayUTC);
+  timerEnd = new Date(todayUTC);
   timerEnd.setUTCHours(endHour, endMinute, 0, 0);
 
   if (timerStart < now) {
@@ -47,7 +99,6 @@ Prio: Scout prio > by points
 T9+ DPS
 Prio to Why Not members / Why Not Rat attendance
 
-----
 1️⃣  Main Tank:
 2️⃣  Off Tank:
 3️⃣  Main Healer:
@@ -59,21 +110,22 @@ Prio to Why Not members / Why Not Rat attendance
 9️⃣  DPS / LC:
 🔟  Lizard:
 
-----
 Roaming rats:
 🐀 Roaming Rat:
 🐀 Roaming Rat:
 🐀 Roaming Rat:`;
 
   const embed = new EmbedBuilder()
-    .setTitle(`${member.user.username}'s WB Party`)
+    .setTitle(`Worldboss Famefarm`)
     .setDescription(embedDescription)
     .setColor(0x00AAFF);
 
   const signupMessage = await interaction.channel.send({ embeds: [embed] });
 
+  ensureDataStructure(signupMessage.id);
+
   const thread = await signupMessage.startThread({
-    name: `WB-${startHour}-${member.user.username}`,
+    name: `WB-${startHour}UTC-${member.user.username}`,
     type: ChannelType.PublicThread,
     reason: 'WB Party Signup'
   });
@@ -92,7 +144,7 @@ Roaming rats:
   await interaction.reply({ content: `Signup initiated! Check the thread: ${thread.url}`, ephemeral: true });
 }
 
-async function handleThreadMessage(message) {
+/* async function handleThreadMessage(message) {
   const thread = message.channel;
   if (!thread.isThread()) return;
   if (!signups.has(thread.id)) return;
@@ -106,7 +158,7 @@ async function handleThreadMessage(message) {
   signups.get(thread.id).set(message.author.id, roleNumbers);
 
   await message.reply({ content: `Your roles [${roleNumbers.join(', ')}] have been recorded.`, allowedMentions: { repliedUser: false } });
-}
+} */
 
 function hasScoutPrioRole(member) {
   return member.roles?.cache?.has(process.env.SCOUT_PRIO_ROLE_ID) || false;
@@ -185,6 +237,6 @@ async function initPrioSelection(thread) {
 
 module.exports = {
   processSignup,
-  handleThreadMessage,
+  //handleThreadMessage,
   initPrioSelection
 };

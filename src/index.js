@@ -288,7 +288,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 client.on("messageCreate", async (message) => {
 
     if (message.channel.isThread()) {
-        await handleThreadMessage(message);
+        //await handleThreadMessage(message);
     
         if (message.content.trim() === '--init') {
             await initPrioSelection(message.channel);

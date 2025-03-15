@@ -78,3 +78,16 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:812:9)
 
+[2025-03-15T19:30:40.137Z] ReferenceError: member is not defined
+    at ensureDataStructure (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:33:16)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:113:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:816:9)
+
+[2025-03-15T19:32:18.907Z] TypeError [ERR_INVALID_ARG_TYPE]: The "path" argument must be of type string or an instance of Buffer or URL. Received an instance of Object
+    at Object.writeFileSync (node:fs:2340:42)
+    at ensureDataStructure (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:58:8)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:118:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:816:9)
+
