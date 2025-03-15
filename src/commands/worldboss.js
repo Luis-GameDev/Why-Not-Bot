@@ -36,7 +36,7 @@ module.exports = {
       .setLabel('Roleindex (1-10) for the friend (optional)')
       .setPlaceholder('1-10')
       .setStyle(TextInputStyle.Short)
-      .setRequired(true);
+      .setRequired(false);
 
     modal.addComponents(
       new ActionRowBuilder().addComponents(timerStartInput),
