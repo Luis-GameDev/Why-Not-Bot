@@ -46,7 +46,7 @@ function ensureDataStructure(messageId) {
     fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
 }
 
-function assignPrioToRoles(messageId, userId, role) {
+function assignUserToRoles(messageId, userId, role) {
     if (role < 1 || role > 10) return;
 
     let worldbossData = {};
@@ -122,7 +122,8 @@ Roaming rats:
 
   const signupMessage = await interaction.channel.send({ embeds: [embed] });
 
-  ensureDataStructure(signupMessage.id);
+  await ensureDataStructure(signupMessage.id);
+  assignPrioToRoles
 
   const thread = await signupMessage.startThread({
     name: `WB-${startHour}UTC-${member.user.username}`,
