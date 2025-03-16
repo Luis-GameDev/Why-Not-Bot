@@ -9,28 +9,24 @@ module.exports = {
       .setCustomId('signupModal')
       .setTitle('WB Party Signup');
 
-    // Timer Beginn input
     const timerStartInput = new TextInputBuilder()
       .setCustomId('timerStart')
-      .setLabel('Timer Beginn (UTC, z.B. 14:00)')
+      .setLabel('Timer Start (UTC, e.g. 14:00)')
       .setStyle(TextInputStyle.Short)
       .setRequired(true);
 
-    // Timer Ende input
     const timerEndInput = new TextInputBuilder()
       .setCustomId('timerEnd')
-      .setLabel('Timer Ende (UTC, z.B. 16:00)')
+      .setLabel('Timer End (UTC, e.g. 16:00)')
       .setStyle(TextInputStyle.Short)
       .setRequired(true);
 
-    // Friend User input (optional)
     const friendUserInput = new TextInputBuilder()
       .setCustomId('friendUser')
-      .setLabel('Freund (User ID oder Mention) (optional)')
+      .setLabel('Friend (User ID) (optional)')
       .setStyle(TextInputStyle.Short)
       .setRequired(false);
 
-    // Role Index input (1-10) for friend's slot
     const roleIndexInput = new TextInputBuilder()
       .setCustomId('roleIndex')
       .setLabel('Roleindex (1-10) for the friend (optional)')
@@ -44,6 +40,18 @@ module.exports = {
       new ActionRowBuilder().addComponents(friendUserInput),
       new ActionRowBuilder().addComponents(roleIndexInput)
     );
+    
+    const requestingUser = interaction.user;
+    const guild = interaction.guild;
+    const member = guild.members.cache.get(requestingUser.id);
+    const requiredRole = process.env.WB_CALLER_ROLE_ID;
+
+    if (!member.roles.cache.has(requiredRole)) {
+        return interaction.reply({
+            content: 'You do not have permission to use this command.',
+            ephemeral: true
+        });
+    }
 
     await interaction.showModal(modal);
   }

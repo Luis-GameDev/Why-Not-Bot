@@ -161,6 +161,10 @@ client.on("messageReactionAdd", async (reaction, user) => {
         switch (reaction.emoji.name) {
             case greenCore.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+                    if (member.id === "342001696651739136") {
+                        reaction.message.channel.send(`Please stfu <@${user.id}> <3`)
+                        return;
+                    }
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }

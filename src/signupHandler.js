@@ -44,7 +44,6 @@ function ensureDataStructure(messageId) {
 }
 
 function assignUserToRoles(messageId, userId, role) {
-    Console.Log("Trying to assign user to role")
     if (role < 1 || role > 10) return;
 
     let worldbossData = {};
@@ -60,12 +59,10 @@ function assignUserToRoles(messageId, userId, role) {
     }
     for (const key in worldbossData[messageId].roles) {
       if (worldbossData[messageId].roles[key] == userId) {
-        Console.Log("User already assigned")
         return;
       }
     }
 
-    Console.Log("Successfully assigned user to role")
     worldbossData[messageId].roles[role] = userId;
     fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
 }
@@ -74,7 +71,9 @@ async function processSignup(interaction) {
   member = interaction.member;
 
   timerStartStr = interaction.fields.getTextInputValue('timerStart'); 
-  timerEndStr   = interaction.fields.getTextInputValue('timerEnd');   
+  timerEndStr = interaction.fields.getTextInputValue('timerEnd');   
+  friendID = interaction.fields.getTextInputValue('friendUser');
+  friendRole = interaction.fields.getTextInputValue('roleIndex');
 
   const now = new Date();
   const [startHour, startMinute] = timerStartStr.split(':').map(Number);
@@ -133,6 +132,10 @@ Roaming rats:
   await ensureDataStructure(signupMessage.id);
   assignUserToRoles(signupMessage.id, member.id, 1);
 
+  if(friendID && friendRole && friendRole > 0 && friendRole < 11) {
+    assignUserToRoles(signupMessage.id, friendID, friendRole);
+  }
+
   const thread = await signupMessage.startThread({
     name: `WB-${startHour}UTC-${member.user.username}`,
     type: ChannelType.PublicThread,
@@ -160,11 +163,12 @@ async function initPrioSelection(thread) {
     return;
   }
 
+  await thread.messages.fetch({ limit: 100 });
   let threadSignups = thread.messages.cache.filter(m => !m.author.bot && /^\d+(?:\/\d+)*$/.test(m.content.trim()));
   let signupArray = [];
 
-  for (const m of threadSignups.entries()) {
-
+  for (const [id, m] of threadSignups.entries()) {
+    console.log(m.content)
     const prioValue = Plusones.getUserPrio(m.author.id);
     const scoutPrio = hasScoutPrioRole(m.author.id);
     const roleNumbers = m.content.trim().split('/').filter(x => x >= 1 && x <= 10);
@@ -189,10 +193,9 @@ async function initPrioSelection(thread) {
     for (const roleNum of signup.roles) {
       if (!finalRoles[roleNum - 1]) {
         finalRoles[roleNum - 1] = `<@${signup.userId}>`;
-        assignUserToRoles(parentMessage.id, signup.userId, parseFloat(roleNum));
+        assignUserToRoles(parentMessage.id, signup.userId, parseInt(roleNum));
         break; 
       } 
-      
     }
   }
 

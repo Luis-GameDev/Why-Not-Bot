@@ -152,3 +152,29 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:13)
 
+[2025-03-16T16:11:09.399Z] TypeError: console.Log is not a function
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:165:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:298:13)
+
+[2025-03-16T16:12:43.549Z] TypeError: Cannot read properties of undefined (reading 'id')
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:168:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:298:13)
+
+[2025-03-16T16:14:15.998Z] TypeError: Cannot read properties of undefined (reading 'id')
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:169:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:298:13)
+
+[2025-03-16T16:15:15.446Z] TypeError: Cannot read properties of undefined (reading 'id')
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:169:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:298:13)
+
+[2025-03-16T16:20:55.810Z] ReferenceError: Console is not defined
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:47:5)
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:193:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:298:13)
+
