@@ -91,3 +91,59 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:816:9)
 
+[2025-03-16T10:58:50.139Z] ReferenceError: assignPrioToRoles is not defined
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:126:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:816:9)
+
+[2025-03-16T11:00:40.953Z] ReferenceError: ticketMessages is not defined
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:134:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:816:9)
+
+[2025-03-16T11:02:08.303Z] ReferenceError: ticketMessages is not defined
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:169:25)
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:19)
+    at Client.emit (node:events:519:28)
+    at MessageCreateAction.handle (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\actions\MessageCreate.js:32:14)
+    at module.exports [as MESSAGE_CREATE] (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\handlers\MESSAGE_CREATE.js:4:32)
+    at WebSocketManager.handlePacket (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:348:31)
+    at WebSocketManager.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:232:12)
+    at WebSocketManager.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1190:51)
+    at WebSocketShard.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+
+[2025-03-16T11:03:11.374Z] ReferenceError: signupArray is not defined
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:193:3)
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:19)
+    at Client.emit (node:events:519:28)
+    at MessageCreateAction.handle (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\actions\MessageCreate.js:32:14)
+    at module.exports [as MESSAGE_CREATE] (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\handlers\MESSAGE_CREATE.js:4:32)
+    at WebSocketManager.handlePacket (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:348:31)
+    at WebSocketManager.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:232:12)
+    at WebSocketManager.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1190:51)
+    at WebSocketShard.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+
+[2025-03-16T11:03:57.405Z] TypeError: Cannot read properties of undefined (reading '0')
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:231:40)
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:19)
+    at Client.emit (node:events:519:28)
+    at MessageCreateAction.handle (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\actions\MessageCreate.js:32:14)
+    at module.exports [as MESSAGE_CREATE] (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\handlers\MESSAGE_CREATE.js:4:32)
+    at WebSocketManager.handlePacket (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:348:31)
+    at WebSocketManager.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:232:12)
+    at WebSocketManager.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1190:51)
+    at WebSocketShard.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+
+[2025-03-16T11:48:38.686Z] TypeError: Cannot read properties of undefined (reading 'id')
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:187:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:13)
+
+[2025-03-16T11:53:48.086Z] TypeError: Cannot read properties of undefined (reading 'user')
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:187:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:13)
+

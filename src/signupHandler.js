@@ -8,9 +8,6 @@ const path = require('path');
 const worldbossDataFile = path.join(__dirname, './data/worldbossData.json');
 const fs = require('fs');
 
-const ticketMessages = new Map();
-const signups = new Map();
-
 let member;
 let timerStartStr;
 let timerEndStr;
@@ -47,6 +44,7 @@ function ensureDataStructure(messageId) {
 }
 
 function assignUserToRoles(messageId, userId, role) {
+    Console.Log("Trying to assign user to role")
     if (role < 1 || role > 10) return;
 
     let worldbossData = {};
@@ -60,7 +58,14 @@ function assignUserToRoles(messageId, userId, role) {
           worldbossData = {};
         }
     }
+    for (const key in worldbossData[messageId].roles) {
+      if (worldbossData[messageId].roles[key] == userId) {
+        Console.Log("User already assigned")
+        return;
+      }
+    }
 
+    Console.Log("Successfully assigned user to role")
     worldbossData[messageId].roles[role] = userId;
     fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
 }
@@ -93,13 +98,16 @@ async function processSignup(interaction) {
 
 <t:${Math.floor(timerStart.getTime() / 1000)}:F>
 <t:${Math.floor(timerStart.getTime() / 1000)}:R>
-
+----
+How to signup:
+- Type your roles into the thread in the following format: \`1/7/3/10\`
+- Type your roles in order of preference, separated by slashes
 ----
 Prio: Scout prio > by points
 T9+ DPS
 Prio to Why Not members / Why Not Rat attendance
 
-1️⃣  Main Tank:
+1️⃣  Main Tank: <@${interaction.member.id}>
 2️⃣  Off Tank:
 3️⃣  Main Healer:
 4️⃣  Looter GA:
@@ -123,7 +131,7 @@ Roaming rats:
   const signupMessage = await interaction.channel.send({ embeds: [embed] });
 
   await ensureDataStructure(signupMessage.id);
-  assignPrioToRoles
+  assignUserToRoles(signupMessage.id, member.id, 1);
 
   const thread = await signupMessage.startThread({
     name: `WB-${startHour}UTC-${member.user.username}`,
@@ -131,9 +139,9 @@ Roaming rats:
     reason: 'WB Party Signup'
   });
 
-  ticketMessages.set(thread.id, signupMessage);
+  /* ticketMessages.set(thread.id, signupMessage);
 
-  signups.set(thread.id, new Map());
+  signups.set(thread.id, new Map()); */
 
   const selectionTime = new Date(timerStart.getTime() - 30 * 60 * 1000);
   if (selectionTime > new Date()) {
@@ -166,26 +174,25 @@ function hasScoutPrioRole(member) {
 }
 
 async function initPrioSelection(thread) {
-  const parentMessage = ticketMessages.get(thread.id);
+  const parentMessage = await thread.fetchStarterMessage();
   if (!parentMessage) {
     console.error("Parent message not found for thread", thread.id);
     return;
   }
 
-  const threadSignups = signups.get(thread.id);
-  if (!threadSignups) return;
+  //const signups = new Map();
 
-  const membersCollection = await thread.members.fetch();
-
+  let threadSignups = thread.messages.cache.filter(m => !m.author.bot && /^\d+(?:\/\d+)*$/.test(m.content.trim()));
   let signupArray = [];
-  for (const [userId, roleNumbers] of threadSignups.entries()) {
-    const member = membersCollection.get(userId);
-    if (!member) continue; 
 
-    const prioValue = Plusones.getUserPrio(userId);
-    const scoutPrio = hasScoutPrioRole(member);
+  for (const m of threadSignups.entries()) {
+
+    const prioValue = Plusones.getUserPrio(m.author.id);
+    const scoutPrio = hasScoutPrioRole(m.author.id);
+    const roleNumbers = m.content.trim().split('/').filter(x => x >= 1 && x <= 10);
+
     signupArray.push({
-      userId,
+      userId: m.author.id,
       roles: roleNumbers, 
       prio: prioValue,
       isScout: scoutPrio
@@ -202,10 +209,11 @@ async function initPrioSelection(thread) {
 
   for (const signup of signupArray) {
     for (const roleNum of signup.roles) {
-      if (!finalRoles[roleNum - 1]) {
+      /* if (!finalRoles[roleNum - 1]) {
         finalRoles[roleNum - 1] = `<@${signup.userId}>`;
         break; 
-      }
+      } */
+      assignUserToRoles(parentMessage.id, signup.userId, roleNum);
     }
   }
 
@@ -228,9 +236,12 @@ async function initPrioSelection(thread) {
   }
   const finalRolesString = lines.join('\n');
 
+  if (!parentMessage.embeds || parentMessage.embeds.length === 0) {
+    console.error("No embeds found in parent message", parentMessage.id);
+    return;
+  }
   const oldEmbed = parentMessage.embeds[0];
-  if (!oldEmbed) return;
-  const updatedDescription = oldEmbed.data.description + `\n\n**Selected Participants:**\n${finalRolesString}`;
+  const updatedDescription = oldEmbed.data.description.replace(/1️⃣.*Lizard:/s, finalRolesString);
   const updatedEmbed = EmbedBuilder.from(oldEmbed).setDescription(updatedDescription);
 
   await parentMessage.edit({ embeds: [updatedEmbed] });
