@@ -147,3 +147,8 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:13)
 
+[2025-03-16T14:12:52.333Z] ReferenceError: signups is not defined
+    at initPrioSelection (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:182:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:294:13)
+

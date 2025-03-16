@@ -139,10 +139,6 @@ Roaming rats:
     reason: 'WB Party Signup'
   });
 
-  /* ticketMessages.set(thread.id, signupMessage);
-
-  signups.set(thread.id, new Map()); */
-
   const selectionTime = new Date(timerStart.getTime() - 30 * 60 * 1000);
   if (selectionTime > new Date()) {
     scheduleJob(selectionTime, async () => {
@@ -152,22 +148,6 @@ Roaming rats:
 
   await interaction.reply({ content: `Signup initiated! Check the thread: ${thread.url}`, ephemeral: true });
 }
-
-/* async function handleThreadMessage(message) {
-  const thread = message.channel;
-  if (!thread.isThread()) return;
-  if (!signups.has(thread.id)) return;
-
-  const content = message.content.trim();
-  const pattern = /^\d+(?:\/\d+)*$/;
-  if (!pattern.test(content)) return; 
-
-  const roleNumbers = content.split('/').map(str => parseInt(str, 10)).filter(x => x >= 1 && x <= 10);
-
-  signups.get(thread.id).set(message.author.id, roleNumbers);
-
-  await message.reply({ content: `Your roles [${roleNumbers.join(', ')}] have been recorded.`, allowedMentions: { repliedUser: false } });
-} */
 
 function hasScoutPrioRole(member) {
   return member.roles?.cache?.has(process.env.SCOUT_PRIO_ROLE_ID) || false;
@@ -179,8 +159,6 @@ async function initPrioSelection(thread) {
     console.error("Parent message not found for thread", thread.id);
     return;
   }
-
-  //const signups = new Map();
 
   let threadSignups = thread.messages.cache.filter(m => !m.author.bot && /^\d+(?:\/\d+)*$/.test(m.content.trim()));
   let signupArray = [];
@@ -209,11 +187,12 @@ async function initPrioSelection(thread) {
 
   for (const signup of signupArray) {
     for (const roleNum of signup.roles) {
-      /* if (!finalRoles[roleNum - 1]) {
+      if (!finalRoles[roleNum - 1]) {
         finalRoles[roleNum - 1] = `<@${signup.userId}>`;
+        assignUserToRoles(parentMessage.id, signup.userId, parseFloat(roleNum));
         break; 
-      } */
-      assignUserToRoles(parentMessage.id, signup.userId, roleNum);
+      } 
+      
     }
   }
 
@@ -249,6 +228,5 @@ async function initPrioSelection(thread) {
 
 module.exports = {
   processSignup,
-  //handleThreadMessage,
   initPrioSelection
 };
