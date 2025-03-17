@@ -178,3 +178,12 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:298:13)
 
+[2025-03-16T20:20:29.203Z] DiscordAPIError[10062]: Unknown interaction
+    at handleErrors (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:727:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async BurstHandler.runRequest (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:831:23)
+    at async _REST.request (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:1272:22)
+    at async ModalSubmitInteraction.reply (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:194:22)
+    at async processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:152:3)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+

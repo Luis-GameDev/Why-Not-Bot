@@ -107,7 +107,7 @@ T9+ DPS
 Prio to Why Not members / Why Not Rat attendance
 
 1️⃣  Main Tank: <@${interaction.member.id}>
-2️⃣  Off Tank:
+2️⃣  Off Tank: 
 3️⃣  Main Healer:
 4️⃣  Looter GA:
 5️⃣  Supp Frost/Shadowcaller:
@@ -132,7 +132,7 @@ Roaming rats:
   await ensureDataStructure(signupMessage.id);
   assignUserToRoles(signupMessage.id, member.id, 1);
 
-  if(friendID && friendRole && friendRole > 0 && friendRole < 11) {
+  if(friendID && friendRole && friendRole > 1 && friendRole < 11) {
     assignUserToRoles(signupMessage.id, friendID, friendRole);
   }
 
