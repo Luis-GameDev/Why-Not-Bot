@@ -74,7 +74,7 @@ async function assignUserToRoles(messageId, userId, role) {
 
     msg = await fetchMessage(process.env.WB_CALL_CHANNEL_ID, messageId)
     let embedParent = EmbedBuilder.from(msg.embeds[0]);
-    await updateEmbedFromRoles(embedParent, worldbossData[messageId].roles);
+    //await updateEmbedFromRoles(embedParent, worldbossData[messageId].roles);
 
     fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
 }
@@ -176,7 +176,8 @@ Roaming rats:
   const signupMessage = await interaction.channel.send({ embeds: [embed] });
 
   await ensureDataStructure(signupMessage.id);
-  await assignUserToRoles(signupMessage.id, member.id, 1);
+  let callerRole = "1"
+  await assignUserToRoles(signupMessage.id, member.id, callerRole);
 
   if(friendID && friendRole && friendRole > 1 && friendRole < 11) {
     assignUserToRoles(signupMessage.id, friendID, friendRole);
@@ -194,6 +195,21 @@ Roaming rats:
       await initPrioSelection(thread);
     });
   }
+
+  // get roles
+  let worldbossData = {};
+
+    if (fs.existsSync(worldbossDataFile)) {
+        try {
+          const data = fs.readFileSync(worldbossDataFile);
+          worldbossData = data.length ? JSON.parse(data) : {};
+        } catch (error) {
+          console.error('Error parsing worldboss data:', error);
+          worldbossData = {};
+        }
+    }
+
+  updateEmbedFromRoles(EmbedBuilder.from(signupMessage.embeds[0]), worldbossData[signupMessage.id].roles)
 
   await interaction.reply({ content: `Signup initiated! Check the thread: ${thread.url}`, ephemeral: true });
 }
@@ -213,6 +229,7 @@ function updateEmbedFromRoles(parentEmbed, roles) {
 function updateParentEmbedWithRole(parentEmbed, roleNr, userId) {
   const roleEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
   const targetEmoji = roleEmojis[roleNr - 1];
+  console.log("Altering parent embed")
 
   let description = parentEmbed.data.description || "";
   let lines = description.split("\n");
@@ -222,6 +239,7 @@ function updateParentEmbedWithRole(parentEmbed, roleNr, userId) {
     if (lines[i].trim().startsWith(targetEmoji)) {
       const colonIndex = lines[i].indexOf(":");
       if (colonIndex !== -1) {
+        console.log("Added "+userId)
         lines[i] = lines[i].substring(0, colonIndex + 1) + ` <@${userId}>`;
       } else {
         lines[i] = lines[i] + `: <@${userId}>`;

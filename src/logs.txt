@@ -313,3 +313,17 @@
     at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:77:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 
+[2025-03-19T23:03:42.520Z] TypeError: parentEmbed.setDescription is not a function
+    at updateParentEmbedWithRole (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:239:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:199:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:822:9)
+
+[2025-03-19T23:14:25.570Z] ReferenceError: Console is not defined
+    at updateParentEmbedWithRole (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:219:3)
+    at updateEmbedFromRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:210:19)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:77:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:180:3)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:822:9)
+
