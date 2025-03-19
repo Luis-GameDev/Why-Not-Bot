@@ -187,3 +187,129 @@
     at async processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:152:3)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
 
+[2025-03-19T20:42:49.206Z] TypeError: Cannot read properties of undefined (reading '0')
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:68:48)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:161:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T20:42:49.208Z] TypeError: Cannot read properties of undefined (reading '0')
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:68:48)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:164:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T20:58:05.069Z] TypeError: index.fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:38)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:163:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T20:58:05.071Z] TypeError: index.fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:38)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:166:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:01:40.000Z] TypeError: idx.fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:36)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:163:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:01:40.002Z] TypeError: idx.fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:36)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:166:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:02:44.504Z] TypeError: fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:32)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:163:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:02:44.506Z] TypeError: fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:32)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:166:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:05:48.051Z] TypeError: idx.fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:15)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:165:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:05:48.053Z] TypeError: idx.fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:15)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:168:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:12:53.409Z] TypeError: fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:165:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:12:53.412Z] TypeError: fetchMessage is not a function
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:168:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:829:9)
+
+[2025-03-19T21:17:10.366Z] TypeError: Cannot read properties of undefined (reading 'channels')
+    at fetchMessage (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:78:32)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:174:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T21:17:10.368Z] TypeError: Cannot read properties of undefined (reading 'channels')
+    at fetchMessage (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:78:32)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:177:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T21:21:17.187Z] TypeError: Cannot read properties of undefined (reading 'channels')
+    at fetchMessage (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:78:36)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:174:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T21:21:17.190Z] TypeError: Cannot read properties of undefined (reading 'channels')
+    at fetchMessage (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:78:36)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:177:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T21:22:47.433Z] TypeError: Cannot read properties of undefined (reading 'channels')
+    at fetchMessage (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:78:29)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:174:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T21:22:47.435Z] TypeError: Cannot read properties of undefined (reading 'channels')
+    at fetchMessage (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:78:29)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:70:17)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:177:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:820:9)
+
+[2025-03-19T21:29:03.307Z] TypeError: parentEmbed.setDescription is not a function
+    at updateParentEmbedWithRole (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:236:17)
+    at updateEmbedFromRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:207:19)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:77:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+[2025-03-19T21:29:03.311Z] TypeError: parentEmbed.setDescription is not a function
+    at updateParentEmbedWithRole (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:236:17)
+    at updateEmbedFromRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:207:19)
+    at assignUserToRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:77:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+

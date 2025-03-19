@@ -29,8 +29,8 @@ module.exports = {
 
     const roleIndexInput = new TextInputBuilder()
       .setCustomId('roleIndex')
-      .setLabel('Roleindex (1-10) for the friend (optional)')
-      .setPlaceholder('1-10')
+      .setLabel('Roleindex (2-10) for the friend (optional)')
+      .setPlaceholder('2-10')
       .setStyle(TextInputStyle.Short)
       .setRequired(false);
 
@@ -51,6 +51,13 @@ module.exports = {
             content: 'You do not have permission to use this command.',
             ephemeral: true
         });
+    }
+
+    if (interaction.channel.id !== process.env.WB_CALL_CHANNEL_ID) {
+      return interaction.reply({
+        content: 'This command can only be used in the WB-Call channel.',
+        ephemeral: true
+    });
     }
 
     await interaction.showModal(modal);

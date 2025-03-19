@@ -14,6 +14,13 @@ let timerEndStr;
 let timerStart;
 let timerEnd;
 
+
+let clientInstance;
+
+function setClient(client) {
+    clientInstance = client;
+}
+
 function hasScoutPrioRole(member) {
   return member.roles?.cache?.has(process.env.SCOUT_PRIO_ROLE_ID) || false;
 }
@@ -43,7 +50,7 @@ function ensureDataStructure(messageId) {
     fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
 }
 
-function assignUserToRoles(messageId, userId, role) {
+async function assignUserToRoles(messageId, userId, role) {
     if (role < 1 || role > 10) return;
 
     let worldbossData = {};
@@ -64,16 +71,55 @@ function assignUserToRoles(messageId, userId, role) {
     }
 
     worldbossData[messageId].roles[role] = userId;
+
+    msg = await fetchMessage(process.env.WB_CALL_CHANNEL_ID, messageId)
+    let embedParent = EmbedBuilder.from(msg.embeds[0]);
+    await updateEmbedFromRoles(embedParent, worldbossData[messageId].roles);
+
     fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
 }
 
+async function fetchMessage(channelId, messageId) {
+  const channel = await clientInstance.channels.fetch(channelId);
+  if (!channel || !channel.isTextBased()) {
+    return Console.error("Couldnt fetch channel")
+  }
+  const message = await channel.messages.fetch(messageId);
+  return message;
+}
+
 async function processSignup(interaction) {
+  const friendUserId = interaction.fields.getTextInputValue('friendUser');
+    if (friendUserId && !/^\d{17,19}$/.test(friendUserId)) {
+      return interaction.reply({
+        content: 'Friend-ID must be a valid Discord user ID.',
+        ephemeral: true
+      });
+    }
+    const friendUserInput = interaction.fields.getTextInputValue('friendUser');
+    if (friendUserInput) { 
+      const roleIndex = parseInt(interaction.fields.getTextInputValue('roleIndex'), 10);
+      if (isNaN(roleIndex) || roleIndex < 2 || roleIndex > 10) {
+      return interaction.reply({
+        content: 'Role-Index must be a number between 2 and 10.',
+        ephemeral: true
+      });
+      }
+    }
+
   member = interaction.member;
 
   timerStartStr = interaction.fields.getTextInputValue('timerStart'); 
   timerEndStr = interaction.fields.getTextInputValue('timerEnd');   
   friendID = interaction.fields.getTextInputValue('friendUser');
   friendRole = interaction.fields.getTextInputValue('roleIndex');
+
+  if (!/^\d{2}:\d{2}$/.test(timerStartStr) || !/^\d{2}:\d{2}$/.test(timerEndStr)) {
+    return interaction.reply({
+      content: 'Timer start and end must be in the format HH:MM (e.g., 16:00).',
+      ephemeral: true
+    });
+  }
 
   const now = new Date();
   const [startHour, startMinute] = timerStartStr.split(':').map(Number);
@@ -106,7 +152,7 @@ Prio: Scout prio > by points
 T9+ DPS
 Prio to Why Not members / Why Not Rat attendance
 
-1️⃣  Main Tank: <@${interaction.member.id}>
+1️⃣  Main Tank: 
 2️⃣  Off Tank: 
 3️⃣  Main Healer:
 4️⃣  Looter GA:
@@ -130,7 +176,7 @@ Roaming rats:
   const signupMessage = await interaction.channel.send({ embeds: [embed] });
 
   await ensureDataStructure(signupMessage.id);
-  assignUserToRoles(signupMessage.id, member.id, 1);
+  await assignUserToRoles(signupMessage.id, member.id, 1);
 
   if(friendID && friendRole && friendRole > 1 && friendRole < 11) {
     assignUserToRoles(signupMessage.id, friendID, friendRole);
@@ -155,6 +201,43 @@ Roaming rats:
 function hasScoutPrioRole(member) {
   return member.roles?.cache?.has(process.env.SCOUT_PRIO_ROLE_ID) || false;
 }
+
+function updateEmbedFromRoles(parentEmbed, roles) {
+  for (const [roleIndex, userId] of Object.entries(roles)) {
+    parentEmbed = updateParentEmbedWithRole(parentEmbed, parseInt(roleIndex, 10), userId);
+  }
+  return parentEmbed;
+}
+
+
+function updateParentEmbedWithRole(parentEmbed, roleNr, userId) {
+  const roleEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+  const targetEmoji = roleEmojis[roleNr - 1];
+
+  let description = parentEmbed.data.description || "";
+  let lines = description.split("\n");
+  let updated = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim().startsWith(targetEmoji)) {
+      const colonIndex = lines[i].indexOf(":");
+      if (colonIndex !== -1) {
+        lines[i] = lines[i].substring(0, colonIndex + 1) + ` <@${userId}>`;
+      } else {
+        lines[i] = lines[i] + `: <@${userId}>`;
+      }
+      updated = true;
+      break;
+    }
+  }
+
+  if (updated) {
+    const newDescription = lines.join("\n");
+    parentEmbed.setDescription(newDescription);
+  }
+  return parentEmbed;
+}
+
 
 async function initPrioSelection(thread) {
   const parentMessage = await thread.fetchStarterMessage();
@@ -231,5 +314,6 @@ async function initPrioSelection(thread) {
 
 module.exports = {
   processSignup,
-  initPrioSelection
+  initPrioSelection,
+  setClient
 };

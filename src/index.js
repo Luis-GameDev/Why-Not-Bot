@@ -6,6 +6,7 @@ const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
 const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
+const signupHandler = require("./signupHandler.js");
 const Ticketsystem = require("./ticketsystem.js");
 const axios = require('axios');
 const { Client: UnbClient } = require('unb-api');
@@ -53,7 +54,7 @@ commandFiles.forEach((commandFile) => {
 const botChannelId = process.env.BOT_CHANNEL; 
 const scoutChannelId = process.env.SCOUT_CHANNEL_ID;
 const ctacheckChannelId = process.env.CTA_CHECK_CHANNEL_ID;
-
+  
 async function payMember(userId, amount) {
     const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
     const guild = process.env.DISCORD_GUILD_ID;
@@ -630,6 +631,7 @@ client.once("ready", async () => {
     console.log("Bot is online");
     client.user.setActivity("Albion Online", "PLAYING");
     Plusones.setClient(client);
+    signupHandler.setClient(client);
 
     try {
         const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID)
@@ -867,4 +869,6 @@ const axios = require('axios');
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
-module.exports = client;
+module.exports = {
+    client
+};
