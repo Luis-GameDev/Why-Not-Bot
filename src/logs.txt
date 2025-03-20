@@ -327,3 +327,28 @@
     at async processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:180:3)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:822:9)
 
+[2025-03-19T23:35:26.399Z] TypeError: Cannot read properties of undefined (reading 'send')
+    at updateParentEmbedWithRole (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:232:23)
+    at updateEmbedFromRoles (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:223:5)
+    at processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:212:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:822:9)
+
+[2025-03-19T23:39:54.542Z] DiscordAPIError[40060]: Interaction has already been acknowledged.
+    at handleErrors (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:727:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async BurstHandler.runRequest (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:831:23)
+    at async _REST.request (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:1272:22)
+    at async ModalSubmitInteraction.reply (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:194:22)
+    at async processSignup (C:\Users\mccre\Desktop\Why-Not-Bot\src\signupHandler.js:214:3)
+    at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:822:9)
+
+[2025-03-19T23:57:16.239Z] DiscordAPIError[50035]: Invalid Form Body
+embeds[0].description[BASE_TYPE_REQUIRED]: This field is required
+    at handleErrors (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:727:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async SequentialHandler.runRequest (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:1128:23)
+    at async SequentialHandler.queueRequest (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:959:14)
+    at async _REST.request (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\rest\dist\index.js:1272:22)
+    at async GuildMessageManager.edit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\managers\MessageManager.js:188:15)
+

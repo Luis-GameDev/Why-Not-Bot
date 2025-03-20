@@ -209,7 +209,7 @@ Roaming rats:
         }
     }
 
-  updateEmbedFromRoles(EmbedBuilder.from(signupMessage.embeds[0]), worldbossData[signupMessage.id].roles)
+  updateEmbedFromRoles(EmbedBuilder.from(signupMessage.embeds[0]), worldbossData[signupMessage.id].roles, signupMessage)
 
   await interaction.reply({ content: `Signup initiated! Check the thread: ${thread.url}`, ephemeral: true });
 }
@@ -218,15 +218,14 @@ function hasScoutPrioRole(member) {
   return member.roles?.cache?.has(process.env.SCOUT_PRIO_ROLE_ID) || false;
 }
 
-function updateEmbedFromRoles(parentEmbed, roles) {
+function updateEmbedFromRoles(parentEmbed, roles, parentMessage) {
   for (const [roleIndex, userId] of Object.entries(roles)) {
-    parentEmbed = updateParentEmbedWithRole(parentEmbed, parseInt(roleIndex, 10), userId);
+    updateParentEmbedWithRole(parentEmbed, parseInt(roleIndex, 10), userId, parentMessage);
   }
-  return parentEmbed;
 }
 
 
-function updateParentEmbedWithRole(parentEmbed, roleNr, userId) {
+async function updateParentEmbedWithRole(parentEmbed, roleNr, userId, parentMessage) {
   const roleEmojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
   const targetEmoji = roleEmojis[roleNr - 1];
   console.log("Altering parent embed")
@@ -250,8 +249,9 @@ function updateParentEmbedWithRole(parentEmbed, roleNr, userId) {
   }
 
   if (updated) {
-    const newDescription = lines.join("\n");
-    parentEmbed.setDescription(newDescription);
+    let newDescription = lines.join("\n");
+    await parentEmbed.setDescription(newDescription);
+    parentMessage.edit({ embeds: [parentEmbed] })
   }
   return parentEmbed;
 }
