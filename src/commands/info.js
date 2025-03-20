@@ -55,7 +55,10 @@ module.exports = {
                         Scout: ${Plusones.getScoutPlus(member.id).length} 
                         Random: ${Plusones.getRandomPlus(member.id).length}
 
-                        Total: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length + Plusones.getVodPlus(member.id).length + Plusones.getScoutPlus(member.id).length + Plusones.getRandomPlus(member.id).length}`,
+                        Negative: ${Plusones.getNegativePlus(member.id).length}
+
+                        Total +1s: ${Plusones.getRatPlus(member.id).length + Plusones.getCtaPlus(member.id).length + Plusones.getContentPlus(member.id).length + Plusones.getFocusPlus(member.id).length + Plusones.getVodPlus(member.id).length + Plusones.getScoutPlus(member.id).length + Plusones.getRandomPlus(member.id).length}
+                        Prio: ${await Plusones.getUserPrio(member.id)}`,
                     },
                     {
                         name: "Link:",

@@ -232,7 +232,7 @@ async function updateUserName(userId) {
         await member.roles.add(process.env.VOUCH_ROLE_ID).catch(console.error);
     }
 
-    const nameWithoutBrackets = member.displayName.replace(/\[\d+\]$/, '').trim(); 
+    const nameWithoutBrackets = member.displayName.replace(/\[\-?\d+\]$/, '').trim();
     try {
         await member.setNickname(`${nameWithoutBrackets} [${points}]`).catch(console.error);
     } catch (error) {

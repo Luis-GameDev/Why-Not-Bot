@@ -44,6 +44,7 @@ function ensureDataStructure(messageId) {
       endUTC: timerEndStr,
       startTime: Math.floor(timerStart.getTime() / 1000),
       endTime: Math.floor(timerEnd.getTime() / 1000),
+      active : 1,
       roles: {}
     };
 
@@ -72,8 +73,8 @@ async function assignUserToRoles(messageId, userId, role) {
 
     worldbossData[messageId].roles[role] = userId;
 
-    msg = await fetchMessage(process.env.WB_CALL_CHANNEL_ID, messageId)
-    let embedParent = EmbedBuilder.from(msg.embeds[0]);
+    //msg = await fetchMessage(process.env.WB_CALL_CHANNEL_ID, messageId)
+    //let embedParent = EmbedBuilder.from(msg.embeds[0]);
     //await updateEmbedFromRoles(embedParent, worldbossData[messageId].roles);
 
     fs.writeFileSync(worldbossDataFile, JSON.stringify(worldbossData, null, 2));
@@ -162,11 +163,7 @@ Prio to Why Not members / Why Not Rat attendance
 8️⃣  Leech / DPS:
 9️⃣  DPS / LC:
 🔟  Lizard:
-
-Roaming rats:
-🐀 Roaming Rat:
-🐀 Roaming Rat:
-🐀 Roaming Rat:`;
+`;
 
   const embed = new EmbedBuilder()
     .setTitle(`Worldboss Famefarm`)
@@ -264,71 +261,69 @@ async function initPrioSelection(thread) {
     return;
   }
 
+  // Fetch up to 100 messages in the thread (which contain the signup entries)
   await thread.messages.fetch({ limit: 100 });
-  let threadSignups = thread.messages.cache.filter(m => !m.author.bot && /^\d+(?:\/\d+)*$/.test(m.content.trim()));
+  const threadSignups = thread.messages.cache.filter(m =>
+    !m.author.bot && /^\d+(?:\/\d+)*$/.test(m.content.trim())
+  );
+  
   let signupArray = [];
-
-  for (const [id, m] of threadSignups.entries()) {
-    console.log(m.content)
-    const prioValue = Plusones.getUserPrio(m.author.id);
-    const scoutPrio = hasScoutPrioRole(m.author.id);
-    const roleNumbers = m.content.trim().split('/').filter(x => x >= 1 && x <= 10);
-
+  // Iterate over the signup messages correctly
+  for (const [userId, msg] of threadSignups.entries()) {
+    console.log(msg.content);
+    const prioValue = Plusones.getUserPrio(msg.author.id);
+    const scoutPrio = hasScoutPrioRole(msg.author);
+    const roleNumbers = msg.content.trim().split('/').map(Number).filter(x => x >= 1 && x <= 10);
     signupArray.push({
-      userId: m.author.id,
-      roles: roleNumbers, 
+      userId: msg.author.id,
+      roles: roleNumbers,
       prio: prioValue,
       isScout: scoutPrio
     });
   }
 
+  // Sort signups: scouts first, then by descending prio
   signupArray.sort((a, b) => {
     if (a.isScout && !b.isScout) return -1;
     if (!a.isScout && b.isScout) return 1;
     return b.prio - a.prio;
   });
 
-  const finalRoles = new Array(10).fill("");
+  // Load the existing worldbossData for the parent message.
+  let worldbossData = {};
+  if (fs.existsSync(worldbossDataFile)) {
+    try {
+      const data = fs.readFileSync(worldbossDataFile, 'utf8');
+      worldbossData = data.length ? JSON.parse(data) : {};
+    } catch (error) {
+      console.error('Error parsing worldboss data:', error);
+      worldbossData = {};
+    }
+  }
+  if (!worldbossData[parentMessage.id]) {
+    worldbossData[parentMessage.id] = { roles: {} };
+  }
+  const jsonRoles = worldbossData[parentMessage.id].roles;
 
   for (const signup of signupArray) {
+    if (Object.values(jsonRoles).includes(signup.userId)) {
+      continue;
+    }
+
     for (const roleNum of signup.roles) {
-      if (!finalRoles[roleNum - 1]) {
-        finalRoles[roleNum - 1] = `<@${signup.userId}>`;
-        assignUserToRoles(parentMessage.id, signup.userId, parseInt(roleNum));
-        break; 
-      } 
+      if (jsonRoles.hasOwnProperty(roleNum.toString())) {
+        continue;
+      } else {
+        await assignUserToRoles(parentMessage.id, signup.userId, roleNum);
+        let parentEmbed = EmbedBuilder.from(parentMessage.embeds[0]);
+        updateParentEmbedWithRole(parentEmbed, roleNum, signup.userId, parentMessage);
+        await parentMessage.edit({ embeds: [parentEmbed] });
+        break;
+      }
     }
   }
-
-  const rolesTemplate =
-`1️⃣  Main Tank:
-2️⃣  Off Tank:
-3️⃣  Main Healer:
-4️⃣  Looter GA:
-5️⃣  Supp Frost/Shadowcaller:
-6️⃣  DPS:
-7️⃣  DPS Frost / Blazing:
-8️⃣  Leech / DPS:
-9️⃣  DPS / LC:
-🔟  Lizard:`;
-  let lines = rolesTemplate.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    if (finalRoles[i]) {
-      lines[i] = lines[i] + ' ' + finalRoles[i];
-    }
-  }
-  const finalRolesString = lines.join('\n');
-
-  if (!parentMessage.embeds || parentMessage.embeds.length === 0) {
-    console.error("No embeds found in parent message", parentMessage.id);
-    return;
-  }
-  const oldEmbed = parentMessage.embeds[0];
-  const updatedDescription = oldEmbed.data.description.replace(/1️⃣.*Lizard:/s, finalRolesString);
-  const updatedEmbed = EmbedBuilder.from(oldEmbed).setDescription(updatedDescription);
-
-  await parentMessage.edit({ embeds: [updatedEmbed] });
 }
+
 
 module.exports = {
   processSignup,
