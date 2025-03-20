@@ -316,7 +316,7 @@ async function initPrioSelection(thread) {
       } else {
         await assignUserToRoles(parentMessage.id, signup.userId, roleNum);
         let parentEmbed = EmbedBuilder.from(parentMessage.embeds[0]);
-        updateParentEmbedWithRole(parentEmbed, roleNum, signup.userId, parentMessage);
+        await updateParentEmbedWithRole(parentEmbed, roleNum, signup.userId, parentMessage);
         await parentMessage.edit({ embeds: [parentEmbed] });
         break;
       }
