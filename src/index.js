@@ -623,6 +623,49 @@ client.on("messageCreate", async (message) => {
 
         message.channel.send({ embeds: [embed], components: [row] });
     }
+    if(message.content.startsWith("--ticket_init_leech")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        const embed = new MessageEmbed()
+            .setTitle('Leech Ticket')
+            .setDescription('Click on the button below to apply for a leech spot in WHY NOT!')
+            .setColor(0x0000FF);
+
+
+        const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('open_ticket_leech')
+                .setLabel('Open Ticket')
+                .setStyle('Secondary'),
+        );
+
+        message.channel.send({ embeds: [embed], components: [row] });
+    }
+    if(message.content.startsWith("--ticket_init_renting")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        const embed = new MessageEmbed()
+            .setTitle('Renting Ticket')
+            .setDescription('Click on the button below to open a renting ticket in WHY NOT!')
+            .setColor(0x00FF00);
+
+        const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('open_ticket_renting')
+                .setLabel('Open Ticket')
+                .setStyle('Secondary'),
+        );
+
+        message.channel.send({ embeds: [embed], components: [row] });
+    }
 });
 
 

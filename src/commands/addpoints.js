@@ -198,6 +198,7 @@ module.exports = {
                 for (let i = 0; i < points; i++) {
                     Plusones.addVodPlus(user.id, reviewer.id);
                     Plusones.addRandomPlus(reviewer.id, `VOD Review for ${user}`);
+                    Plusones.addRandomPlus(reviewer.id, `VOD Review for ${user}`);
                 }
                 break;
         }

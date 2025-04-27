@@ -72,6 +72,18 @@ async function createTicket(interaction) {
                 })
                 .addFields({ name: ' ', value: 'Additionally complete an IQ-Test using the /iq command to prove your mental capability which is required to perform well in our guild.' })
                 .setColor(0xFF0000);
+        } else if (interaction.customId === 'open_ticket_leech') {
+            embed = new EmbedBuilder()
+                .setTitle('Leech Ticket')
+                .setDescription('Welcome! Info about leeching will be provided soon by a Leech Officer! In the mean time, send your in game stats screenshot and your character selection screenshot!')
+                .addFields({ name: 'Payment:', value: 'The average leech cost is 20mil/session, a session takes 2 hours and gives up to 80mil fame.' })
+                .addFields({ name: 'Info:', value: 'You can rent any 4.4 Mobfame weapons for 2mil/session.' })
+                .setColor(0xFF0000);
+        } else if (interaction.customId === 'open_ticket_renting') {
+            embed = new EmbedBuilder()
+                .setTitle('Renting Ticket')
+                .setDescription('Welcome! A Renting officer will be shortly here! In the mean time, please provide your /stats screenshot and your character selection screenshot. Thanks!')
+                .setColor(0xFF0000);
         } else {
             return interaction.editReply({ content: 'An error occurred while creating the ticket.', ephemeral: true });
         }
