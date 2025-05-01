@@ -2,6 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const Plusones = require('../plusones.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -84,6 +85,8 @@ module.exports = {
                     await member.roles.add(process.env.TRIAL_ROLE_ID).catch(console.error);
                 }
             }
+            
+            Plusones.updateUserName(interaction.user.id).catch(console.error);
 
             await interaction.followUp({
                 content: `Your Discord account was successfully linked to "${linkedPlayer.ign}".`,
