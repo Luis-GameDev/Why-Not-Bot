@@ -544,7 +544,7 @@ client.on("messageCreate", async (message) => {
             .setTitle('REGEAR')
             .setDescription('Click the button below to open a regear ticket in case you died during a regearable content session! Make sure to send a screenshot of the death and specify the below information...')
             .addFields(
-                { name: ' ', value: '- Content \n - Caller \n - Time of Death (UTC)' },
+                { name: ' ', value: '- Content \n - Caller \n - Time of Death (UTC) \n - Content Link' },
                 { name: '**RULES**', value: '1. Only approved builds on mandatory content will be regeared.\n2. If the regear ticket is opened after 24hrs has passed from the actual death, the regear will be denied.\n3. All regears must be withdrawn from chest within 24hrs from when the Regear Officer posted your regear chest.' }
             )
             .setColor(0x00FF00);
