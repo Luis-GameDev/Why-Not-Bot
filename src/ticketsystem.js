@@ -84,6 +84,11 @@ async function createTicket(interaction) {
                 .setTitle('Renting Ticket')
                 .setDescription('Welcome! A Renting officer will be shortly here! In the mean time, please provide your /stats screenshot and your character selection screenshot. Thanks!')
                 .setColor(0xFF0000);
+        } else if (interaction.customId === 'open_ticket_diplomacy') {
+            embed = new EmbedBuilder()
+                .setTitle('Diplomacy Ticket')
+                .setDescription('Welcome! Please describe your issue as good as possible while you wait, our officers will be shortly with you.')
+                .setColor(0x0000FF);
         } else {
             return interaction.editReply({ content: 'An error occurred while creating the ticket.', ephemeral: true });
         }

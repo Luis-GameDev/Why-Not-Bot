@@ -152,6 +152,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
     let purpleCoreRavine = {payment: 300000, reaction: "💜", name: "Purple Core in Ravine"};
     let goldCoreRavine = {payment: 500000, reaction: "💛", name: "Gold Core in Ravine"};
 
+    let random = {amount: 1, reaction: "⏺️", reason: "reward by officer"};
+
     if (reaction.message.channel.id === process.env.REWARD_CHANNEL && !user.bot) {
 
         const member = await reaction.message.guild.members.fetch(user.id);
@@ -160,6 +162,18 @@ client.on("messageReactionAdd", async (reaction, user) => {
         if (checkmarkReaction) return;
 
         switch (reaction.emoji.name) {
+            case random.reaction:
+                if (member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+
+                    for (let i = 0; i < random.amount; i++) {
+                        Plusones.addRandomPlus(reaction.message.author.id, random.reason);
+                    }
+
+                    reaction.message.reply(`You have received ${random.amount}x points <@${reaction.message.author.id}>.`);
+                    reaction.message.react("✅");
+                }
+            break;
+
             case greenCore.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     if (member.id === "342001696651739136") {
@@ -531,7 +545,7 @@ client.on("messageCreate", async (message) => {
             .setDescription('Click the button below to open a regear ticket in case you died during a regearable content session! Make sure to send a screenshot of the death and specify the below information...')
             .addFields(
                 { name: ' ', value: '- Content \n - Caller \n - Time of Death (UTC)' },
-                { name: '**RULES**', value: '1. Only approved builds will be regarded.\n2. If the regear ticket is opened after 24hrs has passed from the actual death, the regear will be denied.\n3. All regears must be withdrawn from chest within 24hrs from when the Regear Officer posted your regear chest.' }
+                { name: '**RULES**', value: '1. Only approved builds on mandatory content will be regeared.\n2. If the regear ticket is opened after 24hrs has passed from the actual death, the regear will be denied.\n3. All regears must be withdrawn from chest within 24hrs from when the Regear Officer posted your regear chest.' }
             )
             .setColor(0x00FF00);
 
@@ -660,6 +674,27 @@ client.on("messageCreate", async (message) => {
         .addComponents(
             new ButtonBuilder()
                 .setCustomId('open_ticket_renting')
+                .setLabel('Open Ticket')
+                .setStyle('Secondary'),
+        );
+
+        message.channel.send({ embeds: [embed], components: [row] });
+    }
+    if(message.content.startsWith("--ticket_init_diplomacy")) {
+        const member = await message.guild.members.fetch(message.author.id);
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && !member.roles.cache.has(process.env.RECRUITMENTDISCORD_OFFICER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
+        }
+
+        const embed = new MessageEmbed()
+            .setTitle('Diplomacy Ticket')
+            .setDescription('Click on the button below to open a diplomacy ticket in WHY NOT!')
+            .setColor(0x0000FF);
+
+        const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('open_ticket_diplomacy')
                 .setLabel('Open Ticket')
                 .setStyle('Secondary'),
         );

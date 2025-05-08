@@ -234,7 +234,9 @@ async function updateUserName(userId) {
 
     const nameWithoutBrackets = member.displayName.replace(/\[\-?\d+\]$/, '').trim();
     try {
-        await member.setNickname(`${nameWithoutBrackets} [${points}]`).catch(console.error);
+        if (userId !== process.env.OWNER_USER_ID) {
+            await member.setNickname(`${nameWithoutBrackets} [${points}]`).catch(console.error);
+        }
     } catch (error) {
         console.error("Error updating nickname for: " + userId);
     }   

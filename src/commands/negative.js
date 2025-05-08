@@ -68,10 +68,7 @@ module.exports = {
         }
       });
 
-      await interaction.reply({
-        content: `Gave **${amount}** negative Points to: ${users.map(u => `<@${u.id}>`).join(', ')}`,
-        ephemeral: true
-      });
+      await interaction.reply(`Gave **${amount}** negative Points to: ${users.map(u => `<@${u.id}>`).join(', ')}`);
     } catch (error) {
       console.error('Error trying to execute /negative:', error);
       return interaction.reply({
