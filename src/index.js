@@ -137,10 +137,10 @@ client.on("messageReactionAdd", async (reaction, user) => {
     }
     
 
-    let greenCore = {payment: 50000, reaction: "🟢", name: "Green Core in Lowland"};
-    let blueCore = {payment: 75000, reaction: "🔵", name: "Blue Core in Lowland"};
-    let purpleCore = {payment: 150000, reaction: "🟣", name: "Purple Core in Lowland"};
-    let goldCore = {payment: 300000, reaction: "🟡", name: "Gold Core in Lowland"};
+    let greenCore = {payment: 200000, reaction: "🟢", name: "Green Core in Lowland"};
+    let blueCore = {payment: 300000, reaction: "🔵", name: "Blue Core in Lowland"};
+    let purpleCore = {payment: 600000, reaction: "🟣", name: "Purple Core in Lowland"};
+    let goldCore = {payment: 1000000, reaction: "🟡", name: "Gold Core in Lowland"};
     
     let greenVortex = {payment: 150000, reaction: "🟩", name: "Green Vortex"};
     let blueVortex = {payment: 250000, reaction: "🟦", name: "Blue Vortex"};
