@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const cron = require("node-cron");
 const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
-const { ActionRowBuilder, ButtonBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ChannelType } = require('discord.js');
 const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
 const signupHandler = require("./signupHandler.js");
@@ -34,7 +34,10 @@ const client = new Client({
     partials: [
         Partials.Message, 
         Partials.Channel, 
-        Partials.Reaction
+        Partials.Reaction,
+        Partials.ThreadMember,
+        Partials.User, 
+        Partials.GuildMember
     ]
 });
 client.commands = new Collection();
