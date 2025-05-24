@@ -39,12 +39,14 @@ module.exports = {
     const member = interaction.member;
 
     if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
-            return message.reply("You do not have permission to use this command.");
+      return interaction.reply("You do not have permission to use this command.");
     }
 
     const type = interaction.options.getString('type');
     const days = interaction.options.getInteger('days');
     const amount = interaction.options.getInteger('amount');
+
+    await interaction.deferReply();  // defer the reply to avoid interaction timeout
 
     await interaction.guild.members.fetch();
     const members = interaction.guild.members.cache.filter(m => !m.user.bot);
@@ -64,35 +66,59 @@ module.exports = {
         if (type === 'negative') entries = Plusones.getNegativePlus(member.id);
         if (type === 'random') entries = Plusones.getRandomPlus(member.id);
 
-      const recentCount = entries.filter(e => e.time >= cutoff).length;
-      if (recentCount < amount) {
-        notMet.push({ member, recentCount });
-      }
+        const recentCount = entries.filter(e => e.time >= cutoff).length;
+        if (recentCount < amount) {
+          notMet.push({ member, recentCount });
+        }
     }
 
     if (notMet.length === 0) {
-      return interaction.reply(`✅ All users have at least ${amount} ${type} points in the last ${days} days.`);
+      return interaction.editReply(`✅ All users have at least ${amount} ${type} points in the last ${days} days.`);
     }
 
-    // build one or more embeds (max 25 fields each)
-    const embeds = [];
-    for (let i = 0; i < notMet.length; i += 25) {
-      const slice = notMet.slice(i, i + 25);
-      const embed = new EmbedBuilder()
-        .setTitle(`Users with less than ${amount} ${type} points in the past ${days}d`)
-        .setColor(0xFF0000);
+    // Build the embed with all users in one field, split if too large
+    const embed = new EmbedBuilder()
+      .setTitle(`Users with less than ${amount} ${type} points in the past ${days}d`)
+      .setColor(0xFF0000);
 
-      slice.forEach(({ member, recentCount }) => {
-        embed.addFields({
-          name: member.user.tag,
-          value: `Points: ${recentCount}`,
-          inline: true
-        });
+    let userList = "";
+    notMet.forEach(({ member, recentCount }) => {
+      userList += `${member.user.tag}: Points: ${recentCount}\n`;
+    });
+
+    // Check if the userList exceeds the 1024 character limit
+    const maxLength = 1024;
+    if (userList.length > maxLength) {
+      const chunks = [];
+      while (userList.length > 0) {
+        const chunk = userList.slice(0, maxLength);  // slice up to 1024 characters
+        chunks.push(chunk);
+        userList = userList.slice(chunk.length);  // reduce userList for next chunk
+      }
+
+      // Send multiple embeds if the list is too large
+      const embeds = [];
+      chunks.forEach((chunk, index) => {
+        const embedChunk = new EmbedBuilder()
+          .setTitle(`Users with less than ${amount} ${type} points in the past ${days}d`)
+          .setColor(0xFF0000)
+          .addFields({
+            name: `Users (Part ${index + 1})`,
+            value: chunk,
+            inline: false
+          });
+        embeds.push(embedChunk);
       });
 
-      embeds.push(embed);
+      return interaction.editReply({ embeds });
+    } else {
+      // If the list fits within the limit, send it as one embed
+      embed.addFields({
+        name: "Users",
+        value: userList || "No users found.",
+        inline: false
+      });
+      return interaction.editReply({ embeds: [embed] });
     }
-
-    await interaction.reply({ embeds });
   }
 };
