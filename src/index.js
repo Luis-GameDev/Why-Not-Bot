@@ -309,13 +309,39 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 client.on("messageCreate", async (message) => {
 
-    if (message.channel.isThread()) {
+    if (message.channel.isThread() && message.content.startsWith("--init")) {
         //await handleThreadMessage(message);
     
-        if (message.content.trim() === '--init') {
-            await initPrioSelection(message.channel);
-            message.reply("Prio selection has been executed.");
+        await initPrioSelection(message.channel);
+        message.reply("Prio selection has been executed.");
+    }
+
+    if (message.content.startsWith("!acceptvod")) {
+        const channel = message.channel.parent.id;
+
+        if (channel !== process.env.VOD_CHANNEL_ID) return;
+        const member = await message.guild.members.fetch(message.author.id);
+        
+        if (!member.roles.cache.has(process.env.VODREVIEWER_ROLE_ID)) {
+            return message.reply("You do not have permission to use this command.");
         }
+        
+        const vodAuthorMessage = await message.channel.fetchStarterMessage();
+        const vodAuthor = vodAuthorMessage.author.id;
+
+        Plusones.addVodPlus(vodAuthor, message.author.id);
+        Plusones.addRandomPlus(message.author.id, `VOD Review for ${vodAuthor}`);
+        Plusones.addRandomPlus(message.author.id, `VOD Review for ${vodAuthor}`);
+
+        const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+        const guild = process.env.DISCORD_GUILD_ID;
+        const embed = new MessageEmbed()
+            .setTitle('VOD Accepted')
+            .setDescription(`<@${message.author.id}> reviewed <@${vodAuthor}>'s VOD.`)
+            .setColor(0x00FF00);
+        logChannel.send({ embeds: [embed] });
+    
+        return message.reply(`You have successfully accepted the VOD of <@${vodAuthor}>. Both of you have received points.`);
     }
 
     if (message.content === "--stats" && message.author.id === process.env.OWNER_USER_ID) {
@@ -501,42 +527,72 @@ client.on("messageCreate", async (message) => {
         message.reply("Roles have been removed from mentioned users.");
     }
 
-    if (message.content.startsWith("!split")) {
+        if (message.content.startsWith("!split")) {
         const member = await message.guild.members.fetch(message.author.id);
         const mentionedUsers = message.mentions.users;
         const amount = parseInt(message.content.split(" ")[1].replace(/[.,]/g, ''));
-    
+
         if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && 
             !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID) && 
             !member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID)) {
 
             return message.reply("You do not have permission to use this command.");
         }
-    
+
         if (isNaN(amount)) {
             return message.reply("Please provide a valid amount.");
         }
-    
-        if (mentionedUsers.size === 0) {
-            return message.reply("No users mentioned.");
-        }
-    
-        const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
-        
-        mentionedUsers.forEach(user => {
-            payMember(user.id, amount);
-        });
 
-        message.reply("Payment was successful.");
-    
-        const embed = new MessageEmbed()
-            .setTitle('Lootsplit Payment')
-            .setDescription(`Split payment of **${message.content.split(" ")[1]}** to ${[...mentionedUsers.values()].map(user => user.toString()).join(' ')}`)
-            .setColor(0x00FF00);
-    
-        logChannel.send({ embeds: [embed] });
+        if (mentionedUsers.size === 0) {
+            const linkMatch = message.content.match(/https:\/\/discord\.com\/channels\/\d+\/\d+\/(\d+)/);
+
+            if (linkMatch) {
+                try {
+                    const channel = await client.channels.fetch(linkMatch[0].split("/")[5]);
+                    const targetMessage = await channel.messages.fetch(linkMatch[1]);
+                    const mentionedInTarget = targetMessage.mentions.users;
+
+                    if (mentionedInTarget.size === 0) {
+                        return message.reply("No users mentioned in the linked message.");
+                    }
+
+                    mentionedInTarget.forEach(user => {
+                        payMember(user.id, amount);
+                    });
+
+                    message.reply("Payment was successful.");
+                    
+                    const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+                    const embed = new MessageEmbed()
+                        .setTitle('Lootsplit Payment')
+                        .setDescription(`Split payment of **${amount}** to ${[...mentionedInTarget.values()].map(user => user.toString()).join(' ')}`)
+                        .setColor(0x00FF00);
+
+                    logChannel.send({ embeds: [embed] });
+
+                } catch (error) {
+                    return message.reply("Could not fetch the linked message. Please ensure it's a valid link.");
+                }
+            } else {
+                return message.reply("Please mention users or provide a link to a message.");
+            }
+        } else {
+            mentionedUsers.forEach(user => {
+                payMember(user.id, amount);
+            });
+
+            message.reply("Payment was successful.");
+
+            const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+            const embed = new MessageEmbed()
+                .setTitle('Lootsplit Payment')
+                .setDescription(`Split payment of **${amount}** to ${[...mentionedUsers.values()].map(user => user.toString()).join(' ')}`)
+                .setColor(0x00FF00);
+
+            logChannel.send({ embeds: [embed] });
+        }
     }
-    
+
 
     if(message.content.startsWith("--ticket_init_regear")) {
         const member = await message.guild.members.fetch(message.author.id);

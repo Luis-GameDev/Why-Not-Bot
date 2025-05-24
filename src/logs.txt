@@ -390,3 +390,7 @@ embeds[0].description[BASE_TYPE_REQUIRED]: This field is required
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
     at async Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:299:13)
 
+[2025-05-24T21:47:06.691Z] TypeError: Cannot read properties of undefined (reading 'id')
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:329:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
