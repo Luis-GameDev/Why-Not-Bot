@@ -46,10 +46,18 @@ module.exports = {
     const days = interaction.options.getInteger('days');
     const amount = interaction.options.getInteger('amount');
 
-    await interaction.deferReply();  // defer the reply to avoid interaction timeout
+    await interaction.deferReply(); 
 
-    await interaction.guild.members.fetch();
-    const members = interaction.guild.members.cache.filter(m => !m.user.bot);
+    await interaction.guild.members.fetch(); 
+
+    let members;
+
+    if(type === `rat` || type === `random`) {
+        members = interaction.guild.members.cache.filter(m => !m.user.bot && m.roles.cache.has(process.env.WB_ROLE));
+    }
+    else {
+        members = interaction.guild.members.cache.filter(m => !m.user.bot && m.roles.cache.has(process.env.WHYNOT_ROLE_ID));
+    }
 
     const now = Date.now();
     const cutoff = now - days * 24 * 60 * 60 * 1000;
@@ -76,27 +84,24 @@ module.exports = {
       return interaction.editReply(`✅ All users have at least ${amount} ${type} points in the last ${days} days.`);
     }
 
-    // Build the embed with all users in one field, split if too large
     const embed = new EmbedBuilder()
       .setTitle(`Users with less than ${amount} ${type} points in the past ${days}d`)
       .setColor(0xFF0000);
 
     let userList = "";
     notMet.forEach(({ member, recentCount }) => {
-      userList += `${member.user.tag}: Points: ${recentCount}\n`;
+      userList += `<@${member.user.id}> - Points: ${recentCount}\n`;
     });
 
-    // Check if the userList exceeds the 1024 character limit
     const maxLength = 1024;
     if (userList.length > maxLength) {
       const chunks = [];
       while (userList.length > 0) {
-        const chunk = userList.slice(0, maxLength);  // slice up to 1024 characters
+        const chunk = userList.slice(0, maxLength);  
         chunks.push(chunk);
-        userList = userList.slice(chunk.length);  // reduce userList for next chunk
+        userList = userList.slice(chunk.length); 
       }
 
-      // Send multiple embeds if the list is too large
       const embeds = [];
       chunks.forEach((chunk, index) => {
         const embedChunk = new EmbedBuilder()
@@ -112,7 +117,6 @@ module.exports = {
 
       return interaction.editReply({ embeds });
     } else {
-      // If the list fits within the limit, send it as one embed
       embed.addFields({
         name: "Users",
         value: userList || "No users found.",
