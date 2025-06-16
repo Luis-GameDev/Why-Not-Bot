@@ -858,24 +858,6 @@ async function checkGiveawayEndTime() {
     }
 }
 
-// Cron job to archive channels every day at midnight if the archive process was not done (in case the bot was offline, need to fix that later)
-
-cron.schedule('0 0 * * *', async () => {
-    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
-    const archivedCategory = guild.channels.cache.get(process.env.DISCORD_ARCHIVED_CATEGORY_ID);
-
-    if (!archivedCategory) {
-        console.error("Archived category not found");
-        return;
-    }
-
-    guild.channels.cache.forEach(channel => {
-        if (channel.name.startsWith("archived") && channel.parentId !== process.env.DISCORD_ARCHIVED_CATEGORY_ID) {
-            channel.setParent(process.env.DISCORD_ARCHIVED_CATEGORY_ID).catch(console.error);
-        }
-    });
-});
-
 // cron job for 2-week statsTrack
 
 cron.schedule('0 2 * * 1', () => {
@@ -918,6 +900,109 @@ process.on('unhandledRejection', (reason, promise) => {
 // END OF ERROR HANDLING
 
 client.on("interactionCreate", async (interaction) => {
+    if (interaction.isButton() && interaction.customId === 'show_results') {
+        const messageId = interaction.message.id;
+
+        const dataPath = path.join(__dirname, './data/iqtest.json');
+        let results = [];
+
+        try {
+            results = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+        } catch (err) {
+            console.error('Failed to read iqtest.json:', err);
+        }
+
+        const testResult = results.find(entry => entry.messageId === messageId);
+
+        if (!testResult) {
+            return interaction.reply({ content: 'No result data found for this message.', ephemeral: true });
+        }
+
+        const questions = [
+            {
+                question: "Do you understand that this IQ-Test needs to be taken seriously and completed within 5 minutes?",
+                choices: ["Yes", "No"],  
+                correct: 0,
+            },
+            {
+                question: "What is the opposite of North-West?",
+                choices: ["North-East", "South-East", "South-West"],
+                correct: 1,
+            },
+            {
+                question: "What is the capital of France?",
+                choices: ["Berlin", "Madrid", "Paris", "Rome"],
+                correct: 2,
+            },
+            {
+                question: "Where is the sun rising from on the northern hemisphere?",
+                choices: ["East", "West", "North", "South"],
+                correct: 0,
+            },
+            {
+                question: "Spell 'cat' backwards.",
+                choices: ["act", "tac", "cta", "atc"],
+                correct: 1,
+            },
+            {
+                question: "What is the first letter of the English alphabet?",
+                choices: ["A", "B", "C", "D"],
+                correct: 0,
+            },
+            {
+                question: "If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops necessarily Lazzies?",
+                choices: ["Yes", "No", "Maybe", "I don't know"],
+                correct: 0,
+            },
+            {
+                question: "What is the next number in the sequence: 2, 4, 8, 16, ...?",
+                choices: ["18", "20", "32", "24"],
+                correct: 2,
+            },
+            {
+                question: "Which of the following does not belong: apple, strawberry, carrot, grape?",
+                choices: ["apple", "strawberry", "carrot", "grape"],
+                correct: 2,
+            },
+            {
+                question: "Which number fits in the gap? [2] [6] [ ] [54] [162]",
+                choices: ["9", "18", "4", "28"],
+                correct: 1,
+            },
+            {
+                question: "What is 12 divided by 3?",
+                choices: ["2", "3", "4", "6"],
+                correct: 2,
+            },
+            {
+                question: "Rearrange the letters of 'LISTEN' to form another word.",
+                choices: ["SILENT", "ENLIST", "TINSEL", "All of the above"],
+                correct: 3,
+            },
+            {
+                question: "If a train travels at 60 miles per hour, how far does it travel in 2 hours?",
+                choices: ["60 miles", "120 miles", "180 miles", "240 miles"],
+                correct: 1,
+            },
+        ];
+
+        const embed = new MessageEmbed()
+            .setTitle('IQ Test Results')
+            .setColor(0x3498db);
+
+        questions.forEach((q, index) => {
+            const selected = testResult.answers[index];
+            const isCorrect = selected === q.correct;
+            embed.addFields({
+            name: `Q${index + 1}: ${q.question}`,
+            value: `Answer: ${q.choices[selected]} ${isCorrect ? '✅' : '❌'}`,
+            inline: false
+            });
+        });
+
+        await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+        
     if (interaction.isButton() && interaction.customId.startsWith('open_ticket')) {
         await interaction.deferReply({ ephemeral: true });
 

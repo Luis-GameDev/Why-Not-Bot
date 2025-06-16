@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder } = require('discord.js');
+const { AttachmentBuilder } = require('discord.js'); // Verwende AttachmentBuilder in v14
+const fs = require('fs');
 const Plusones = require('../plusones.js');
 
 module.exports = {
@@ -52,7 +53,7 @@ module.exports = {
 
     let members;
 
-    if(type === `rat` || type === `random`) {
+    if(type === `rat` || type === `negative`) {
         members = interaction.guild.members.cache.filter(m => !m.user.bot && m.roles.cache.has(process.env.WB_ROLE));
     }
     else {
@@ -84,45 +85,15 @@ module.exports = {
       return interaction.editReply(`✅ All users have at least ${amount} ${type} points in the last ${days} days.`);
     }
 
-    const embed = new EmbedBuilder()
-      .setTitle(`Users with less than ${amount} ${type} points in the past ${days}d`)
-      .setColor(0xFF0000);
-
-    let userList = "";
+    let userList = "Users with less than " + amount + " " + type + " points in the past " + days + " days:\n\n";
     notMet.forEach(({ member, recentCount }) => {
-      userList += `<@${member.user.id}> - Points: ${recentCount}\n`;
+      userList += `${member.user.tag} - Points: ${recentCount}\n`;
     });
 
-    const maxLength = 1024;
-    if (userList.length > maxLength) {
-      const chunks = [];
-      while (userList.length > 0) {
-        const chunk = userList.slice(0, maxLength);  
-        chunks.push(chunk);
-        userList = userList.slice(chunk.length); 
-      }
+    const filePath = './attendancecheck.txt';
+    fs.writeFileSync(filePath, userList);
 
-      const embeds = [];
-      chunks.forEach((chunk, index) => {
-        const embedChunk = new EmbedBuilder()
-          .setTitle(`Users with less than ${amount} ${type} points in the past ${days}d`)
-          .setColor(0xFF0000)
-          .addFields({
-            name: `Users (Part ${index + 1})`,
-            value: chunk,
-            inline: false
-          });
-        embeds.push(embedChunk);
-      });
-
-      return interaction.editReply({ embeds });
-    } else {
-      embed.addFields({
-        name: "Users",
-        value: userList || "No users found.",
-        inline: false
-      });
-      return interaction.editReply({ embeds: [embed] });
-    }
+    const attachment = new AttachmentBuilder(filePath, { name: 'attendancecheck.txt' });
+    return interaction.editReply({ content: 'Here is the attendance report:', files: [attachment] });
   }
 };
