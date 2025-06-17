@@ -77,6 +77,54 @@ async function payMember(userId, amount) {
     })
 }
 
+async function checkForGuildmembers() {
+  const usersPath = path.join(__dirname, './data/users');
+  const files = fs.readdirSync(usersPath).filter(file => file.endsWith('.json'));
+
+  const res = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/guilds/${process.env.ALBION_GUILD_ID}/members`);
+  const guildData = res.data;
+  const guildMemberIds = guildData.map(member => member.Id);
+
+  for (const file of files) {
+    const filePath = path.join(usersPath, file);
+    const userData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+
+    if (userData.ignoreCheck) continue;
+
+    const isInGuild = guildMemberIds.includes(userData.playerId);
+    if (!isInGuild) {
+      const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+      if (!logChannel) continue;
+
+      const embed = new MessageEmbed()
+        .setTitle('Guild Check: Member Left')
+        .setDescription(`Player **${userData.ign}** (<@${userData.discordId}>) is no longer in the guild.`)
+        .setColor(0xff0000)
+        .setTimestamp();
+
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`purge_${userData.discordId}`)
+          .setLabel('Purge')
+          .setStyle("Danger"),
+        new ButtonBuilder()
+          .setCustomId(`ignore_${userData.discordId}`)
+          .setLabel('Ignore')
+          .setStyle("Secondary"),
+        new ButtonBuilder()
+          .setCustomId(`kick_${userData.discordId}`)
+          .setLabel('Kick')
+          .setStyle("Primary")
+      );
+
+      await logChannel.send({
+        embeds: [embed],
+        components: [row]
+      });
+    }
+  }
+}
+
 client.on("guildMemberAdd", async (member) => {
     if (member.guild.id !== process.env.DISCORD_GUILD_ID) return;
     
@@ -308,7 +356,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("messageCreate", async (message) => {
-
+    if (message.content.startsWith("!abc") && !message.author.bot) {
+        checkForGuildmembers();
+    }
     if (message.channel.isThread() && message.content.startsWith("--init")) {
         //await handleThreadMessage(message);
     
@@ -864,6 +914,10 @@ cron.schedule('0 2 * * 1', () => {
     operateWeeklyStatsTrack()
 })
 
+cron.schedule('0 * * * *', () => {
+    checkForGuildmembers();
+});
+
 function operateWeeklyStatsTrack() {
     const statusFilePath = path.join(__dirname, './data/jobStatus.json');
     const jobStatus = JSON.parse(fs.readFileSync(statusFilePath, 'utf8'));
@@ -900,6 +954,86 @@ process.on('unhandledRejection', (reason, promise) => {
 // END OF ERROR HANDLING
 
 client.on("interactionCreate", async (interaction) => {
+    if (
+        interaction.isButton() &&
+        (
+            interaction.customId.startsWith('purge_') ||
+            interaction.customId.startsWith('ignore_') ||
+            interaction.customId.startsWith('kick_')
+        )
+        ) {
+        const [action, discordId] = interaction.customId.split('_');
+
+        const userPath = path.join(__dirname, './data/users', `${discordId}.json`);
+        if (!fs.existsSync(userPath)) {
+            return interaction.reply({ content: `User file not found for ${discordId}.`, ephemeral: true });
+        }
+
+        const userData = JSON.parse(fs.readFileSync(userPath, 'utf-8'));
+        const member = await interaction.guild.members.fetch(discordId).catch(() => null);
+
+        if (action === 'purge') {
+            try {
+            if (member) {
+                const rolesToRemove = member.roles.cache.filter(role => role.editable && role.id !== interaction.guild.id);
+                await member.roles.remove(rolesToRemove);
+            }
+            fs.unlinkSync(userPath);
+            await interaction.reply({
+                content: member
+                ? `All roles were removed from <@${discordId}> and their user file has been deleted.`
+                : `User <@${discordId}> is no longer in the server, but their file has been deleted.`,
+                ephemeral: true
+            });
+            } catch (err) {
+            console.error(`Error while purging user:`, err);
+            await interaction.reply({
+                content: `Failed to remove roles or delete user file: ${err.message}`,
+                ephemeral: true
+            });
+            }
+        }
+
+        else if (action === 'kick') {
+            try {
+            if (member) {
+                await member.kick('No longer in the guild');
+            }
+            fs.unlinkSync(userPath);
+            await interaction.reply({
+                content: member
+                ? `<@${discordId}> was kicked and their user file has been deleted.`
+                : `User <@${discordId}> was already gone, but their file has been deleted.`,
+                ephemeral: true
+            });
+            } catch (err) {
+            console.error(`Error while kicking user:`, err);
+            await interaction.reply({
+                content: `Failed to kick or delete user file: ${err.message}`,
+                ephemeral: true
+            });
+            }
+        }
+
+        else if (action === 'ignore') {
+            try {
+            userData.ignoreCheck = true;
+            fs.writeFileSync(userPath, JSON.stringify(userData, null, 2));
+            await interaction.reply({
+                content: `<@${discordId}> will now be ignored during future guild checks.`,
+                ephemeral: true
+            });
+            } catch (err) {
+            console.error(`Error updating user file:`, err);
+            await interaction.reply({
+                content: `Failed to update user file: ${err.message}`,
+                ephemeral: true
+            });
+            }
+        }
+    }
+
+
     if (interaction.isButton() && interaction.customId === 'show_results') {
         const messageId = interaction.message.id;
 
