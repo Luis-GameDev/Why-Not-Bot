@@ -105,8 +105,8 @@ async function checkForGuildmembers() {
       const row = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setCustomId(`purge_${userData.discordId}`)
-          .setLabel('Purge')
-          .setStyle("Danger"),
+          .setLabel('Friend')
+          .setStyle("Primary"),
         new ButtonBuilder()
           .setCustomId(`ignore_${userData.discordId}`)
           .setLabel('Ignore')
@@ -114,7 +114,7 @@ async function checkForGuildmembers() {
         new ButtonBuilder()
           .setCustomId(`kick_${userData.discordId}`)
           .setLabel('Kick')
-          .setStyle("Primary")
+          .setStyle("Danger")
       );
 
       await logChannel.send({
@@ -974,25 +974,38 @@ client.on("interactionCreate", async (interaction) => {
 
         if (action === 'purge') {
             try {
-            if (member) {
-                const rolesToRemove = member.roles.cache.filter(role => role.editable && role.id !== interaction.guild.id);
-                await member.roles.remove(rolesToRemove);
-            }
-            fs.unlinkSync(userPath);
-            await interaction.reply({
-                content: member
-                ? `All roles were removed from <@${discordId}> and their user file has been deleted.`
-                : `User <@${discordId}> is no longer in the server, but their file has been deleted.`,
-                ephemeral: true
-            });
+                let hadWBRole = false;
+
+                if (member) {
+                    const rolesToRemove = member.roles.cache.filter(role => role.editable && role.id !== interaction.guild.id);
+                    hadWBRole = member.roles.cache.has(process.env.WB_ROLE);
+                    await member.roles.remove(rolesToRemove);
+
+                    const rolesToAdd = [process.env.FRIEND_ROLE_ID];
+                    if (hadWBRole) {
+                        rolesToAdd.unshift(process.env.WBFRIEND_ROLE_ID);
+                    }
+
+                    await member.roles.add(rolesToAdd);
+                }
+
+                fs.unlinkSync(userPath);
+
+                await interaction.reply({
+                    content: member
+                        ? `All roles were removed from <@${discordId}>. ${hadWBRole ? 'WB Friend role' : 'Friend role'} was added and their user file has been deleted.`
+                        : `User <@${discordId}> is no longer in the server, but their file has been deleted.`,
+                    ephemeral: true
+                });
             } catch (err) {
-            console.error(`Error while purging user:`, err);
-            await interaction.reply({
-                content: `Failed to remove roles or delete user file: ${err.message}`,
-                ephemeral: true
-            });
+                console.error(`Error while purging user:`, err);
+                await interaction.reply({
+                    content: `Failed to purge user: ${err.message}`,
+                    ephemeral: true
+                });
             }
         }
+
 
         else if (action === 'kick') {
             try {
