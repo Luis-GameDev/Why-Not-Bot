@@ -77,22 +77,19 @@ module.exports = {
 
             const member = await interaction.guild.members.fetch(discordId);
 
-            if (process.env.NOTLINKED_ROLE_ID && member.roles.cache.has(process.env.NOTLINKED_ROLE_ID)) {
-                await member.roles.remove(process.env.NOTLINKED_ROLE_ID);
-
-                if (process.env.WHYNOT_ROLE_ID) {
-                    await member.roles.add(process.env.WHYNOT_ROLE_ID).catch(console.error);
-                    await member.roles.add(process.env.TRIAL_ROLE_ID).catch(console.error);
-                }
+            if (member.roles.cache.has(process.env.NOTLINKED_ROLE_ID)) {
+                
+                member.roles.remove(process.env.NOTLINKED_ROLE_ID);
+                member.roles.add(process.env.WHYNOT_ROLE_ID).catch(console.error);
+                member.roles.add(process.env.TRIAL_ROLE_ID).catch(console.error);
             }
-            
-            Plusones.updateUserName(interaction.user.id).catch(console.error);
 
             await interaction.followUp({
                 content: `Your Discord account was successfully linked to "${linkedPlayer.ign}".`,
                 ephemeral: true,
             });
             await member.setNickname(linkedPlayer.ign).catch(console.log("Error: Could not set nickname"));
+            Plusones.updateUserName(interaction.user.id).catch(console.error);
 
         } catch (error) {
             console.error('Error trying to link or change nickname:', error.message);

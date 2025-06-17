@@ -12,6 +12,7 @@ const axios = require('axios');
 const { Client: UnbClient } = require('unb-api');
 const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
 const { processSignup, handleThreadMessage, initPrioSelection } = require('./signupHandler.js');
+const GLOBALS = require("./globals.js");
 
 console.log("Starting bot...");
 
@@ -130,9 +131,7 @@ client.on("guildMemberAdd", async (member) => {
     
     const publicChannel = await client.channels.fetch(process.env.PUBLIC_CHANNEL_ID);
     await member.roles.add(process.env.NOTLINKED_ROLE_ID).catch(console.error);
-    publicChannel.send(`Welcome ${member}!\n
-If you joined the guild please follow the instructions pinned here https://discord.com/channels/1248205717379354664/1330900761302929418 to link your account and get full permissions. \n
-Once linked, please read https://discord.com/channels/1248205717379354664/1248250430283190273 and https://discord.com/channels/1248205717379354664/1267166145618640957`);
+    publicChannel.send(`Welcome ${member}!` + GLOBALS.WelcomeMessage);
 });
 
 client.on("messageReactionAdd", async (reaction, user) => {
@@ -187,24 +186,6 @@ client.on("messageReactionAdd", async (reaction, user) => {
         return;
     }
     
-
-    let greenCore = {payment: 200000, reaction: "🟢", name: "Green Core in Lowland"};
-    let blueCore = {payment: 300000, reaction: "🔵", name: "Blue Core in Lowland"};
-    let purpleCore = {payment: 600000, reaction: "🟣", name: "Purple Core in Lowland"};
-    let goldCore = {payment: 1000000, reaction: "🟡", name: "Gold Core in Lowland"};
-    
-    let greenVortex = {payment: 150000, reaction: "🟩", name: "Green Vortex"};
-    let blueVortex = {payment: 250000, reaction: "🟦", name: "Blue Vortex"};
-    let purpleVortex = {payment: 500000, reaction: "🟪", name: "Purple Vortex"};
-    let goldVortex = {payment: 750000, reaction: "🟨", name: "Gold Vortex"};
-
-    let greenCoreRavine = {payment: 100000, reaction: "💚", name: "Green Core in Ravine"};
-    let blueCoreRavine = {payment: 150000, reaction: "💙", name: "Blue Core in Ravine"};
-    let purpleCoreRavine = {payment: 300000, reaction: "💜", name: "Purple Core in Ravine"};
-    let goldCoreRavine = {payment: 500000, reaction: "💛", name: "Gold Core in Ravine"};
-
-    let random = {amount: 1, reaction: "⏺️", reason: "reward by officer"};
-
     if (reaction.message.channel.id === process.env.REWARD_CHANNEL && !user.bot) {
 
         const member = await reaction.message.guild.members.fetch(user.id);
@@ -213,19 +194,19 @@ client.on("messageReactionAdd", async (reaction, user) => {
         if (checkmarkReaction) return;
 
         switch (reaction.emoji.name) {
-            case random.reaction:
+            case GLOBALS.random.reaction:
                 if (member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
 
-                    for (let i = 0; i < random.amount; i++) {
-                        Plusones.addRandomPlus(reaction.message.author.id, random.reason);
+                    for (let i = 0; i < GLOBALS.random.amount; i++) {
+                        Plusones.addRandomPlus(reaction.message.author.id, GLOBALS.random.reason);
                     }
 
-                    reaction.message.reply(`You have received ${random.amount}x points <@${reaction.message.author.id}>.`);
+                    reaction.message.reply(`You have received ${GLOBALS.random.amount}x points <@${reaction.message.author.id}>.`);
                     reaction.message.react("✅");
                 }
             break;
 
-            case greenCore.reaction:
+            case GLOBALS.greenCore.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     if (member.id === "342001696651739136") {
                         reaction.message.channel.send(`Please stfu <@${user.id}> <3`)
@@ -234,119 +215,119 @@ client.on("messageReactionAdd", async (reaction, user) => {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${greenCore.payment}** for securing the ${greenCore.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.greenCore.payment}** for securing the ${GLOBALS.greenCore.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, greenCore.payment);
+            payMember(reaction.message.author.id, GLOBALS.greenCore.payment);
             break;
 
-            case blueCore.reaction:
+            case GLOBALS.blueCore.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${blueCore.payment}** for securing the ${blueCore.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.blueCore.payment}** for securing the ${GLOBALS.blueCore.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, blueCore.payment);
+            payMember(reaction.message.author.id, GLOBALS.blueCore.payment);
             break;
 
-            case purpleCore.reaction:
+            case GLOBALS.purpleCore.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${purpleCore.payment}** for securing the ${purpleCore.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.purpleCore.payment}** for securing the ${GLOBALS.purpleCore.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, purpleCore.payment);
+            payMember(reaction.message.author.id, GLOBALS.purpleCore.payment);
             break;
 
-            case goldCore.reaction:
+            case GLOBALS.goldCore.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${goldCore.payment}** for securing the ${goldCore.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.goldCore.payment}** for securing the ${GLOBALS.goldCore.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, goldCore.payment);
+            payMember(reaction.message.author.id, GLOBALS.goldCore.payment);
             break;
 
-            case greenVortex.reaction:
+            case GLOBALS.greenVortex.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${greenVortex.payment}** for securing the ${greenVortex.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.greenVortex.payment}** for securing the ${GLOBALS.greenVortex.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, greenVortex.payment);
+            payMember(reaction.message.author.id, GLOBALS.greenVortex.payment);
             break;
 
-            case blueVortex.reaction:
+            case GLOBALS.blueVortex.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${blueVortex.payment}** for securing the ${blueVortex.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.blueVortex.payment}** for securing the ${GLOBALS.blueVortex.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, blueVortex.payment);
+            payMember(reaction.message.author.id, GLOBALS.blueVortex.payment);
             break;
 
-            case purpleVortex.reaction:
+            case GLOBALS.purpleVortex.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${purpleVortex.payment}** for securing the ${purpleVortex.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.purpleVortex.payment}** for securing the ${GLOBALS.purpleVortex.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, purpleVortex.payment);
+            payMember(reaction.message.author.id, GLOBALS.purpleVortex.payment);
             break;
 
-            case goldVortex.reaction:
+            case GLOBALS.goldVortex.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${goldVortex.payment}** for securing the ${goldVortex.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.goldVortex.payment}** for securing the ${GLOBALS.goldVortex.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, goldVortex.payment);
+            payMember(reaction.message.author.id, GLOBALS.goldVortex.payment);
             break;
 
-            case greenCoreRavine.reaction:
+            case GLOBALS.greenCoreRavine.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${greenCoreRavine.payment}** for securing the ${greenCoreRavine.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.greenCoreRavine.payment}** for securing the ${GLOBALS.greenCoreRavine.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, greenCoreRavine.payment);
+            payMember(reaction.message.author.id, GLOBALS.greenCoreRavine.payment);
             break;
 
-            case blueCoreRavine.reaction:
+            case GLOBALS.blueCoreRavine.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${blueCoreRavine.payment}** for securing the ${blueCoreRavine.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.blueCoreRavine.payment}** for securing the ${GLOBALS.blueCoreRavine.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, blueCoreRavine.payment);
+            payMember(reaction.message.author.id, GLOBALS.blueCoreRavine.payment);
             break;
 
-            case purpleCoreRavine.reaction:
+            case GLOBALS.purpleCoreRavine.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${purpleCoreRavine.payment}** for securing the ${purpleCoreRavine.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.purpleCoreRavine.payment}** for securing the ${GLOBALS.purpleCoreRavine.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, purpleCoreRavine.payment);
+            payMember(reaction.message.author.id, GLOBALS.purpleCoreRavine.payment);
             break;
 
-            case goldCoreRavine.reaction:
+            case GLOBALS.goldCoreRavine.reaction:
                 if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
                     reaction.message.channel.send(`You do not have permission to reward players <@${user.id}>.`);
                     return;
                 }
-            originalMessage.reply(`You have received **${goldCoreRavine.payment}** for securing the ${goldCoreRavine.name}!`);
+            originalMessage.reply(`You have received **${GLOBALS.goldCoreRavine.payment}** for securing the ${GLOBALS.goldCoreRavine.name}!`);
             originalMessage.react("✅");
-            payMember(reaction.message.author.id, goldCoreRavine.payment);
+            payMember(reaction.message.author.id, GLOBALS.goldCoreRavine.payment);
             break;
 
             default:
@@ -651,10 +632,10 @@ client.on("messageCreate", async (message) => {
         }
         const embed = new MessageEmbed()
             .setTitle('REGEAR')
-            .setDescription('Click the button below to open a regear ticket in case you died during a regearable content session! Make sure to send a screenshot of the death and specify the below information...')
+            .setDescription(GLOBALS.RegearTicketPanelDescription)
             .addFields(
-                { name: ' ', value: '- Content \n - Caller \n - Time of Death (UTC) \n - Content Link' },
-                { name: '**RULES**', value: '1. Only approved builds on mandatory content will be regeared.\n2. If the regear ticket is opened after 24hrs has passed from the actual death, the regear will be denied.\n3. All regears must be withdrawn from chest within 24hrs from when the Regear Officer posted your regear chest.' }
+                { name: ' ', value: GLOBALS.RegearTicketPanelField1 },
+                { name: '**RULES**', value: GLOBALS.RegearTicketPanelField2 }
             )
             .setColor(0x00FF00);
 
@@ -676,9 +657,9 @@ client.on("messageCreate", async (message) => {
 
         const embed = new MessageEmbed()
             .setTitle('WORLD BOSS ACCESS')
-            .setDescription('In order to access World Boss content or solve WB related issues, please open a ticket sending the below information.')
+            .setDescription(GLOBALS.WorldbossTicketPanelDescription)
             .addFields(
-                { name: 'REQUIREMENTS', value: '- Being able to provide information, rat, and defend the parties in your free time. \n- Screenshot on 100 spec on weapon and offhand or 100 spec armor if offtank. \n- Good english understanding and speaking in order to provide information from scout and be understood by the party. \n- Vouch of WB Member (not mandatory) \n- Willing to rat in case its needed. The rat presence is tracked by the guild. \n- Deposit of a Cautional Fee of 10 million silver. \n- Willingness to do at least 50m PVE fame each 14 days (equivalent fame amount of 2 hrs of WB). \n\nCautional Fee is NOT a payment: Its a caution we ask to ensure good behavior and rules abiding.\nYou will recieve the 10 million cautional fee if all the following conditions are met:\n1) You did not get kicked from the guild and you didnt systematically break rules\n2) Asked a WB Officer to have the fee back before leaving. We are humans, we cant and wont chase you. Officers are humans playing a game in their free time and for fun. Please respect that.' }
+                { name: 'REQUIREMENTS', value: GLOBALS.WorldbossTicketPanelField1 }
             )
             .setColor(0xFF0000);
 
@@ -701,9 +682,9 @@ client.on("messageCreate", async (message) => {
 
         const embed = new MessageEmbed()
             .setTitle('ISSUES & SUGGESTIONS')
-            .setDescription('Click the button below to open a ticket. Make sure to follow the below format and be patient for your reply from the officer that will handle your ticket!')
+            .setDescription(GLOBALS.IssuesTicketPanelDescription)
             .addFields(
-                { name: ' ', value: '- Type: \"Issue/Suggestion/Point system\"\n- Description: \"A description of your thoughts on the matter\"' }
+                { name: ' ', value: GLOBALS.IssuesTicketPanelField1 }
             )
             .setColor(0xFFFF00);
 
@@ -726,12 +707,12 @@ client.on("messageCreate", async (message) => {
 
         const embed = new MessageEmbed()
             .setTitle('WHY NOT Application')
-            .setDescription('Click on the button below to apply for membership in WHY NOT!')
+            .setDescription(GLOBALS.ApplicationTicketPanelDescription)
             .addFields(
-                { name: 'REQUIREMENTS EU', value: '- 60m pve fame\n- 20m pvp fame (exceptions can be made if vods are provided)\n- IGN + Screenshot of your Characters Stats (EU)\n- Ability to play 2 pvp roles and to record your game.\n- Speaking English, being able to join Voice channels and follow calls\n- Willingness to learn, improve, behave correctly with other people and be part of our community. We do not like guild hoppers / leechers.' }
+                { name: 'REQUIREMENTS EU', value: GLOBALS.ApplicationTicketPanelField1 }
             )
             .addFields(
-                { name: ' ', value: '(If you are thinking of the applying in the guild just so you can fame up on World Boss and then logout till the next World Boss session save yourself the trouble of applying. We do not need World Boss slaves but people that are interested on doing content and dive into our community)'}
+                { name: ' ', value: GLOBALS.ApplicationTicketPanelField2 }
             )
             .setColor(0xFF0000);
 
@@ -754,7 +735,7 @@ client.on("messageCreate", async (message) => {
 
         const embed = new MessageEmbed()
             .setTitle('Leech Ticket')
-            .setDescription('Click on the button below to apply for a leech spot in WHY NOT!')
+            .setDescription(GLOBALS.LeechTicketPanel)
             .setColor(0x0000FF);
 
 
@@ -776,7 +757,7 @@ client.on("messageCreate", async (message) => {
 
         const embed = new MessageEmbed()
             .setTitle('Renting Ticket')
-            .setDescription('Click on the button below to open a renting ticket in WHY NOT!')
+            .setDescription(GLOBALS.RentingTicketPanel)
             .setColor(0x00FF00);
 
         const row = new ActionRowBuilder()
@@ -797,7 +778,7 @@ client.on("messageCreate", async (message) => {
 
         const embed = new MessageEmbed()
             .setTitle('Diplomacy Ticket')
-            .setDescription('Click on the button below to open a diplomacy ticket in WHY NOT!')
+            .setDescription(GLOBALS.DiplomacyTicketPanel)
             .setColor(0x0000FF);
 
         const row = new ActionRowBuilder()

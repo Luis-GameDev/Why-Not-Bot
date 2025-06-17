@@ -394,3 +394,10 @@ embeds[0].description[BASE_TYPE_REQUIRED]: This field is required
     at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:329:77)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 
+[2025-06-17T20:39:37.564Z] Error: Received one or more errors
+    at _UnionValidator.handle (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@sapphire\shapeshift\dist\cjs\index.cjs:1965:23)
+    at _UnionValidator.parse (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@sapphire\shapeshift\dist\cjs\index.cjs:972:90)
+    at EmbedBuilder.setDescription (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\builders\dist\index.js:315:26)
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:710:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
