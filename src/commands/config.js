@@ -25,6 +25,11 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    
+    if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
+        return message.reply("You do not have permission to use this command.");
+    }
+
     const sub = interaction.options.getSubcommand();
     const globalsPath = path.join(__dirname, '..', 'globals.js');
 
