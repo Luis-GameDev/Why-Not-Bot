@@ -72,6 +72,7 @@ module.exports = {
             userData.discordId = discordId;
             userData.ign = linkedPlayer.ign;
             userData.playerId = linkedPlayer.playerId;
+            userData.linkTime = Date.now();
 
             fs.writeFileSync(userFilePath, JSON.stringify(userData, null, 2));
 

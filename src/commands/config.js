@@ -25,7 +25,8 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    
+
+    const member = interaction.member;
     if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID)) {
         return message.reply("You do not have permission to use this command.");
     }

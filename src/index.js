@@ -94,6 +94,11 @@ async function checkForGuildmembers() {
 
     const isInGuild = guildMemberIds.includes(userData.playerId);
     if (!isInGuild) {
+
+      if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000) {
+        continue;
+      }
+
       const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
       if (!logChannel) continue;
 
