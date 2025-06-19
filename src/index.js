@@ -1125,11 +1125,15 @@ client.on("interactionCreate", async (interaction) => {
 
         questions.forEach((q, index) => {
             const selected = testResult.answers[index];
+            const isAnswered = typeof selected === 'number';
             const isCorrect = selected === q.correct;
+
             embed.addFields({
-            name: `Q${index + 1}: ${q.question}`,
-            value: `Answer: ${q.choices[selected]} ${isCorrect ? '✅' : '❌'}`,
-            inline: false
+                name: `Q${index + 1}: ${q.question}`,
+                value: isAnswered
+                    ? `Answer: ${q.choices[selected]} ${isCorrect ? '✅' : '❌'}`
+                    : 'Answer: Not answered ❌',
+                inline: false
             });
         });
 
