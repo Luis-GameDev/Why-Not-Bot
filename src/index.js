@@ -99,7 +99,7 @@ async function checkForGuildmembers() {
         continue;
       }
 
-      const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+      const logChannel = await client.channels.fetch(process.env.ATTENDANCE_CHANNEL_ID);
       if (!logChannel) continue;
 
       const embed = new MessageEmbed()

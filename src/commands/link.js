@@ -19,6 +19,14 @@ module.exports = {
         const userFilePath = path.join(__dirname, '../data/users/', `${discordId}.json`);
         const guildName = "WHY NOT";
 
+        if( interaction.guild.id !== process.env.DISCORD_GUILD_ID ) {
+            await interaction.reply({
+                content: 'This command can only be used in the official WHY NOT Discord server.',
+                ephemeral: true
+            });
+            return;
+        }
+
         let userData = {};
         if (fs.existsSync(userFilePath)) {
             userData = JSON.parse(fs.readFileSync(userFilePath, 'utf8'));
