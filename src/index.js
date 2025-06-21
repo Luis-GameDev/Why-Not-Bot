@@ -437,6 +437,10 @@ client.on("messageCreate", async (message) => {
         message.reply(`<@${userId}>, you now have **${plusamount}** Rat +1s.`);
     }
 
+    if (message.content.startsWith("!run")) {
+        checkForGuildmembers();
+    }
+
     if (message.content.startsWith("!wb")) {
         message.reply(`if you're interested in joining World Boss fame farm activities, you shall open a ticket in https://discord.com/channels/1248205717379354664/1274422719168909323. Requirements are the following: Ability to use a scout while fame farming. 100 spec on weapon / offhand from https://discord.com/channels/1248205717379354664/1248254004962525255 If playing DPS, higher spec might be required Vouch of WB members (not mandatory but appreciated) Willingness to rat (!rat for more info).`);
     }
@@ -949,13 +953,13 @@ client.on("interactionCreate", async (interaction) => {
         )
         ) {
         const [action, discordId] = interaction.customId.split('_');
-
+            
         const userPath = path.join(__dirname, './data/users', `${discordId}.json`);
-        if (!fs.existsSync(userPath)) {
-            return interaction.reply({ content: `User file not found for ${discordId}.`, ephemeral: true });
+        let userData;
+        if (fs.existsSync(userPath)) {
+            userData = JSON.parse(fs.readFileSync(userPath, 'utf-8'));
         }
 
-        const userData = JSON.parse(fs.readFileSync(userPath, 'utf-8'));
         const member = await interaction.guild.members.fetch(discordId).catch(() => null);
 
         if (action === 'purge') {
@@ -974,15 +978,44 @@ client.on("interactionCreate", async (interaction) => {
 
                     await member.roles.add(rolesToAdd);
                 }
+                
+                if (userData) {
+                    fs.unlinkSync(userPath);
+                } else {
+                    await interaction.reply({
+                        content: `User file for <@${discordId}> was already deleted but the user has been given the friend role.`,
+                        ephemeral: true
+                    });
+                }
 
-                fs.unlinkSync(userPath);
+                const disabledRow = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`purge_${discordId}`)
+                        .setLabel('Friend')
+                        .setStyle("Primary")
+                        .setDisabled(true),
+                    new ButtonBuilder()
+                        .setCustomId(`ignore_${discordId}`)
+                        .setLabel('Ignore')
+                        .setStyle("Secondary")
+                        .setDisabled(true),
+                    new ButtonBuilder()
+                        .setCustomId(`kick_${discordId}`)
+                        .setLabel('Kick')
+                        .setStyle("Danger")
+                )
+                
+                await interaction.message.edit({ components: [disabledRow] });
 
-                await interaction.reply({
-                    content: member
-                        ? `All roles were removed from <@${discordId}>. ${hadWBRole ? 'WB Friend role' : 'Friend role'} was added and their user file has been deleted.`
-                        : `User <@${discordId}> is no longer in the server, but their file has been deleted.`,
-                    ephemeral: true
-                });
+                if (userData) {
+                    await interaction.reply({
+                        content: member
+                            ? `All roles were removed from <@${discordId}>. ${hadWBRole ? 'WB Friend role' : 'Friend role'} was added and their user file has been deleted.`
+                            : `User <@${discordId}> is no longer in the server, but their file has been deleted.`,
+                        ephemeral: true
+                    });
+                }
+                
             } catch (err) {
                 console.error(`Error while purging user:`, err);
                 await interaction.reply({
@@ -998,13 +1031,44 @@ client.on("interactionCreate", async (interaction) => {
             if (member) {
                 await member.kick('No longer in the guild');
             }
-            fs.unlinkSync(userPath);
-            await interaction.reply({
-                content: member
-                ? `<@${discordId}> was kicked and their user file has been deleted.`
-                : `User <@${discordId}> was already gone, but their file has been deleted.`,
-                ephemeral: true
-            });
+
+            if( userData) {
+                fs.unlinkSync(userPath);
+            } else {
+                await interaction.reply({
+                    content: `User file for <@${discordId}> was already deleted but the user has been kicked.`,
+                    ephemeral: true
+                });
+            }
+
+            const disabledRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`purge_${discordId}`)
+                    .setLabel('Friend')
+                    .setStyle("Primary")
+                    .setDisabled(true),
+                new ButtonBuilder()
+                    .setCustomId(`ignore_${discordId}`)
+                    .setLabel('Ignore')
+                    .setStyle("Secondary")
+                    .setDisabled(true),
+                new ButtonBuilder()
+                    .setCustomId(`kick_${discordId}`)
+                    .setLabel('Kick')
+                    .setStyle("Danger")
+                    .setDisabled(true)
+            );
+            await interaction.message.edit({ components: [disabledRow] });
+            
+            if (userData) {
+                await interaction.reply({
+                    content: member
+                    ? `<@${discordId}> was kicked and their user file has been deleted.`
+                    : `User <@${discordId}> was already gone, but their file has been deleted.`,
+                    ephemeral: true
+                });
+            }
+            
             } catch (err) {
             console.error(`Error while kicking user:`, err);
             await interaction.reply({
@@ -1016,12 +1080,40 @@ client.on("interactionCreate", async (interaction) => {
 
         else if (action === 'ignore') {
             try {
-            userData.ignoreCheck = true;
-            fs.writeFileSync(userPath, JSON.stringify(userData, null, 2));
-            await interaction.reply({
-                content: `<@${discordId}> will now be ignored during future guild checks.`,
-                ephemeral: true
-            });
+            if (userData) {
+                userData.ignoreCheck = true;
+                fs.writeFileSync(userPath, JSON.stringify(userData, null, 2));
+            } else {
+                return interaction.reply({
+                    content: `User file for <@${discordId}> was already deleted.`,
+                    ephemeral: true
+                });
+            }
+
+            const disabledRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`purge_${discordId}`)
+                    .setLabel('Friend')
+                    .setStyle("Primary"),
+                new ButtonBuilder()
+                    .setCustomId(`ignore_${discordId}`)
+                    .setLabel('Ignore')
+                    .setStyle("Secondary")
+                    .setDisabled(true),
+                new ButtonBuilder()
+                    .setCustomId(`kick_${discordId}`)
+                    .setLabel('Kick')
+                    .setStyle("Danger")
+            );
+            await interaction.message.edit({ components: [disabledRow] });
+
+            if(userData) {
+                await interaction.reply({
+                    content: `<@${discordId}> will now be ignored during future guild checks.`,
+                    ephemeral: true
+                });
+            }
+            
             } catch (err) {
             console.error(`Error updating user file:`, err);
             await interaction.reply({
