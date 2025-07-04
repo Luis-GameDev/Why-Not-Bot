@@ -95,7 +95,7 @@ async function checkForGuildmembers() {
     const isInGuild = guildMemberIds.includes(userData.playerId);
     if (!isInGuild) {
 
-      if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000) {
+      if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000 || userData.lastLeftMessage && Date.now() - userData.lastLeftMessage < 24 * 60 * 60 * 1000) {
         continue;
       }
 
@@ -127,6 +127,9 @@ async function checkForGuildmembers() {
         embeds: [embed],
         components: [row]
       });
+
+        userData.lastLeftMessage = Date.now();
+        fs.writeFileSync(filePath, JSON.stringify(userData, null, 2));
     }
   }
 }
