@@ -59,6 +59,10 @@ module.exports = {
 
             let linkedPlayer = null;
             for (const player of matchingPlayers) {
+                if (player.GuildName === guildName) {
+                    linkedPlayer = { ign: player.Name, playerId: player.Id };
+                    break;
+                }
                 const playerDetailsUrl = `https://gameinfo-ams.albiononline.com/api/gameinfo/players/${player.Id}`;
                 const playerDetailsResponse = await axios.get(playerDetailsUrl);
                 const playerData = playerDetailsResponse.data;
@@ -71,7 +75,7 @@ module.exports = {
 
             if (!linkedPlayer) {
                 await interaction.followUp({
-                    content: `Player "${ign}" is not a member of "${guildName}". Link failed.`,
+                    content: `Player "${ign}" is not recognized as a member of "${guildName}" by the API. \nLink failed, if you are a member of the guild, please try again later.`,
                     ephemeral: true,
                 });
                 return;
@@ -97,11 +101,15 @@ module.exports = {
                 content: `Your Discord account was successfully linked to "${linkedPlayer.ign}".`,
                 ephemeral: true,
             });
-            await member.setNickname(linkedPlayer.ign).catch(console.log("Error: Could not set nickname"));
+            try {
+                await member.setNickname(linkedPlayer.ign);
+            } catch (error) {
+                console.log('Error setting nickname:', error.message);
+            }
             Plusones.updateUserName(interaction.user.id).catch(console.error);
 
         } catch (error) {
-            console.error('Error trying to link or change nickname:', error.message);
+            console.error('Error trying to link:', error.message);
             await interaction.followUp({
                 content: 'The Albion API is not responding, please try again later.',
                 ephemeral: true,
