@@ -88,6 +88,10 @@ async function createTicket(interaction) {
                     .setLabel('Close')
                     .setStyle('Danger'), 
                 new ButtonBuilder()
+                    .setCustomId('close_reason_ticket')
+                    .setLabel('Close with Reason')
+                    .setStyle('Danger'), 
+                new ButtonBuilder()
                     .setCustomId('delete_ticket')
                     .setLabel('Delete')
                     .setStyle('Danger') 

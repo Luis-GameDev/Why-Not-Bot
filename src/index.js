@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const cron = require("node-cron");
 const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
-const { ActionRowBuilder, ButtonBuilder, ChannelType } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
 const signupHandler = require("./signupHandler.js");
@@ -72,7 +72,7 @@ async function payMember(userId, amount) {
         const embed = new MessageEmbed()
             .setTitle('Payment Error')
             .setDescription(`Error making payment of ${amount} to <@${userId}>, please pay him manually.`)
-            .addField('Error', error.message)
+            .addFields('Error', error.message)
             .setColor(0xFF0000);
         logChannel.send({ embeds: [embed] });
     })
@@ -1271,10 +1271,71 @@ client.on("interactionCreate", async (interaction) => {
         return;
     }
 
+    if (interaction.isButton() && interaction.customId === 'close_reason_ticket') {
+        await interaction.showModal(
+            new ModalBuilder()
+            .setCustomId('submitclosereason')
+            .setTitle('Close Ticket with Reason')
+            .addComponents(
+                new ActionRowBuilder().addComponents(
+                new TextInputBuilder()
+                    .setCustomId('close_reason')
+                    .setLabel('Reason for closing the ticket')
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setRequired(true)
+                )
+            ))
+        return;
+    }
+
     if (interaction.isModalSubmit() && interaction.customId === 'signupModal') {
         //await interaction.deferUpdate({ ephemeral: true });
         await processSignup(interaction);
         return;
+    }
+
+    if (interaction.isModalSubmit() && interaction.customId === 'close_reason_ticket') {
+        interaction.deferUpdate();
+        const reason = interaction.fields.getTextInputValue('close_reason');
+        const closer = interaction.user;
+        const thread = interaction.channel;
+
+        const messages = await interaction.channel.messages.fetch({ limit: 50 });
+        const firstEmbedMessage = messages.find(m => m.embeds.length > 0 && m.embeds[0].description?.includes('<@'));
+
+        let openerId = null;
+
+        if (firstEmbedMessage) {
+            const match = firstEmbedMessage.embeds[0].description.match(/<@!?(\d+)>/);
+            if (match) {
+                openerId = match[1];
+            }
+        }
+
+        if (openerId && openerId !== closer.id) {
+            try {
+                const openerUser = await interaction.client.users.fetch(openerId);
+                let closeEmbed = new EmbedBuilder()
+                    .setTitle('🔒 » Ticket Closed')
+                    .setDescription(`Your Ticket was closed by ${closer} for the following Reason:\n\`\`\`${reason}\`\`\``)
+                    .setColor('Red')
+                    .setTimestamp();
+                    
+                await openerUser.send({ embeds: [closeEmbed] });
+                await thread.send({ embeds: [closeEmbed] });
+            } catch (err) {
+                console.error("Failed to DM ticket opener:", err);
+            }
+        }
+        
+        if (thread.isThread()) {
+            try {
+                await thread.setLocked(true);
+                await thread.setArchived(true);
+            } catch (error) {
+                console.error("Error closing ticket:", error);
+            }
+        }
     }
     
     if (!interaction.isCommand()) return;
