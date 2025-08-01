@@ -13,6 +13,7 @@ const { Client: UnbClient } = require('unb-api');
 const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
 const { processSignup, handleThreadMessage, initPrioSelection } = require('./signupHandler.js');
 const GLOBALS = require("./globals.js");
+let logChannel;
 
 console.log("Starting bot...");
 
@@ -60,7 +61,7 @@ const scoutChannelId = process.env.SCOUT_CHANNEL_ID;
 const ctacheckChannelId = process.env.CTA_CHECK_CHANNEL_ID;
   
 async function payMember(userId, amount) {
-    const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+
     const guild = process.env.DISCORD_GUILD_ID;
     balanceBotAPI.editUserBalance(guild, userId, { cash: amount }, "Why Bot Reward-Payment").then(response => {
         const embed = new MessageEmbed()
@@ -826,6 +827,16 @@ client.once("ready", async () => {
 
     const channel = await client.channels.fetch(process.env.REWARD_CHANNEL);
     const messages = await channel.messages.fetch({ limit: 100 });
+    logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+
+    // send online-notification
+    let onlineEmbed = new MessageEmbed()
+        .setTitle('✅ Bot Online')
+        .setDescription(`⋙ The bot is now online.`)
+        .setTimestamp()
+        .setColor(0x00FF00)
+
+    logChannel.send({ embeds: [onlineEmbed] });
 
     setInterval(checkGiveawayEndTime, 1000); // Check every minute
 });
@@ -926,13 +937,21 @@ function operateWeeklyStatsTrack() {
 // ERROR HANDLING
 const logFilePath = path.join(__dirname, 'logs.txt');
 
-function logError(error) {
+async function logError(error) {
     const timestamp = new Date().toISOString();
     const logMessage = `[${timestamp}] ${error.stack || error}\n\n`;
 
     fs.appendFile(logFilePath, logMessage, (err) => {
         if (err) console.error("Failed to write to log file:", err);
     });
+
+    let errorEmbed = new MessageEmbed()
+        .setTitle('❌ Bot Error ')
+        .setDescription(`\`\`\`${error.stack}\`\`\``)
+        .setTimestamp()
+        .setColor(0xFF0000);
+
+    await logChannel.send({ embeds: [errorEmbed] })
 }
 
 process.on('uncaughtException', (error) => {
@@ -1294,7 +1313,7 @@ client.on("interactionCreate", async (interaction) => {
         return;
     }
 
-    if (interaction.isModalSubmit() && interaction.customId === 'close_reason_ticket') {
+    if (interaction.isModalSubmit() && interaction.customId === 'submitclosereason') {
         interaction.deferUpdate();
         const reason = interaction.fields.getTextInputValue('close_reason');
         const closer = interaction.user;
@@ -1315,10 +1334,10 @@ client.on("interactionCreate", async (interaction) => {
         if (openerId && openerId !== closer.id) {
             try {
                 const openerUser = await interaction.client.users.fetch(openerId);
-                let closeEmbed = new EmbedBuilder()
+                let closeEmbed = new MessageEmbed()
                     .setTitle('🔒 » Ticket Closed')
                     .setDescription(`Your Ticket was closed by ${closer} for the following Reason:\n\`\`\`${reason}\`\`\``)
-                    .setColor('Red')
+                    .setColor(0xFF0000)
                     .setTimestamp();
                     
                 await openerUser.send({ embeds: [closeEmbed] });
