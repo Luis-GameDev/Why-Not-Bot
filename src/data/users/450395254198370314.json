@@ -2,5 +2,15 @@
   "discordId": "450395254198370314",
   "playerId": "vaGwuX_DSvOlVk6PNDXmBQ",
   "linkTime": 1752268104902,
-  "ign": "Oberbillig"
+  "ign": "Oberbillig",
+  "weeklyStats": [
+    {
+      "date": "2025-08-01",
+      "fame": 693099263
+    },
+    {
+      "date": "2025-08-01",
+      "fame": 693099263
+    }
+  ]
 }

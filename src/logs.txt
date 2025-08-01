@@ -485,3 +485,7 @@ embeds[0].description[BASE_TYPE_REQUIRED]: This field is required
     at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:834:53)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 
+[2025-08-01T21:30:46.588Z] TypeError: fs.readdirSync is not a function
+    at calculateWeeklyStats (C:\Users\mccre\Desktop\Why-Not-Bot\src\weeklyStatsTrack.js:18:26)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+

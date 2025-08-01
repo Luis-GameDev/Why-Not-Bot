@@ -1,5 +1,15 @@
 {
   "discordId": "232074742226485259",
   "ign": "DanyV1",
-  "playerId": "0nDyC6O7RPO2qd6DwSQVGg"
+  "playerId": "0nDyC6O7RPO2qd6DwSQVGg",
+  "weeklyStats": [
+    {
+      "date": "2025-08-01",
+      "fame": 7104653061
+    },
+    {
+      "date": "2025-08-01",
+      "fame": 7104653061
+    }
+  ]
 }
