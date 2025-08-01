@@ -37,25 +37,25 @@ async function createTicket(interaction) {
         if (interaction.customId === 'open_ticket_regear') {
             embed = new EmbedBuilder()
                 .setTitle('Regear Ticket')
-                .setDescription(GLOBALS.RegearTicketPanelDescription)
+                .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.RegearTicketPanelDescription)
                 .addFields({ name: ' ', value: GLOBALS.RegearTicketMessage})
                 .setColor(0x00FF00);
         } else if (interaction.customId === 'open_ticket_drama') {
             embed = new EmbedBuilder()
                 .setTitle('Worldboss Ticket')
-                .setDescription(GLOBALS.WorldbossTicketMessageDescription)
+                .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.WorldbossTicketMessageDescription)
                 .addFields({ name: ' ', value: GLOBALS.WorldbossTicketMessage})
                 .setColor(0xFF0000);
         } else if (interaction.customId === 'open_ticket_issues') {
             embed = new EmbedBuilder()
                 .setTitle('Issues & Suggestions')
-                .setDescription(GLOBALS.IssuesTicketMessageDescription)
+                .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.IssuesTicketMessageDescription)
                 .addFields({ name: ' ', value: GLOBALS.IssuesTicketMessage })
                 .setColor(0xFFFF00);
         } else if (interaction.customId === 'open_ticket_apply') {
             embed = new EmbedBuilder()
                 .setTitle('Application')
-                .setDescription(GLOBALS.ApplicationTicketMessageDescription)
+                .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.ApplicationTicketMessageDescription)
                 .addFields({
                     name: ' ', value: GLOBALS.ApplicationTicketMessage })
                 .addFields({ name: ' ', value: GLOBALS.ApplicationTicketMessage2 })
@@ -63,19 +63,19 @@ async function createTicket(interaction) {
         } else if (interaction.customId === 'open_ticket_leech') {
             embed = new EmbedBuilder()
                 .setTitle('Leech Ticket')
-                .setDescription(GLOBALS.LeechTicketMessageDescription)
+                .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.LeechTicketMessageDescription)
                 .addFields({ name: 'Payment:', value: GLOBALS.LeechTicketMessage1 })
                 .addFields({ name: 'Info:', value: GLOBALS.LeechTicketMessage2 })
                 .setColor(0xFF0000);
         } else if (interaction.customId === 'open_ticket_renting') {
             embed = new EmbedBuilder()
                 .setTitle('Renting Ticket')
-                .setDescription(GLOBALS.RentingTicketMessage)
+                .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.RentingTicketMessage)
                 .setColor(0xFF0000);
         } else if (interaction.customId === 'open_ticket_diplomacy') {
             embed = new EmbedBuilder()
                 .setTitle('Diplomacy Ticket')
-                .setDescription(GLOBALS.DiplomacyTicketMessage)
+                .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.DiplomacyTicketMessage)
                 .setColor(0x0000FF);
         } else {
             return interaction.editReply({ content: 'An error occurred while creating the ticket.', ephemeral: true });
@@ -86,6 +86,10 @@ async function createTicket(interaction) {
                 new ButtonBuilder()
                     .setCustomId('close_ticket')
                     .setLabel('Close')
+                    .setStyle('Danger'), 
+                new ButtonBuilder()
+                    .setCustomId('close_reason_ticket')
+                    .setLabel('Close with Reason')
                     .setStyle('Danger'), 
                 new ButtonBuilder()
                     .setCustomId('delete_ticket')

@@ -469,3 +469,19 @@ embeds[0].description[BASE_TYPE_REQUIRED]: This field is required
     at async ButtonInteraction.deferUpdate (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\structures\interfaces\InteractionResponses.js:306:22)
     at async InteractionCollector.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\commands\IQ.js:151:7)
 
+[2025-07-16T17:14:27.413Z] ReferenceError: te is not defined
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:834:51)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+[2025-07-16T17:19:01.383Z] ReferenceError: te is not defined
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:834:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+[2025-07-16T17:19:33.173Z] ReferenceError: te is not defined
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:834:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+[2025-07-16T17:20:52.511Z] ReferenceError: te is not defined
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:834:53)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
