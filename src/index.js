@@ -82,8 +82,12 @@ async function payMember(userId, amount) {
 async function checkForGuildmembers() {
   const usersPath = path.join(__dirname, './data/users');
   const files = fs.readdirSync(usersPath).filter(file => file.endsWith('.json'));
-
-  const res = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/guilds/${process.env.ALBION_GUILD_ID}/members`);
+  const guildName = "WHY NOT";
+  try {
+    var logChannel = await client.channels.fetch(process.env.ATTENDANCE_CHANNEL_ID);
+    var res = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/guilds/${process.env.ALBION_GUILD_ID}/members`);
+  } catch (error) { logError(error); return; }
+  
   const guildData = res.data;
   const guildMemberIds = guildData.map(member => member.Id);
 
@@ -100,8 +104,12 @@ async function checkForGuildmembers() {
         continue;
       }
 
-      const logChannel = await client.channels.fetch(process.env.ATTENDANCE_CHANNEL_ID);
-      if (!logChannel) continue;
+    const playerDetailsResponse = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/players/${userData.playerId}`);
+    const playerData = playerDetailsResponse.data;
+
+    if (playerData.GuildName === guildName) {
+        continue;
+    }
 
       const embed = new MessageEmbed()
         .setTitle('Guild Check: Member Left')

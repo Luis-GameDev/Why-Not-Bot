@@ -66,8 +66,8 @@ module.exports = {
 
             const members = channel.members;
 
-            if(members.size < 7) {
-                await interaction.reply('You need at least 7 members in your voice channel to use this command.');
+            if(members.size < 5) {
+                await interaction.reply('You need at least 5 members in your voice channel to use this command.');
                 return;
             }
 
