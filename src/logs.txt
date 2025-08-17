@@ -489,3 +489,9 @@ embeds[0].description[BASE_TYPE_REQUIRED]: This field is required
     at calculateWeeklyStats (C:\Users\mccre\Desktop\Why-Not-Bot\src\weeklyStatsTrack.js:18:26)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 
+[2025-08-17T21:21:16.985Z] ReferenceError: ign is not defined
+    at C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:116:86
+    at Array.filter (<anonymous>)
+    at checkForGuildmembers (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:116:49)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+

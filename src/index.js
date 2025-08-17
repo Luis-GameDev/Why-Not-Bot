@@ -61,7 +61,7 @@ const scoutChannelId = process.env.SCOUT_CHANNEL_ID;
 const ctacheckChannelId = process.env.CTA_CHECK_CHANNEL_ID;
   
 async function payMember(userId, amount) {
-
+    
     const guild = process.env.DISCORD_GUILD_ID;
     balanceBotAPI.editUserBalance(guild, userId, { cash: amount }, "Why Bot Reward-Payment").then(response => {
         const embed = new MessageEmbed()
@@ -100,7 +100,7 @@ async function checkForGuildmembers() {
     const isInGuild = guildMemberIds.includes(userData.playerId);
     if (!isInGuild) {
 
-      if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000 || userData.lastLeftMessage && Date.now() - userData.lastLeftMessage < 24 * 60 * 60 * 1000) {
+      if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000 * 2 /* <-- 2 days */ || userData.lastLeftMessage && Date.now() - userData.lastLeftMessage < 24 * 60 * 60 * 1000) {
         continue;
       }
 
@@ -111,34 +111,43 @@ async function checkForGuildmembers() {
         continue;
     }
 
-      const embed = new MessageEmbed()
-        .setTitle('Guild Check: Member Left')
-        .setDescription(`Player **${userData.ign}** (<@${userData.discordId}>) is no longer in the guild.`)
-        .setColor(0xff0000)
-        .setTimestamp();
+    const playerDetailsResponse2 = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/search?q=${userData.ign}`);
+    const playerData2 = playerDetailsResponse2.data;
+    const matchingPlayers = playerData2.players.filter(p => p.Name.toLowerCase() === userData.ign.toLowerCase());
+    for (const player of matchingPlayers) {
+        if (player.GuildName === guildName) {
+            continue;
+        }
+    }
 
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`purge_${userData.discordId}`)
-          .setLabel('Friend')
-          .setStyle("Primary"),
-        new ButtonBuilder()
-          .setCustomId(`ignore_${userData.discordId}`)
-          .setLabel('Ignore')
-          .setStyle("Secondary"),
-        new ButtonBuilder()
-          .setCustomId(`kick_${userData.discordId}`)
-          .setLabel('Kick')
-          .setStyle("Danger")
-      );
+    const embed = new MessageEmbed()
+    .setTitle('Guild Check: Member Left')
+    .setDescription(`Player **${userData.ign}** (<@${userData.discordId}>) is no longer in the guild.`)
+    .setColor(0xff0000)
+    .setTimestamp();
 
-      await logChannel.send({
-        embeds: [embed],
-        components: [row]
-      });
+    const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId(`purge_${userData.discordId}`)
+        .setLabel('Friend')
+        .setStyle("Primary"),
+    new ButtonBuilder()
+        .setCustomId(`ignore_${userData.discordId}`)
+        .setLabel('Ignore')
+        .setStyle("Secondary"),
+    new ButtonBuilder()
+        .setCustomId(`kick_${userData.discordId}`)
+        .setLabel('Kick')
+        .setStyle("Danger")
+    );
 
-        userData.lastLeftMessage = Date.now();
-        fs.writeFileSync(filePath, JSON.stringify(userData, null, 2));
+    await logChannel.send({
+    embeds: [embed],
+    components: [row]
+    });
+
+    userData.lastLeftMessage = Date.now();
+    fs.writeFileSync(filePath, JSON.stringify(userData, null, 2));
     }
   }
 }
