@@ -23,6 +23,7 @@ const {
     Partials,
     GatewayIntentBits
 } = require("discord.js");
+const { start } = require("repl");
 
 const client = new Client({
     intents: [
@@ -32,6 +33,7 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.DirectMessages
     ],
     partials: [
         Partials.Message, 
@@ -77,6 +79,57 @@ async function payMember(userId, amount) {
             .setColor(0xFF0000);
         logChannel.send({ embeds: [embed] });
     })
+}
+
+async function startDMHandler(message) {
+    if (message.author.bot) return;
+    let inquiryChannel = await client.channels.fetch(process.env.INQUIRIES_CHANNEL_ID);
+    let user = message.author;
+    let embedMessage = `\`\`\`${message.content}\`\`\``;
+
+    let embed = new MessageEmbed()
+        .setTitle("New Inquiry")
+        .setDescription(`**From:** ${user}`)
+        .addFields({ name: 'Message', value: embedMessage })
+        .setColor(0x00FF00)
+        .setFooter({ text: `If you reply to this message it will be forwarded to the user.` })
+        .setTimestamp();
+    
+    inquiryChannel.send({ embeds: [embed] })
+}
+
+async function startInquiryHandler(message) {
+    if (message.reference && message.reference.messageId) {
+        try {
+            const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
+            
+            if (repliedMessage.author.id === client.user.id) {
+                const embed = repliedMessage.embeds[0];
+                if (embed && embed.description) {
+                    const mentionMatch = embed.description.match(/<@!?(\d+)>/);
+                    if (mentionMatch) {
+                        const mentionedUserId = mentionMatch[1];
+                        let recipient = await client.users.fetch(mentionedUserId).catch(() => null);
+                        if (recipient) {
+                            const replyEmbed = new MessageEmbed()
+                                .setTitle("Inquiry Response")
+                                .setDescription(`**From:** ${message.author}`)
+                                .addFields({ name: 'Message', value: `\`\`\`${message.content}\`\`\`` })
+                                .setColor(0x00FF00)
+                                .setTimestamp();
+                            
+                            await recipient.send({ embeds: [replyEmbed] });
+                            
+                        } else {
+                            message.reply("Could not find the user to send the response. Is he still in the server?");
+                        }
+                    }
+                }
+            } 
+        } catch (error) {
+            console.error("Error fetching the replied message:", error);
+        }
+    }
 }
 
 async function checkForGuildmembers() {
@@ -363,6 +416,15 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("messageCreate", async (message) => {
+
+    if (message.channel.type === 1 || message.channel.type === 'DM') {
+        startDMHandler(message);
+    }
+
+    if (message.channel.id === process.env.INQUIRIES_CHANNEL_ID && !message.author.bot) {
+        startInquiryHandler(message);
+    }
+
     if (message.content.startsWith("!abc") && !message.author.bot) {
         checkForGuildmembers();
     }
