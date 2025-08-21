@@ -509,3 +509,15 @@ embeds[0].description[BASE_TYPE_REQUIRED]: This field is required
     at startDMHandler (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:93:10)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 
+[2025-08-21T20:15:08.908Z] TypeError: Cannot read properties of undefined (reading 'id')
+    at Client.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\src\index.js:227:26)
+    at Client.emit (node:events:519:28)
+    at Client.emit (node:domain:488:12)
+    at MessageReactionAdd.handle (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\actions\MessageReactionAdd.js:64:17)
+    at module.exports [as MESSAGE_REACTION_ADD] (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\handlers\MESSAGE_REACTION_ADD.js:4:37)
+    at WebSocketManager.handlePacket (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:348:31)
+    at WebSocketManager.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\discord.js\src\client\websocket\WebSocketManager.js:232:12)
+    at WebSocketManager.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+    at WebSocketShard.<anonymous> (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@discordjs\ws\dist\index.js:1190:51)
+    at WebSocketShard.emit (C:\Users\mccre\Desktop\Why-Not-Bot\node_modules\@vladfrangu\async_event_emitter\dist\index.cjs:287:31)
+

@@ -224,6 +224,27 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
     originalMessage = reaction.message;
 
+    if (reaction.message.channel.id === process.env.REWARD_CHANNEL && !user.bot && reaction.emoji.name === "🐀") {
+        const member = await reaction.message.guild.members.fetch(user.id);
+        const checkmarkReaction = reaction.message.reactions.cache.find(r => r.emoji.name === "✅");
+
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) || checkmarkReaction) {
+            reaction.remove();
+            return reaction.message.reply("You do not have permission to reward players.");
+        }
+
+        // Try to extract a number from the message content (e.g., "1000000" or "1,000,000")
+        const match = reaction.message.content.replace(/[.,]/g, '').match(/(\d{4,})/);
+        if (!match) {
+            return reaction.message.reply("No proper killfame number provided.");
+        }
+        const killfameAmount = parseInt(match[1], 10) * 2;
+        payMember(reaction.message.author.id, killfameAmount);
+        reaction.message.reply(`You have received **${killfameAmount}** for your killfame contribution!`);
+        reaction.message.react("✅");
+        return;
+    }
+
     if (reaction.emoji.name === "❌" && reaction.message.channel.id === process.env.STANDING_CHECK_CHANNEL_ID) {
         const member = await reaction.message.guild.members.fetch(user.id);
         if (!member.roles.cache.has(process.env.WB_CALLER_ROLE_ID)) {
