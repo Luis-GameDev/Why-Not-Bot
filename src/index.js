@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const cron = require("node-cron");
 const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
-const { ActionRowBuilder, ButtonBuilder, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ChannelType, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
 const signupHandler = require("./signupHandler.js");
@@ -13,6 +13,8 @@ const { Client: UnbClient } = require('unb-api');
 const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
 const { processSignup, handleThreadMessage, initPrioSelection } = require('./signupHandler.js');
 const GLOBALS = require("./globals.js");
+const stickyHandler = require('./stickyHandler');
+const { trackVoiceTime } = require('./voicetracker');
 let logChannel;
 
 console.log("Starting bot...");
@@ -106,6 +108,11 @@ async function startInquiryHandler(message) {
             if (repliedMessage.author.id === client.user.id) {
                 const embed = repliedMessage.embeds[0];
                 if (embed && embed.description) {
+                    const newEmbed = EmbedBuilder.from(embed)
+                        .setColor(0xff0000); 
+
+                    await repliedMessage.edit({ embeds: [newEmbed] });
+
                     const mentionMatch = embed.description.match(/<@!?(\d+)>/);
                     if (mentionMatch) {
                         const mentionedUserId = mentionMatch[1];
@@ -416,6 +423,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("messageCreate", async (message) => {
+    stickyHandler(message);
 
     if (message.channel.type === 1 || message.channel.type === 'DM') {
         startDMHandler(message);
@@ -1450,6 +1458,10 @@ client.on("interactionCreate", async (interaction) => {
             }
         }
     }
+});
+
+client.on('voiceStateUpdate', (oldState, newState) => {
+    trackVoiceTime(oldState, newState);
 });
 
 async function deployCommandsForGuild(guildId) {
