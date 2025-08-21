@@ -15,12 +15,16 @@
   ],
   "lastLeftMessage": 1755774006971,
   "voicetime": {
-    "total": 133096,
-    "lastJoin": 1755806624505,
+    "total": 1215394,
+    "lastJoin": null,
     "sessions": [
       {
         "join": 1755804114334,
         "leave": 1755804247430
+      },
+      {
+        "join": 1755806624505,
+        "leave": 1755807706803
       }
     ]
   }
