@@ -13,5 +13,15 @@
       "fame": 693099263
     }
   ],
-  "lastLeftMessage": 1755774006971
+  "lastLeftMessage": 1755774006971,
+  "voicetime": {
+    "total": 133096,
+    "lastJoin": null,
+    "sessions": [
+      {
+        "join": 1755804114334,
+        "leave": 1755804247430
+      }
+    ]
+  }
 }
