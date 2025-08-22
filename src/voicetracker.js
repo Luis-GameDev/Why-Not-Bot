@@ -10,7 +10,7 @@ function getUserFilePath(userId) {
 function loadUserData(userId) {
     const file = getUserFilePath(userId);
     if (!fs.existsSync(file)) {
-        return { voicetime: { total: 0, lastJoin: null, sessions: [] } };
+        return;
     }
     return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
@@ -26,6 +26,7 @@ function trackVoiceTime(oldState, newState) {
     const isInVC = newState.channelId !== null;
 
     const userData = loadUserData(userId);
+    if (!userData) return;
     const vt = userData.voicetime || { total: 0, lastJoin: null, sessions: [] };
 
     if (!wasInVC && isInVC) {

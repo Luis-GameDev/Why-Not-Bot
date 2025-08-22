@@ -14,12 +14,8 @@ function writeStickyData(data) {
 }
 
 function htmlspecialchars(str) {
-return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    if (typeof str !== 'string') str = String(str ?? '');
+    return str.replace(/([&<>"`'])/g, '\\$1');
 }
 
 module.exports = {
