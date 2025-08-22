@@ -25,7 +25,6 @@ const {
     Partials,
     GatewayIntentBits
 } = require("discord.js");
-const { start } = require("repl");
 
 const client = new Client({
     intents: [
@@ -139,6 +138,34 @@ async function startInquiryHandler(message) {
     }
 }
 
+async function checkAfkStatus() {
+    const afkPath = path.join(__dirname, './data/afkStatus.json');
+    if (!fs.existsSync(afkPath)) return;
+
+    const afkData = JSON.parse(fs.readFileSync(afkPath, 'utf8'));
+    const now = Date.now();
+    let changed = false;
+
+    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+    if (!guild) return;
+
+    for (const userId in afkData) {
+        const entry = afkData[userId];
+        if (entry.endTime <= now) {
+            const member = await guild.members.fetch(userId).catch(() => null);
+            if (member && process.env.AFK_ROLE_ID) {
+                await member.roles.remove(process.env.AFK_ROLE_ID).catch(() => {});
+            }
+            delete afkData[userId];
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        fs.writeFileSync(afkPath, JSON.stringify(afkData, null, 2));
+    }
+}
+
 async function checkForGuildmembers() {
   const usersPath = path.join(__dirname, './data/users');
   const files = fs.readdirSync(usersPath).filter(file => file.endsWith('.json'));
@@ -161,6 +188,16 @@ async function checkForGuildmembers() {
     if (!isInGuild) {
 
       if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000 * 2 /* <-- 2 days */ || userData.lastLeftMessage && Date.now() - userData.lastLeftMessage < 24 * 60 * 60 * 1000) {
+        continue;
+      }
+
+      if ( userData.playerId === undefined || userData.playerId === null ) {
+        let logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+        let embed = new MessageEmbed()
+            .setTitle('User not linked')
+            .setDescription(`User <@${path.parse(file).name}> is not linked to an Albion Account.`)
+            .setColor(0xff0000)
+        logChannel.send({ embeds: [embed] });
         continue;
       }
 
@@ -566,7 +603,7 @@ client.on("messageCreate", async (message) => {
     }
 
     if (message.content.startsWith("!info")) {
-        message.reply(`https://discord.com/channels/1248205717379354664/1274422719168909323 = Apply for Worldboss member role / issue WB releted complains. \nhttps://discord.com/channels/1248205717379354664/1248254004962525255 = Why not builds for WB \nhttps://discord.com/channels/1248205717379354664/1319310140222079006 = DPS and other tutorials made by our members. Follow these to get GOOD at your weapon and learn your rotations for WB. \nhttps://discord.com/channels/1248205717379354664/1267166145618640957 = NAPs \n"How to redeem balance? 💸 " - Contact any officer that is online and request your Discord Balance.`);
+        message.reply(`https://discord.com/channels/1248205717379354664/1274422719168909323 = Apply for Worldboss member role / issue WB releted complains. \nhttps://discord.com/channels/1248205717379354664/1248254004962525255 = Why not builds for WB \nhttps://discord.com/channels/1248205717379354664/1319310140222079006 = DPS and other tutorials made by our members. Follow these to get GOOD at your weapon and learn your rotations for WB. \nhttps://discord.com/channels/1248205717379354664/1267166145618640957 = NAPs \n"How to redeem balance? 💸 " - Send me a DM and request your Discord Balance.`);
     }
 
     if (message.content.startsWith("!complain")) {
@@ -1026,8 +1063,11 @@ cron.schedule('0 2 * * 1', () => {
     operateWeeklyStatsTrack()
 })
 
+// hourly cron job
+
 cron.schedule('0 * * * *', () => {
     checkForGuildmembers();
+    checkAfkStatus();
 });
 
 function operateWeeklyStatsTrack() {

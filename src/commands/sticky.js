@@ -13,6 +13,15 @@ function writeStickyData(data) {
     fs.writeFileSync(stickyPath, JSON.stringify(data, null, 2));
 }
 
+function htmlspecialchars(str) {
+return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('sticky')
@@ -46,7 +55,8 @@ module.exports = {
 
     async execute(interaction) {
         const sub = interaction.options.getSubcommand();
-        const name = interaction.options.getString('name');
+        let name = interaction.options.getString('name');
+        name = htmlspecialchars(name);
         const stickyData = readStickyData();
 
         const officerRoleId = process.env.OFFICER_ROLE_ID;
@@ -57,7 +67,11 @@ module.exports = {
         }
 
         if (sub === 'add') {
-            const text = interaction.options.getString('text');
+            
+
+            // Usage:
+            let text = interaction.options.getString('text');
+            text = htmlspecialchars(text);
             const embedValue = interaction.options.getString('format') === 'true';
             stickyData[name] = {
                 channelId: interaction.channel.id,

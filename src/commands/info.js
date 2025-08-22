@@ -10,6 +10,26 @@ function msToTime(ms) {
     return `${hours}h ${minutes}m`;
 }
 
+function getAfkEmbedValue(userId) {
+    const afkPath = path.join(__dirname, '../data/afkStatus.json');
+    if (!fs.existsSync(afkPath)) return "Not AFK";
+
+    const afkData = JSON.parse(fs.readFileSync(afkPath, 'utf8'));
+    const entry = afkData[userId];
+    if (!entry || !entry.endTime) return "Not AFK";
+
+    const endTime = Number(entry.endTime);
+    const now = Date.now();
+    if (isNaN(endTime) || endTime <= now) return "Not AFK";
+
+    const remaining = endTime - now;
+    const totalMinutes = Math.floor(remaining / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours}h ${minutes}m remaining`;
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('info')
@@ -82,6 +102,10 @@ module.exports = {
                     {
                         name: "Link:",
                         value: `${userIgn}`
+                    },
+                    {
+                        name: "AFK Status:",
+                        value: getAfkEmbedValue(member.id)
                     },
                     {
                         name: `Roles:`,
