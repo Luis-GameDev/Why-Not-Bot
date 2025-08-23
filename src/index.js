@@ -275,7 +275,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
         if (!match) {
             return reaction.message.reply("No proper killfame number provided.");
         }
-        const killfameAmount = parseInt(match[1], 10) * 2;
+        const killfameAmount = parseInt(match[1], 10);
         payMember(reaction.message.author.id, killfameAmount);
         reaction.message.reply(`You have received **${killfameAmount}** for your killfame contribution!`);
         reaction.message.react("✅");
