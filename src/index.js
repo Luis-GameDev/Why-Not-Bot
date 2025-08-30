@@ -273,6 +273,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
         // Try to extract a number from the message content (e.g., "1000000" or "1,000,000")
         const match = reaction.message.content.replace(/[.,]/g, '').match(/(\d{4,})/);
         if (!match) {
+            reaction.remove();
             return reaction.message.reply("No proper killfame number provided.");
         }
         const killfameAmount = parseInt(match[1], 10);

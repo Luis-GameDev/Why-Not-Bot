@@ -79,7 +79,13 @@ module.exports = {
             if (process.env.AFK_ROLE_ID) {
                 await member.roles.add(process.env.AFK_ROLE_ID).catch(() => {});
             }
-
+            let logChannel = await interaction.client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+            let afkEmbed = new EmbedBuilder()
+                .setTitle('User AFK')
+                .setDescription(`${interaction.user} is now AFK for **${timeStr}**.\n\n**Reason:** ${reason}`)
+                .setColor(0xFF0000)
+                .setTimestamp()
+            await logChannel.send({embeds: [afkEmbed]});
             await interaction.reply({ content: `You are now AFK for ${timeStr}. Reason: ${reason}`, ephemeral: true });
 
         } else if (sub === 'cancel') {

@@ -3,7 +3,7 @@ const path = require('path');
 const { EmbedBuilder } = require('discord.js');
 
 const stickyPath = path.join(__dirname, './data/stickymessages.json');
-const cooldowns = {}; 
+const cooldowns = {};
 
 function readStickyData() {
     if (!fs.existsSync(stickyPath)) return {};
@@ -25,9 +25,13 @@ module.exports = async function stickyHandler(message) {
     if (stickyEntry.messageId) {
         try {
             const oldMsg = await message.channel.messages.fetch(stickyEntry.messageId);
-            if (oldMsg) await oldMsg.delete();
-        } catch (_) {}
-        stickyEntry.messageId = null;
+            await oldMsg.delete();
+        } catch (err) {
+            console.warn(`Could not delete sticky message: ${err.message}`);
+        } finally {
+            stickyEntry.messageId = null;
+            writeStickyData(data);
+        }
     }
 
     if (cooldowns[channelId]) clearTimeout(cooldowns[channelId]);
@@ -42,9 +46,8 @@ module.exports = async function stickyHandler(message) {
         } else {
             sent = await message.channel.send({ content: stickyEntry.text });
         }
+
         stickyEntry.messageId = sent.id;
         writeStickyData(data);
-    }, 2 * 60 * 1000); // 2 minutes
-
-    writeStickyData(data);
+    }, 2 * 60 * 1000); // 2 Min
 };
