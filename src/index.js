@@ -1203,7 +1203,7 @@ client.on("interactionCreate", async (interaction) => {
                 await member.kick('No longer in the guild');
             }
 
-            if( userData) {
+            if(userData) {
                 fs.unlinkSync(userPath);
             } else {
                 await interaction.reply({
