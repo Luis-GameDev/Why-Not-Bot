@@ -13,7 +13,38 @@ const { Client: UnbClient } = require('unb-api');
 const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
 const { processSignup, handleThreadMessage, initPrioSelection } = require('./signupHandler.js');
 const GLOBALS = require("./globals.js");
+const iqQuestions = require('./iqQuestions');
 let logChannel;
+const iqResultsPath = path.join(__dirname, './data/iqtest.json');
+const iqSessionsPath = path.join(__dirname, './data/iqsessions.json');
+
+function loadIqSessions() {
+    try {
+        const data = fs.readFileSync(iqSessionsPath, 'utf-8');
+        const parsed = JSON.parse(data);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveIqSessions(sessions) {
+    fs.writeFileSync(iqSessionsPath, JSON.stringify(sessions, null, 2));
+}
+
+function loadIqResults() {
+    try {
+        const data = fs.readFileSync(iqResultsPath, 'utf-8');
+        const parsed = JSON.parse(data);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+function saveIqResults(results) {
+    fs.writeFileSync(iqResultsPath, JSON.stringify(results, null, 2));
+}
 
 console.log("Starting bot...");
 
@@ -1147,97 +1178,147 @@ client.on("interactionCreate", async (interaction) => {
     }
 
 
-    if (interaction.isButton() && interaction.customId === 'show_results') {
-        const messageId = interaction.message.id;
+    if (interaction.isButton() && interaction.customId.startsWith('iq_choice_')) {
+        const selected = Number(interaction.customId.split('_')[2]);
+        const sessions = loadIqSessions();
+        const sessionIndex = sessions.findIndex(session => session.messageId === interaction.message.id);
 
-        const dataPath = path.join(__dirname, './data/iqtest.json');
-        let results = [];
-
-        try {
-            results = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
-        } catch (err) {
-            console.error('Failed to read iqtest.json:', err);
+        if (sessionIndex === -1) {
+            return interaction.reply({ content: 'This IQ test session has expired. Please run /iq to start again.', ephemeral: true });
         }
 
+        const session = sessions[sessionIndex];
+
+        if (interaction.user.id !== session.userId) {
+            return interaction.reply({ content: 'Only the original test taker can answer these questions.', ephemeral: true });
+        }
+
+        const total = iqQuestions.length;
+        const timeLimitMs = 300_000;
+        const now = Date.now();
+
+        if (now - session.startedAt > timeLimitMs) {
+            await interaction.deferUpdate();
+            sessions.splice(sessionIndex, 1);
+            saveIqSessions(sessions);
+
+            await interaction.message.edit({ content: '\u200B', embeds: [], components: [] });
+
+            const resultMessage = await interaction.channel.send({
+                embeds: [
+                    new MessageEmbed()
+                        .setTitle('IQ Test Ended')
+                        .setDescription(`Time's up! <@${session.userId}> scored ${session.score} out of ${total}.`)
+                        .setColor(0xff0000)
+                ],
+                components: [
+                    new ActionRowBuilder().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('show_results')
+                            .setLabel('Show Results')
+                            .setStyle('Secondary')
+                    )
+                ]
+            });
+
+            const results = loadIqResults();
+            results.push({
+                messageId: resultMessage.id,
+                user: session.userId,
+                score: session.score,
+                answers: session.answers,
+                timestamp: now
+            });
+            saveIqResults(results);
+            return;
+        }
+
+        const currentQuestion = session.currentQuestion;
+        const current = iqQuestions[currentQuestion];
+
+        if (!current) {
+            sessions.splice(sessionIndex, 1);
+            saveIqSessions(sessions);
+            return interaction.reply({ content: 'This IQ test session has already ended. Please run /iq to start again.', ephemeral: true });
+        }
+
+        session.answers[currentQuestion] = selected;
+        if (selected === current.correct) {
+            session.score += 1;
+        }
+        session.currentQuestion += 1;
+
+        if (session.currentQuestion < total) {
+            const nextQuestion = iqQuestions[session.currentQuestion];
+            const embed = new MessageEmbed()
+                .setTitle(`Question ${session.currentQuestion + 1}/${total}`)
+                .setDescription(nextQuestion.question)
+                .setColor(0x1e90ff);
+
+            const row = new ActionRowBuilder();
+            nextQuestion.choices.forEach((choice, index) => {
+                row.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`iq_choice_${index}`)
+                        .setLabel(choice)
+                        .setStyle('Primary')
+                );
+            });
+
+            sessions[sessionIndex] = session;
+            saveIqSessions(sessions);
+            await interaction.update({ embeds: [embed], components: [row] });
+            return;
+        }
+
+        sessions.splice(sessionIndex, 1);
+        saveIqSessions(sessions);
+
+        await interaction.update({ content: '\u200B', embeds: [], components: [] });
+
+        const resultMessage = await interaction.channel.send({
+            embeds: [
+                new MessageEmbed()
+                    .setTitle('IQ Test Completed')
+                    .setDescription(`<@${session.userId}> scored ${session.score} out of ${total}!`)
+                    .setColor(0x00ff00)
+            ],
+            components: [
+                new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('show_results')
+                        .setLabel('Show Results')
+                        .setStyle('Secondary')
+                )
+            ]
+        });
+
+        const results = loadIqResults();
+        results.push({
+            messageId: resultMessage.id,
+            user: session.userId,
+            score: session.score,
+            answers: session.answers,
+            timestamp: now
+        });
+        saveIqResults(results);
+        return;
+    }
+
+    if (interaction.isButton() && interaction.customId === 'show_results') {
+        const messageId = interaction.message.id;
+        const results = loadIqResults();
         const testResult = results.find(entry => entry.messageId === messageId);
 
         if (!testResult) {
             return interaction.reply({ content: 'No result data found for this message.', ephemeral: true });
         }
 
-        const questions = [
-            {
-                question: "Do you understand that this IQ-Test needs to be taken seriously and completed within 5 minutes?",
-                choices: ["Yes", "No"],  
-                correct: 0,
-            },
-            {
-                question: "What is the opposite of North-West?",
-                choices: ["North-East", "South-East", "South-West"],
-                correct: 1,
-            },
-            {
-                question: "What is the capital of France?",
-                choices: ["Berlin", "Madrid", "Paris", "Rome"],
-                correct: 2,
-            },
-            {
-                question: "Where is the sun rising from on the northern hemisphere?",
-                choices: ["East", "West", "North", "South"],
-                correct: 0,
-            },
-            {
-                question: "Spell 'cat' backwards.",
-                choices: ["act", "tac", "cta", "atc"],
-                correct: 1,
-            },
-            {
-                question: "What is the first letter of the English alphabet?",
-                choices: ["A", "B", "C", "D"],
-                correct: 0,
-            },
-            {
-                question: "If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops necessarily Lazzies?",
-                choices: ["Yes", "No", "Maybe", "I don't know"],
-                correct: 0,
-            },
-            {
-                question: "What is the next number in the sequence: 2, 4, 8, 16, ...?",
-                choices: ["18", "20", "32", "24"],
-                correct: 2,
-            },
-            {
-                question: "Which of the following does not belong: apple, strawberry, carrot, grape?",
-                choices: ["apple", "strawberry", "carrot", "grape"],
-                correct: 2,
-            },
-            {
-                question: "Which number fits in the gap? [2] [6] [ ] [54] [162]",
-                choices: ["9", "18", "4", "28"],
-                correct: 1,
-            },
-            {
-                question: "What is 12 divided by 3?",
-                choices: ["2", "3", "4", "6"],
-                correct: 2,
-            },
-            {
-                question: "Rearrange the letters of 'LISTEN' to form another word.",
-                choices: ["SILENT", "ENLIST", "TINSEL", "All of the above"],
-                correct: 3,
-            },
-            {
-                question: "If a train travels at 60 miles per hour, how far does it travel in 2 hours?",
-                choices: ["60 miles", "120 miles", "180 miles", "240 miles"],
-                correct: 1,
-            },
-        ];
-
         const embed = new MessageEmbed()
             .setTitle('IQ Test Results')
             .setColor(0x3498db);
 
-        questions.forEach((q, index) => {
+        iqQuestions.forEach((q, index) => {
             const selected = testResult.answers[index];
             const isAnswered = typeof selected === 'number';
             const isCorrect = selected === q.correct;
