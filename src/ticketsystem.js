@@ -1,10 +1,37 @@
 const { ChannelType, ActionRowBuilder, ButtonBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const GLOBALS = require('./globals.js');
 
+// Cooldown map: { userId: { category: timestamp } }
+const cooldowns = new Map();
+
+// 1h in ms
+const COOLDOWN_MS = 60 * 60 * 1000;
+
 async function createTicket(interaction) {
     const guild = interaction.guild;
     const member = interaction.member;
     const supportChannel = interaction.channel; 
+    const category = interaction.customId; // e.g. "open_ticket_regear"
+
+    // check cooldown
+    const now = Date.now();
+    if (!cooldowns.has(member.id)) {
+        cooldowns.set(member.id, {});
+    }
+    const userCooldowns = cooldowns.get(member.id);
+
+    if (userCooldowns[category] && (now - userCooldowns[category]) < COOLDOWN_MS) {
+        const remaining = COOLDOWN_MS - (now - userCooldowns[category]);
+        const minutes = Math.ceil(remaining / 60000);
+        return interaction.editReply({ 
+            content: `⏳ You must wait **${minutes} more minutes** before opening another ticket in this category.`,
+            ephemeral: true 
+        });
+    }
+
+    // set cooldown
+    userCooldowns[category] = now;
+    cooldowns.set(member.id, userCooldowns);
 
     let officer, ticketofficer;
     let thread;
@@ -27,7 +54,6 @@ async function createTicket(interaction) {
             reason: 'User created a ticket'
         });
 
-        //await thread.members.add(member.id);
         let addingMessage = await thread.send({ content: `<@${member.id}> <@&${officer}> <@&${ticketofficer}>` });
         await addingMessage.delete();
 
@@ -56,8 +82,7 @@ async function createTicket(interaction) {
             embed = new EmbedBuilder()
                 .setTitle('Application')
                 .setDescription(`Thanks for opening a ticket ${interaction.user}!\n` + GLOBALS.ApplicationTicketMessageDescription)
-                .addFields({
-                    name: ' ', value: GLOBALS.ApplicationTicketMessage })
+                .addFields({ name: ' ', value: GLOBALS.ApplicationTicketMessage })
                 .addFields({ name: ' ', value: GLOBALS.ApplicationTicketMessage2 })
                 .setColor(0xFF0000);
         } else if (interaction.customId === 'open_ticket_leech') {

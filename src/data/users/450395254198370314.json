@@ -2,5 +2,30 @@
   "discordId": "450395254198370314",
   "playerId": "vaGwuX_DSvOlVk6PNDXmBQ",
   "linkTime": 1752268104902,
-  "ign": "Oberbillig"
+  "ign": "Oberbillig",
+  "weeklyStats": [
+    {
+      "date": "2025-08-01",
+      "fame": 693099263
+    },
+    {
+      "date": "2025-08-01",
+      "fame": 693099263
+    }
+  ],
+  "lastLeftMessage": 1769029205232,
+  "voicetime": {
+    "total": 1215394,
+    "lastJoin": null,
+    "sessions": [
+      {
+        "join": 1755804114334,
+        "leave": 1755804247430
+      },
+      {
+        "join": 1755806624505,
+        "leave": 1755807706803
+      }
+    ]
+  }
 }

@@ -1,5 +1,16 @@
 {
   "discordId": "858005582514225192",
   "ign": "DIngusTheChad",
-  "playerId": "MDhMt1bWS_qwWcLrHNtITQ"
+  "playerId": "MDhMt1bWS_qwWcLrHNtITQ",
+  "weeklyStats": [
+    {
+      "date": "2025-08-01",
+      "fame": 1477119628
+    },
+    {
+      "date": "2025-08-01",
+      "fame": 1477119628
+    }
+  ],
+  "lastLeftMessage": 1769029215025
 }

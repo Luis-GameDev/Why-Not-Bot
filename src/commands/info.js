@@ -3,6 +3,32 @@ const Plusones = require("../plusones.js");
 const fs = require("fs");
 const path = require('path');
 
+function msToTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+}
+
+function getAfkEmbedValue(userId) {
+    const afkPath = path.join(__dirname, '../data/afkStatus.json');
+    if (!fs.existsSync(afkPath)) return "Not AFK";
+
+    const afkData = JSON.parse(fs.readFileSync(afkPath, 'utf8'));
+    const entry = afkData[userId];
+    if (!entry || !entry.endTime) return "Not AFK";
+
+    const endTime = Number(entry.endTime);
+    const now = Date.now();
+    if (isNaN(endTime) || endTime <= now) return "Not AFK";
+
+    const remaining = endTime - now;
+    const totalMinutes = Math.floor(remaining / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
+    return `${hours}h ${minutes}m remaining`;
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,32 +39,41 @@ module.exports = {
                 .setDescription('The member you want to get information about.')
                 .setRequired(true)
         ),
-        async execute(interaction) {
-                
-            const member = interaction.options.getMember("member")
-            const avatar = member.user.displayAvatarURL({dynamic: true})
+    async execute(interaction) {
+        const member = interaction.options.getMember("member")
+        const avatar = member.user.displayAvatarURL({ dynamic: true })
 
-            const filePath = path.join(__dirname, '../data/users', `${member.id}.json`);
+        const filePath = path.join(__dirname, '../data/users', `${member.id}.json`);
 
-            let userData;
-            if (fs.existsSync(filePath)) {
-                userData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-            } else {
-                userData = {ign: undefined};
-            }
-            const userIgn = userData.ign === undefined ? "Not Linked" : `IGN - ${userData.ign}`
+        let userData;
+        if (fs.existsSync(filePath)) {
+            userData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        } else {
+            userData = { ign: undefined, voicetime: { total: 0, sessions: [] } };
+        }
 
-            interaction.reply({embeds: [
-                new EmbedBuilder()
+        const userIgn = userData.ign === undefined ? "Not Linked" : `IGN - ${userData.ign}`;
+
+        const totalVoice = userData.voicetime?.total || 0;
+        const thisMonthSessions = (userData.voicetime?.sessions || []).filter(s => {
+            const joinDate = new Date(s.join);
+            const now = new Date();
+            return joinDate.getMonth() === now.getMonth() && joinDate.getFullYear() === now.getFullYear();
+        });
+
+        const monthlyVoice = thisMonthSessions.reduce((acc, s) => acc + (s.leave - s.join), 0);
+
+        interaction.reply({ embeds: [
+            new EmbedBuilder()
                 .setTitle(`${member.user.username}\`s Infocard`)
                 .addFields([
                     {
                         name: `Account created at:`,
-                        value: `<t:${Math.round(member.user.createdTimestamp/1000)}>`,
+                        value: `<t:${Math.round(member.user.createdTimestamp / 1000)}>`,
                     },
                     {
                         name: `Joined server at:`,
-                        value: `<t:${Math.round(member.joinedTimestamp/1000)}>`,
+                        value: `<t:${Math.round(member.joinedTimestamp / 1000)}>`,
                         inline: true
                     },
                     {
@@ -61,24 +96,32 @@ module.exports = {
                         Prio: ${await Plusones.getUserPrio(member.id)}`,
                     },
                     {
+                        name: "Voice Activity:",
+                        value: `Past 30d: ${msToTime(monthlyVoice)}\nTotal: ${msToTime(totalVoice)}`,
+                    },
+                    {
                         name: "Link:",
                         value: `${userIgn}`
                     },
                     {
-                        name: `Roles:`, 
+                        name: "AFK Status:",
+                        value: getAfkEmbedValue(member.id)
+                    },
+                    {
+                        name: `Roles:`,
                         value: member.roles.cache
                             .filter(role => role.name !== '@everyone')
                             .map(role => `<@&${role.id}>`)
-                            .join(" ") || "-", 
-                        inline: false 
+                            .join(" ") || "-",
+                        inline: false
                     },
                     {
                         name: "Avatar:",
                         value: " "
-                    }                  
+                    }
                 ])
                 .setImage(avatar)
                 .setColor(0)
-            ]})
-        }
-}
+        ] });
+    }
+};

@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const cron = require("node-cron");
 const { EmbedBuilder: MessageEmbed } = require('@discordjs/builders');
-const { ActionRowBuilder, ButtonBuilder, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ChannelType, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const calcStats = require("./weeklyStatsTrack.js");
 const Plusones = require("./plusones.js");
 const signupHandler = require("./signupHandler.js");
@@ -13,7 +13,12 @@ const { Client: UnbClient } = require('unb-api');
 const balanceBotAPI = new UnbClient(process.env.BALANCE_BOT_API_KEY);
 const { processSignup, handleThreadMessage, initPrioSelection } = require('./signupHandler.js');
 const GLOBALS = require("./globals.js");
+
+const stickyHandler = require('./stickyHandler');
+const { trackVoiceTime } = require('./voicetracker');
+
 const iqQuestions = require('./iqQuestions');
+
 let logChannel;
 const iqResultsPath = path.join(__dirname, './data/iqtest.json');
 const iqSessionsPath = path.join(__dirname, './data/iqsessions.json');
@@ -63,6 +68,7 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.DirectMessages
     ],
     partials: [
         Partials.Message, 
@@ -92,7 +98,7 @@ const scoutChannelId = process.env.SCOUT_CHANNEL_ID;
 const ctacheckChannelId = process.env.CTA_CHECK_CHANNEL_ID;
   
 async function payMember(userId, amount) {
-
+    
     const guild = process.env.DISCORD_GUILD_ID;
     balanceBotAPI.editUserBalance(guild, userId, { cash: amount }, "Why Bot Reward-Payment").then(response => {
         const embed = new MessageEmbed()
@@ -110,11 +116,99 @@ async function payMember(userId, amount) {
     })
 }
 
+async function startDMHandler(message) {
+    if (message.author.bot) return;
+    let inquiryChannel = await client.channels.fetch(process.env.INQUIRIES_CHANNEL_ID);
+    let user = message.author;
+    let embedMessage = `\`\`\`${message.content}\`\`\``;
+
+    let embed = new MessageEmbed()
+        .setTitle("New Inquiry")
+        .setDescription(`**From:** ${user}`)
+        .addFields({ name: 'Message', value: embedMessage })
+        .setColor(0x00FF00)
+        .setFooter({ text: `If you reply to this message it will be forwarded to the user.` })
+        .setTimestamp();
+    
+    inquiryChannel.send({ embeds: [embed] })
+}
+
+async function startInquiryHandler(message) {
+    if (message.reference && message.reference.messageId) {
+        try {
+            const repliedMessage = await message.channel.messages.fetch(message.reference.messageId);
+            
+            if (repliedMessage.author.id === client.user.id) {
+                const embed = repliedMessage.embeds[0];
+                if (embed && embed.description) {
+                    const newEmbed = EmbedBuilder.from(embed)
+                        .setColor(0xff0000); 
+
+                    await repliedMessage.edit({ embeds: [newEmbed] });
+
+                    const mentionMatch = embed.description.match(/<@!?(\d+)>/);
+                    if (mentionMatch) {
+                        const mentionedUserId = mentionMatch[1];
+                        let recipient = await client.users.fetch(mentionedUserId).catch(() => null);
+                        if (recipient) {
+                            const replyEmbed = new MessageEmbed()
+                                .setTitle("Inquiry Response")
+                                .setDescription(`**From:** ${message.author}`)
+                                .addFields({ name: 'Message', value: `\`\`\`${message.content}\`\`\`` })
+                                .setColor(0x00FF00)
+                                .setTimestamp();
+                            
+                            await recipient.send({ embeds: [replyEmbed] });
+                            
+                        } else {
+                            message.reply("Could not find the user to send the response. Is he still in the server?");
+                        }
+                    }
+                }
+            } 
+        } catch (error) {
+            console.error("Error fetching the replied message:", error);
+        }
+    }
+}
+
+async function checkAfkStatus() {
+    const afkPath = path.join(__dirname, './data/afkStatus.json');
+    if (!fs.existsSync(afkPath)) return;
+
+    const afkData = JSON.parse(fs.readFileSync(afkPath, 'utf8'));
+    const now = Date.now();
+    let changed = false;
+
+    const guild = client.guilds.cache.get(process.env.DISCORD_GUILD_ID);
+    if (!guild) return;
+
+    for (const userId in afkData) {
+        const entry = afkData[userId];
+        if (entry.endTime <= now) {
+            const member = await guild.members.fetch(userId).catch(() => null);
+            if (member && process.env.AFK_ROLE_ID) {
+                await member.roles.remove(process.env.AFK_ROLE_ID).catch(() => {});
+            }
+            delete afkData[userId];
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        fs.writeFileSync(afkPath, JSON.stringify(afkData, null, 2));
+    }
+}
+
 async function checkForGuildmembers() {
   const usersPath = path.join(__dirname, './data/users');
   const files = fs.readdirSync(usersPath).filter(file => file.endsWith('.json'));
-
-  const res = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/guilds/${process.env.ALBION_GUILD_ID}/members`);
+  const guildName = "WHY NOT";
+  try {
+    var logChannel = await client.channels.fetch(process.env.ATTENDANCE_CHANNEL_ID);
+    var res = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/guilds/${process.env.ALBION_GUILD_ID}/members`);
+  } catch (error) { logError(error); return; }
+  
   const guildData = res.data;
   const guildMemberIds = guildData.map(member => member.Id);
 
@@ -127,41 +221,64 @@ async function checkForGuildmembers() {
     const isInGuild = guildMemberIds.includes(userData.playerId);
     if (!isInGuild) {
 
-      if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000 || userData.lastLeftMessage && Date.now() - userData.lastLeftMessage < 24 * 60 * 60 * 1000) {
+      if (userData.linkTime && Date.now() - userData.linkTime < 24 * 60 * 60 * 1000 * 2 /* <-- 2 days */ || userData.lastLeftMessage && Date.now() - userData.lastLeftMessage < 24 * 60 * 60 * 1000) {
         continue;
       }
 
-      const logChannel = await client.channels.fetch(process.env.ATTENDANCE_CHANNEL_ID);
-      if (!logChannel) continue;
+      if ( userData.playerId === undefined || userData.playerId === null ) {
+        let logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+        let embed = new MessageEmbed()
+            .setTitle('User not linked')
+            .setDescription(`User <@${path.parse(file).name}> is not linked to an Albion Account.`)
+            .setColor(0xff0000)
+        logChannel.send({ embeds: [embed] });
+        continue;
+      }
 
-      const embed = new MessageEmbed()
-        .setTitle('Guild Check: Member Left')
-        .setDescription(`Player **${userData.ign}** (<@${userData.discordId}>) is no longer in the guild.`)
-        .setColor(0xff0000)
-        .setTimestamp();
+    const playerDetailsResponse = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/players/${userData.playerId}`);
+    const playerData = playerDetailsResponse.data;
 
-      const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`purge_${userData.discordId}`)
-          .setLabel('Friend')
-          .setStyle("Primary"),
-        new ButtonBuilder()
-          .setCustomId(`ignore_${userData.discordId}`)
-          .setLabel('Ignore')
-          .setStyle("Secondary"),
-        new ButtonBuilder()
-          .setCustomId(`kick_${userData.discordId}`)
-          .setLabel('Kick')
-          .setStyle("Danger")
-      );
+    if (playerData.GuildName === guildName) {
+        continue;
+    }
 
-      await logChannel.send({
-        embeds: [embed],
-        components: [row]
-      });
+    const playerDetailsResponse2 = await axios.get(`https://gameinfo-ams.albiononline.com/api/gameinfo/search?q=${userData.ign}`);
+    const playerData2 = playerDetailsResponse2.data;
+    const matchingPlayers = playerData2.players.filter(p => p.Name.toLowerCase() === userData.ign.toLowerCase());
+    for (const player of matchingPlayers) {
+        if (player.GuildName === guildName) {
+            continue;
+        }
+    }
 
-        userData.lastLeftMessage = Date.now();
-        fs.writeFileSync(filePath, JSON.stringify(userData, null, 2));
+    const embed = new MessageEmbed()
+    .setTitle('Guild Check: Member Left')
+    .setDescription(`Player **${userData.ign}** (<@${userData.discordId}>) is no longer in the guild.`)
+    .setColor(0xff0000)
+    .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+        .setCustomId(`purge_${userData.discordId}`)
+        .setLabel('Friend')
+        .setStyle("Primary"),
+    new ButtonBuilder()
+        .setCustomId(`ignore_${userData.discordId}`)
+        .setLabel('Ignore')
+        .setStyle("Secondary"),
+    new ButtonBuilder()
+        .setCustomId(`kick_${userData.discordId}`)
+        .setLabel('Kick')
+        .setStyle("Danger")
+    );
+
+    await logChannel.send({
+    embeds: [embed],
+    components: [row]
+    });
+
+    userData.lastLeftMessage = Date.now();
+    fs.writeFileSync(filePath, JSON.stringify(userData, null, 2));
     }
   }
 }
@@ -177,6 +294,28 @@ client.on("guildMemberAdd", async (member) => {
 client.on("messageReactionAdd", async (reaction, user) => {
 
     originalMessage = reaction.message;
+
+    if (reaction.message.channel.id === process.env.REWARD_CHANNEL && !user.bot && reaction.emoji.name === "🐀") {
+        const member = await reaction.message.guild.members.fetch(user.id);
+        const checkmarkReaction = reaction.message.reactions.cache.find(r => r.emoji.name === "✅");
+
+        if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) || checkmarkReaction) {
+            reaction.remove();
+            return reaction.message.reply("You do not have permission to reward players.");
+        }
+
+        // Try to extract a number from the message content (e.g., "1000000" or "1,000,000")
+        const match = reaction.message.content.replace(/[.,]/g, '').match(/(\d{4,})/);
+        if (!match) {
+            reaction.remove();
+            return reaction.message.reply("No proper killfame number provided.");
+        }
+        const killfameAmount = parseInt(match[1], 10);
+        payMember(reaction.message.author.id, killfameAmount);
+        reaction.message.reply(`You have received **${killfameAmount}** for your killfame contribution!`);
+        reaction.message.react("✅");
+        return;
+    }
 
     if (reaction.emoji.name === "❌" && reaction.message.channel.id === process.env.STANDING_CHECK_CHANNEL_ID) {
         const member = await reaction.message.guild.members.fetch(user.id);
@@ -377,6 +516,16 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 client.on("messageCreate", async (message) => {
+    stickyHandler(message);
+
+    if (message.channel.type === 1 || message.channel.type === 'DM') {
+        startDMHandler(message);
+    }
+
+    if (message.channel.id === process.env.INQUIRIES_CHANNEL_ID && !message.author.bot) {
+        startInquiryHandler(message);
+    }
+
     if (message.content.startsWith("!abc") && !message.author.bot) {
         checkForGuildmembers();
     }
@@ -489,7 +638,7 @@ client.on("messageCreate", async (message) => {
     }
 
     if (message.content.startsWith("!info")) {
-        message.reply(`https://discord.com/channels/1248205717379354664/1274422719168909323 = Apply for Worldboss member role / issue WB releted complains. \nhttps://discord.com/channels/1248205717379354664/1248254004962525255 = Why not builds for WB \nhttps://discord.com/channels/1248205717379354664/1319310140222079006 = DPS and other tutorials made by our members. Follow these to get GOOD at your weapon and learn your rotations for WB. \nhttps://discord.com/channels/1248205717379354664/1267166145618640957 = NAPs \n"How to redeem balance? 💸 " - Contact any officer that is online and request your Discord Balance.`);
+        message.reply(`https://discord.com/channels/1248205717379354664/1274422719168909323 = Apply for Worldboss member role / issue WB releted complains. \nhttps://discord.com/channels/1248205717379354664/1248254004962525255 = Why not builds for WB \nhttps://discord.com/channels/1248205717379354664/1319310140222079006 = DPS and other tutorials made by our members. Follow these to get GOOD at your weapon and learn your rotations for WB. \nhttps://discord.com/channels/1248205717379354664/1267166145618640957 = NAPs \n"How to redeem balance? 💸 " - Send me a DM and request your Discord Balance.`);
     }
 
     if (message.content.startsWith("!complain")) {
@@ -609,7 +758,8 @@ client.on("messageCreate", async (message) => {
 
         if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && 
             !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID) && 
-            !member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID)) {
+            !member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID) && 
+            !member.roles.cache.has(process.env.SPLITS_OFFICER_ROLE_ID)) {
 
             return message.reply("You do not have permission to use this command.");
         }
@@ -949,8 +1099,11 @@ cron.schedule('0 2 * * 1', () => {
     operateWeeklyStatsTrack()
 })
 
+// hourly cron job
+
 cron.schedule('0 * * * *', () => {
     checkForGuildmembers();
+    checkAfkStatus();
 });
 
 function operateWeeklyStatsTrack() {
@@ -1085,7 +1238,7 @@ client.on("interactionCreate", async (interaction) => {
                 await member.kick('No longer in the guild');
             }
 
-            if( userData) {
+            if(userData) {
                 fs.unlinkSync(userPath);
             } else {
                 await interaction.reply({
@@ -1452,6 +1605,10 @@ client.on("interactionCreate", async (interaction) => {
             }
         }
     }
+});
+
+client.on('voiceStateUpdate', (oldState, newState) => {
+    trackVoiceTime(oldState, newState);
 });
 
 async function deployCommandsForGuild(guildId) {
