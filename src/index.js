@@ -106,13 +106,6 @@ async function payMember(userId, amount) {
             .setDescription(`Added ${amount} to <@${userId}> balance.`)
             .setColor(0x00FF00);
         logChannel.send({ embeds: [embed] });
-    }).catch(error => {
-        const embed = new MessageEmbed()
-            .setTitle('Payment Error')
-            .setDescription(`Error making payment of ${amount} to <@${userId}>, please pay him manually.`)
-            .addFields('Error', error.message)
-            .setColor(0xFF0000);
-        logChannel.send({ embeds: [embed] });
     })
 }
 
@@ -751,7 +744,7 @@ client.on("messageCreate", async (message) => {
         message.reply("Roles have been removed from mentioned users.");
     }
 
-        if (message.content.startsWith("!split")) {
+    if (message.content.startsWith("!split")) {
         const member = await message.guild.members.fetch(message.author.id);
         const mentionedUsers = message.mentions.users;
         const amount = parseInt(message.content.split(" ")[1].replace(/[.,]/g, ''));
@@ -768,54 +761,59 @@ client.on("messageCreate", async (message) => {
             return message.reply("Please provide a valid amount.");
         }
 
-        if (mentionedUsers.size === 0) {
-            const linkMatch = message.content.match(/https:\/\/discord\.com\/channels\/\d+\/\d+\/(\d+)/);
+        try {
+            if (mentionedUsers.size === 0) {
+                const linkMatch = message.content.match(/https:\/\/discord\.com\/channels\/\d+\/\d+\/(\d+)/);
 
-            if (linkMatch) {
-                try {
-                    const channel = await client.channels.fetch(linkMatch[0].split("/")[5]);
-                    const targetMessage = await channel.messages.fetch(linkMatch[1]);
-                    const mentionedInTarget = targetMessage.mentions.users;
+                if (linkMatch) {
+                    try {
+                        const channel = await client.channels.fetch(linkMatch[0].split("/")[5]);
+                        const targetMessage = await channel.messages.fetch(linkMatch[1]);
+                        const mentionedInTarget = targetMessage.mentions.users;
 
-                    if (mentionedInTarget.size === 0) {
-                        return message.reply("No users mentioned in the linked message.");
+                        if (mentionedInTarget.size === 0) {
+                            return message.reply("No users mentioned in the linked message.");
+                        }
+
+                        await mentionedInTarget.forEach(user => {
+                            payMember(user.id, amount);
+                        });
+                        
+                        const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+                        const embed = new MessageEmbed()
+                            .setTitle('Lootsplit Payment')
+                            .setDescription(`Split payment of **${amount}** to ${[...mentionedInTarget.values()].map(user => user.toString()).join(' ')}`)
+                            .setColor(0x00FF00);
+
+                        logChannel.send({ embeds: [embed] });
+
+                    } catch (error) {
+                        return message.reply("Could not fetch the linked message. Please ensure it's a valid link.");
                     }
-
-                    mentionedInTarget.forEach(user => {
-                        payMember(user.id, amount);
-                    });
-
-                    message.reply("Payment was successful.");
-                    
-                    const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
-                    const embed = new MessageEmbed()
-                        .setTitle('Lootsplit Payment')
-                        .setDescription(`Split payment of **${amount}** to ${[...mentionedInTarget.values()].map(user => user.toString()).join(' ')}`)
-                        .setColor(0x00FF00);
-
-                    logChannel.send({ embeds: [embed] });
-
-                } catch (error) {
-                    return message.reply("Could not fetch the linked message. Please ensure it's a valid link.");
+                } else {
+                    return message.reply("Please mention users or provide a link to a message.");
                 }
             } else {
-                return message.reply("Please mention users or provide a link to a message.");
+                mentionedUsers.forEach(user => {
+                    payMember(user.id, amount);
+                });
+
+                message.reply("Payment was successful.");
+
+                const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
+                const embed = new MessageEmbed()
+                    .setTitle('Lootsplit Payment')
+                    .setDescription(`Split payment of **${amount}** to ${[...mentionedUsers.values()].map(user => user.toString()).join(' ')}`)
+                    .setColor(0x00FF00);
+
+                logChannel.send({ embeds: [embed] });
             }
-        } else {
-            mentionedUsers.forEach(user => {
-                payMember(user.id, amount);
-            });
-
-            message.reply("Payment was successful.");
-
-            const logChannel = await client.channels.fetch(process.env.LOGS_CHANNEL_ID);
-            const embed = new MessageEmbed()
-                .setTitle('Lootsplit Payment')
-                .setDescription(`Split payment of **${amount}** to ${[...mentionedUsers.values()].map(user => user.toString()).join(' ')}`)
-                .setColor(0x00FF00);
-
-            logChannel.send({ embeds: [embed] });
+        } catch (error) {
+            logError(error);
+            message.reply("An error occurred while processing the payment.");
+            return;
         }
+        message.reply("Payment was successful.");
     }
 
 

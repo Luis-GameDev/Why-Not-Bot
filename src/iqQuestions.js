@@ -60,8 +60,8 @@ const questions = [
     correct: 3,
   },
   {
-    question: "If a train travels at 60 miles per hour, how far does it travel in 2 hours?",
-    choices: ["60 miles", "120 miles", "180 miles", "240 miles"],
+    question: "What is 3 + 5 x 2?",
+    choices: ["16", "13", "10", "11"],
     correct: 1,
   },
 ];
