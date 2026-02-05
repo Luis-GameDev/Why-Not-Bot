@@ -724,7 +724,8 @@ client.on("messageCreate", async (message) => {
 
         if (!member.roles.cache.has(process.env.OFFICER_ROLE_ID) && 
             !member.roles.cache.has(process.env.ECONOMY_OFFICER_ROLE_ID) && 
-            !member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID)) {
+            !member.roles.cache.has(process.env.CONTENTCALLER_ROLE_ID) && 
+            !member.roles.cache.has(process.env.SPLITS_OFFICER_ROLE_ID)) {
 
             return message.reply("You do not have permission to use this command.");
         }

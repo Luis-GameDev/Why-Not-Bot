@@ -90,15 +90,22 @@ module.exports = {
 
             const member = await interaction.guild.members.fetch(discordId);
 
-            if (member.roles.cache.has(process.env.NOTLINKED_ROLE_ID)) {
-                
-                member.roles.remove(process.env.NOTLINKED_ROLE_ID);
+            try {
+                if(member.roles.cache.has(process.env.NOTLINKED_ROLE_ID)) {
+                    await member.roles.remove(process.env.NOTLINKED_ROLE_ID);
+                }
                 member.roles.add(process.env.WHYNOT_ROLE_ID).catch(console.error);
                 member.roles.add(process.env.TRIAL_ROLE_ID).catch(console.error);
+            } catch (error) {
+                await interaction.followUp({
+                    content: `There was an error assigning roles, but your account was still linked successfully. Please contact an officer to resolve this issue.`,
+                    ephemeral: true,
+                });
+                return;
             }
 
             await interaction.followUp({
-                content: `Your Discord account was successfully linked to "${linkedPlayer.ign}".`,
+                content: `Your Discord account was successfully linked to "${linkedPlayer.ign}". Welcome to WHY NOT!`,
                 ephemeral: true,
             });
             try {
